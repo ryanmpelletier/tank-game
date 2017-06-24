@@ -1,0 +1,16 @@
+{
+  "name": "node-game-framework",
+  "version": "1.0.0",
+  "description": "Game framework for writing Node.js games using WebSockets and Express",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://ryan102694@bitbucket.org/ryan102694/node-game-framework.git"
+  },
+  "author": "Ryan Pelletier",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/ryan102694/node-game-framework#readme"
+}

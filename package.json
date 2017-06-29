@@ -18,6 +18,8 @@
     "gulp": "^3.9.1",
     "gulp-babel": "^6.1.2",
     "gulp-nodemon": "^2.2.1",
+    "socket.io": "^2.0.3",
+    "socket.io-client": "^2.0.3",
     "webpack": "^3.0.0",
     "webpack-stream": "^3.2.0"
   },

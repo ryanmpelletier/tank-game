@@ -9,7 +9,7 @@
 
 class Greeter {
   constructor() {
-    this.greeting = "Hello from the greeter!";
+    this.greeting = "Welcome to the node game framework!";
   }
 
   greet() {

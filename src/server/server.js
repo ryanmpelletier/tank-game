@@ -10,9 +10,6 @@ var http = require('http').Server(app);
 var socketIo = require('socket.io')(http);
 var path = require('path');
 
-// Import utilities.
-var util = require('./lib/util');
-
 // Import application config
 var config = require('../../config.json');
 
@@ -39,6 +36,11 @@ http.listen(config.port, function(){
 /**
  * 2. GAME VARIABLES
  */
+
+//import game related classes
+var ClientData = require('./lib/clientData');
+var util = require('./lib/util');
+
 
 /**
  * currentClientDatas stores references to the currentClientData objects which are inside of the on('connection') handler,
@@ -68,13 +70,7 @@ socketIo.on('connection', function(socket){
    * 
    * I only need to give this to the client when they are ready, will identify them by the socket?
    */
-  var currentClientData = {
-    player: {
-      screenName:""
-    },
-    id: socket.id,
-    lastHeartbeat: new Date().getTime(),
-  }
+  var currentClientData = new ClientData(socket.id);
 
   /**
    * Client broadcasts this init event after it has set up its socket to respond to
@@ -87,13 +83,15 @@ socketIo.on('connection', function(socket){
 
   /**
    * Client broadcasts this event after they have received the welcome event from the server
-   * They send back some information the server needs to properly manage this user, for example, client screen height and width
+   * They send back some information the server needs to properly manage this user
    */
   socket.on('welcome_recieved', function(clientUpdatedData){
-      //associate this socket with the id of the connecting player, they are now ready to play
-      sockets[clientUpdatedData.id] = socket;
+      //copy over player nested object to clientData reference for this socket
       currentClientData.player = clientUpdatedData.player;
-      currentClientDatas.push(currentClientData); //it is really important that what is pushed into the players array here is the reference to clientData that all the socket connections share
+
+      //add references for the clientData and for the socket 
+      currentClientDatas.push(currentClientData); 
+      sockets[clientUpdatedData.id] = socket;
   });
 
   /**
@@ -102,6 +100,13 @@ socketIo.on('connection', function(socket){
    */
   socket.on('client_checkin',function(clientCheckinData){
         currentClientData.lastHeartbeat = new Date().getTime();
+  });
+
+
+  socket.on('windowResized', function (data) {
+    console.log(data);
+    currentClientData.player.screenWidth = data.screenWidth;
+    currentClientData.player.screenHeight = data.screenHeight;
   });
 
   /**
@@ -144,7 +149,7 @@ var gameObjectUpdater = function(){
  */
 var clientUpdater = function(){
   currentClientDatas.forEach(function(clientData){
-      sockets[clientData.id].emit('client_update', {"server_time":new Date().getTime()});
+      sockets[clientData.id].emit('game_objects_update', {"server_time":new Date().getTime()});
   });
 }
 

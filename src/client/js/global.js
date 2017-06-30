@@ -5,6 +5,7 @@ module.exports = {
     //Canvas properties
 
     //player data
-    player:null
+    screenWidth: undefined,
+    screenHeight: undefined
 
 };

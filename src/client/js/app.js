@@ -91,8 +91,29 @@ function setupSocket(socket){
         //I think it would be nice here to basically send the server back a clientData object, I think the client should have one of those
         socket.emit('client_checkin',{"test":"nothing"});
     });
+
+    /**
+     * Check how long the communication between client
+     * and server was.
+     */
+    socket.on('pongcheck',function(){
+        global.latency = new Date().getTime() - global.startPingTime;
+    });
 }
 
+/**
+ * Check latency, store current time then on server
+ * 'pongcheck' event record time difference.
+ */
+function checkLatency() {
+    global.startPingTime = Date.now();
+    socket.emit('pingcheck');
+}
+
+/**
+ * Store global screen dimensions, then send them to the server.
+ * This function is bound to the browser's 'resize' event.
+ */
 function resize(){
     global.screenWidth = window.innerWidth;
     global.screenHeight = window.innerHeight;

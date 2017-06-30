@@ -102,9 +102,11 @@ socketIo.on('connection', function(socket){
         currentClientData.lastHeartbeat = new Date().getTime();
   });
 
+  socket.on('pingcheck', function () {
+      socket.emit('pongcheck');
+  });
 
   socket.on('windowResized', function (data) {
-    console.log(data);
     currentClientData.player.screenWidth = data.screenWidth;
     currentClientData.player.screenHeight = data.screenHeight;
   });

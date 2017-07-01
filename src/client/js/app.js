@@ -94,9 +94,13 @@ function setupSocket(socket){
     socket.on('game_objects_update',function(gameObjects){
         clientGameObjects = gameObjects;
         //I think it would be nice here to basically send the server back a clientData object, I think the client should have one of those
-        socket.emit('client_checkin',{"test":"nothing"});
+        socket.emit('client_checkin', canvasGameBoard.getKeysPressed());
     });
 
+    /**
+     * Server wants to calculate my ping, 
+     * emit back to server right away.
+     */
     socket.on('pingcheck',function(){
         socket.emit('pongcheck');
     });

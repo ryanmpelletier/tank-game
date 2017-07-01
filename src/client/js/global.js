@@ -1,9 +1,9 @@
 module.exports = {
-    screenWidth: window.innerWidth,
-    screenHeight: window.innerHeight,
-    KEY_LEFT: 65,
-    KEY_UP:87,
-    KEY_RIGHT: 68,
-    KEY_DOWN: 83,
-    player:{}
+    'screenWidth': window.innerWidth,
+    'screenHeight': window.innerHeight,
+    '65': 'KEY_LEFT',
+    '87': 'KEY_UP',
+    '68': 'KEY_RIGHT',
+    '83': 'KEY_DOWN',
+    'player':{}
 };

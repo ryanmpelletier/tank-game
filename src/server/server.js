@@ -102,9 +102,9 @@ socketIo.on('connection', function(socket){
         currentClientData.lastHeartbeat = new Date().getTime();
   });
 
-    /**
-     * Client responded to pingcheck event,
-     * calculate how long it took
+  /**
+   * Client responded to pingcheck event,
+   * calculate how long it took
    */
   socket.on('pongcheck',function(){
       currentClientData.ping = new Date().getTime() - currentClientData.startPingTime;

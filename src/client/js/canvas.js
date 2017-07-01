@@ -13,13 +13,18 @@ class Canvas{
         this.canvas.parent = this;
         this.canvas.addEventListener('keydown',this.onKeyDown,false);
         this.canvas.addEventListener('keyup',this.onKeyUp,false);
-        //will keep track of the state of key events which are defined in global.js with keycodes
-        this.keysPressed = {}
+
+        this.canvas.addEventListener('mousemove', this.onMouseMove, false);
+        //will keep track of user input
+        this.userInput = {
+            keysPressed: {},
+            mousePointAngleFromCenter: null
+        }
     }
 
     //get the keys pressed from the canvas
-    getKeysPressed(){
-        return this.keysPressed;
+    getUserInput(){
+        return this.userInput;
     }
 
     //get the component you can actually draw on
@@ -43,7 +48,7 @@ class Canvas{
         if(typeof global[event.keyCode] === 'undefined'){
             return;
         }
-        this.parent.keysPressed[global[event.keyCode]] = true;
+        this.parent.userInput.keysPressed[global[event.keyCode]] = true;
     }
 
     onKeyUp(event){
@@ -51,9 +56,25 @@ class Canvas{
         if(typeof global[event.keyCode] === 'undefined'){
             return;
         }            
-        this.parent.keysPressed[global[event.keyCode]] = false;
+        this.parent.userInput.keysPressed[global[event.keyCode]] = false;
     }
 
+    //remember that y increases as you go DOWN the page, x increases as you go RIGHT on the page
+    onMouseMove(event){
+        var x = this.width/2 - event.clientX;
+        var y = this.height/2 - event.clientY;
+        var angle;
+        if(x >= 0 && y <= 0){
+            angle = 180 + Math.atan(Math.abs(y)/x) * (180/Math.PI);
+        }else if(x <=0 && y >=0){
+            angle = Math.atan(y/Math.abs(x)) * (180/Math.PI);
+        }else if(x >= 0 && y >= 0){
+            angle = 180 - Math.atan(y/x) * (180/Math.PI);
+        }else if(x <= 0 && y <= 0){
+            angle = 360 - Math.atan(Math.abs(y)/Math.abs(x)) * (180/Math.PI);
+        }
+        this.parent.userInput.mousePointAngleFromCenter = angle;
+    }
 }
 
 module.exports = Canvas;

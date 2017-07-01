@@ -94,7 +94,7 @@ function setupSocket(socket){
     socket.on('game_objects_update',function(gameObjects){
         clientGameObjects = gameObjects;
         //I think it would be nice here to basically send the server back a clientData object, I think the client should have one of those
-        socket.emit('client_checkin', canvasGameBoard.getKeysPressed());
+        socket.emit('client_checkin', canvasGameBoard.getUserInput());
     });
 
     /**

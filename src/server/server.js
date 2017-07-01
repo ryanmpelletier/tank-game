@@ -99,6 +99,7 @@ socketIo.on('connection', function(socket){
    * This is called at least once each time the client redraws the frame
    */
   socket.on('client_checkin',function(clientCheckinData){
+        currentClientData.player.userInput = clientCheckinData;
         currentClientData.lastHeartbeat = new Date().getTime();
   });
 

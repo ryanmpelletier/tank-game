@@ -14,17 +14,23 @@ class Canvas{
         this.canvas.addEventListener('keydown',this.onKeyDown,false);
         this.canvas.addEventListener('keyup',this.onKeyUp,false);
 
+        this.canvas.addEventListener('mousedown',this.onMouseDown,false);
+        this.canvas.addEventListener('mouseup',this.onMouseUp,false);
+
         this.canvas.addEventListener('mousemove', this.onMouseMove, false);
         //will keep track of user input
         this.userInput = {
             keysPressed: {},
+            click:false,
             mousePointAngleFromCenter: null
         }
+        //set focus to canvas so that user input can be collected
+        this.canvas.focus();
     }
 
-    //get the keys pressed from the canvas
-    getUserInput(){
-        return this.userInput;
+    //get a reference to the canvas element
+    getCanvas(){
+        return this.canvas;
     }
 
     //get the component you can actually draw on
@@ -35,6 +41,11 @@ class Canvas{
     //make the canvas blank
     clear(){
         this.getContext().clearRect(0,0,this.canvas.width,this.canvas.height);
+    }
+
+    //get the keys pressed from the canvas
+    getUserInput(){
+        return this.userInput;
     }
 
     /**
@@ -57,6 +68,15 @@ class Canvas{
             return;
         }            
         this.parent.userInput.keysPressed[global[event.keyCode]] = false;
+    }
+
+
+    onMouseDown(event){
+        this.parent.userInput.click = true;
+    }
+
+    onMouseUp(event){
+        this.parent.userInput.click = false;
     }
 
     //remember that y increases as you go DOWN the page, x increases as you go RIGHT on the page

@@ -10,6 +10,8 @@ class ClientData {
       screenHeight: undefined
     };
     this.id = id;
+    this.ping = undefined;
+    this.startPingTime = undefined;
     this.lastHeartbeat = new Date().getTime();
   }
 

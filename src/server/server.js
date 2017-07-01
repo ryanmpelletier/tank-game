@@ -29,7 +29,7 @@ app.get('/', function(req, res){
  * Start listening, I'm not sure how the details of this are working
  */
 http.listen(config.port, function(){
-  console.log('listening on *:' + config.port);
+  console.log('listening on port:' + config.port);
 });
 
 
@@ -102,8 +102,12 @@ socketIo.on('connection', function(socket){
         currentClientData.lastHeartbeat = new Date().getTime();
   });
 
-  socket.on('pingcheck', function () {
-      socket.emit('pongcheck');
+    /**
+     * Client responded to pingcheck event,
+     * calculate how long it took
+   */
+  socket.on('pongcheck',function(){
+      currentClientData.ping = new Date().getTime() - currentClientData.startPingTime;
   });
 
   socket.on('windowResized', function (data) {
@@ -123,6 +127,18 @@ socketIo.on('connection', function(socket){
   });
 
 });
+
+
+/**
+ * Check the ping for all connected clients
+ */
+var checkPing = function(){
+  currentClientDatas.forEach(function(clientData){
+    currentClientDatas[util.findIndex(currentClientDatas,clientData.id)].startPingTime = new Date().getTime();
+    sockets[clientData.id].emit('pingcheck');
+  })
+}
+
 
 /**
  * gameTick is called once per player on each gameObjectUpdater call  

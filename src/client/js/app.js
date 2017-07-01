@@ -3,9 +3,11 @@
  * dependencies and wires it all together when it builds our single client JS file.
  */
 var global = require('./global');
+var Canvas = require('./canvas');
 var socketIoClient = require('socket.io-client');
 var socket;
 var clientGameObjects = {};
+var canvasGameBoard;
 
 
 window.addEventListener('resize', resize);
@@ -21,7 +23,6 @@ window.onload = function(){
     //this is important, the server will use heartbeats to know when to kill connections that are no longer active (and remove the corresponding user)
     startGame();
 
-
     //socket says it is ready to start playing (I'm not exactly sure what this means, what does the client need to do to say it is ready?)
     socket.emit('init');
 };
@@ -31,20 +32,27 @@ window.onload = function(){
  * and will likely also be where we do some last minute (millisecond) checking to make sure we are good to go
  */
 function startGame(){
-    global.screenHeight = window.innerHeight;
-    global.screenWidth = window.innerWidth;
+    canvasGameBoard = new Canvas();
     animationLoop();
 }
 
 function animationLoop(){
-    console.log("animationLoop");
     window.requestAnimationFrame(animationLoop);
     updateClientView();
 }
 
+/**
+ * Here is where all the game objects are drawn,
+ * it is important to start by clearing the canvas here first.
+ */
 function updateClientView(){
+    //clear canvase
+    canvasGameBoard.clear();
+
     //draw the gameObjects
-    document.getElementById('test_data').innerText = clientGameObjects['server_time'];
+    var context = canvasGameBoard.getContext();
+    context.font = "30px Arial";
+    context.fillText(clientGameObjects['server_time'],10,50);
 }
 
 
@@ -63,16 +71,13 @@ function setupSocket(socket){
      * 
      */
     socket.on('welcome',function(clientInitData){
-        console.log("Welcome Data Recieved:", clientInitData);
+        /**
+         * Here the client gets a chance to add any data that the server will need to
+         * know in order to correctly computer game logic, such as the client's viewbox
+         */
         clientInitData.player.screenName = "test" + new Date().getTime();
         clientInitData.player.screenHeight = global.screenHeight;
         clientInitData.player.screenWidth = global.screenWidth;
-        /**
-         * get clientInitData and save what I need to,
-         * then let the server know I got the data and send them what they need from me
-         * this will likely include anything I have added, like a screen name
-         * also this will include stuff like my screen height and width (server needs this information to know what objects I can see)
-         */
 
 
         socket.emit('welcome_recieved', clientInitData);
@@ -92,22 +97,10 @@ function setupSocket(socket){
         socket.emit('client_checkin',{"test":"nothing"});
     });
 
-    /**
-     * Check how long the communication between client
-     * and server was.
-     */
-    socket.on('pongcheck',function(){
-        global.latency = new Date().getTime() - global.startPingTime;
+    socket.on('pingcheck',function(){
+        socket.emit('pongcheck');
     });
-}
 
-/**
- * Check latency, store current time then on server
- * 'pongcheck' event record time difference.
- */
-function checkLatency() {
-    global.startPingTime = Date.now();
-    socket.emit('pingcheck');
 }
 
 /**

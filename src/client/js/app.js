@@ -4,10 +4,25 @@
  */
 var global = require('./global');
 var Canvas = require('./canvas');
+var DrawingUtil = require('./drawingUtil');
 var socketIoClient = require('socket.io-client');
 var socket;
-var clientGameObjects = {};
+
+/**
+ * Here is the data for the objects which need to be drawn.
+ * The DrawingUtil class will abstract away the drawing process,
+ * so we can keep our drawing code out of this file.
+ */
+var clientGameObjects = {
+    "player":{},
+    "tanks": {},
+    "bullets":{},
+    "barriers":{},
+    "time":{},
+};
+
 var canvasGameBoard;
+var drawingUtil;
 
 
 window.addEventListener('resize', resize);
@@ -33,6 +48,7 @@ window.onload = function(){
  */
 function startGame(){
     canvasGameBoard = new Canvas();
+    drawingUtil = new DrawingUtil(canvasGameBoard.getCanvas());
     animationLoop();
 }
 
@@ -46,13 +62,9 @@ function animationLoop(){
  * it is important to start by clearing the canvas here first.
  */
 function updateClientView(){
-    //clear canvase
+    //clear canvas
     canvasGameBoard.clear();
-
-    //draw the gameObjects
-    var context = canvasGameBoard.getContext();
-    context.font = "30px Arial";
-    context.fillText(clientGameObjects['server_time'],10,50);
+    drawingUtil.drawGameObjects(clientGameObjects);
 }
 
 

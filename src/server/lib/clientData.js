@@ -5,7 +5,7 @@
  * the "player" nested object. As of right now this will include user input and the screen height and width of the client.
  * Other values as calculated by the server will be stored outside of the "player" nested object.
  */
-var config = require('../../config.json');
+var config = require('../../../config.json');
 
 class ClientData {
   constructor(id, startXPosition, startYPosition) {

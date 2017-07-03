@@ -70,7 +70,7 @@ socketIo.on('connection', function(socket){
    * 
    * I only need to give this to the client when they are ready, will identify them by the socket?
    */
-  var currentClientData = new ClientData(socket.id);
+  var currentClientData = new ClientData(socket.id, config.gameWidth/2, config.gameHeight/2);
 
   /**
    * Client broadcasts this init event after it has set up its socket to respond to

@@ -80,7 +80,7 @@ socketIo.on('connection', function(socket){
    * events from the server socket.
    */
   socket.on('init',function(){
-    socket.emit('welcome',currentClientData);
+    socket.emit('welcome',currentClientData, {gameWidth: config.gameWidth, gameHeight: config.gameHeight});
   });
 
   /**
@@ -179,7 +179,12 @@ var gameObjectUpdater = function(){
  */
 var clientUpdater = function(){
   currentClientDatas.forEach(function(clientData){
-      sockets[clientData.id].emit('game_objects_update', {"server_time":new Date().getTime()});
+      sockets[clientData.id].emit('game_objects_update', {
+        "server_time":new Date().getTime(),
+        "player":{
+          "position":clientData.position
+        }
+      });
   });
 }
 

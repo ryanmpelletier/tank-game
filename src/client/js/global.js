@@ -5,5 +5,8 @@ module.exports = {
     '87': 'KEY_UP',
     '68': 'KEY_RIGHT',
     '83': 'KEY_DOWN',
-    'player':{}
+    'background_props':{
+        'cellHeight':50,
+        'cellWidth':50,
+    }
 };

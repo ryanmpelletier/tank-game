@@ -1,4 +1,6 @@
 {
     "port":8080,
-    "maxLastHeartBeat":5000
+    "maxLastHeartBeat":5000,
+    "gameWidth":5000,
+    "gameHeight":5000
 }

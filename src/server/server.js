@@ -66,11 +66,14 @@ socketIo.on('connection', function(socket){
 
   /**
    * Here is where I need to perform any server-side logic to set up state for the newly connecting player.
-   * For example: calculate players starting position, get their ID, record stats about them, etc.
-   * 
-   * I only need to give this to the client when they are ready, will identify them by the socket?
+   * For example: calculate players starting position, get their ID, etc.
    */
-  var currentClientData = new ClientData(socket.id);
+  var currentClientData = new ClientData(socket.id, config.gameWidth/2, config.gameHeight/2);
+
+
+  /**
+   * 2.1 "HANDSHAKE"/MANAGEMENT RELATED SOCKET EVENTS
+   */
 
   /**
    * Client broadcasts this init event after it has set up its socket to respond to
@@ -79,7 +82,6 @@ socketIo.on('connection', function(socket){
   socket.on('init',function(){
     socket.emit('welcome',currentClientData);
   });
-
 
   /**
    * Client broadcasts this event after they have received the welcome event from the server
@@ -94,16 +96,7 @@ socketIo.on('connection', function(socket){
       sockets[clientUpdatedData.id] = socket;
   });
 
-  /**
-   * This is likely where client will send their movement input
-   * This is called at least once each time the client redraws the frame
-   */
-  socket.on('client_checkin',function(clientCheckinData){
-        currentClientData.player.userInput = clientCheckinData;
-        currentClientData.lastHeartbeat = new Date().getTime();
-  });
-
-  /**
+   /**
    * Client responded to pingcheck event,
    * calculate how long it took
    */
@@ -111,10 +104,6 @@ socketIo.on('connection', function(socket){
       currentClientData.ping = new Date().getTime() - currentClientData.startPingTime;
   });
 
-  socket.on('windowResized', function (data) {
-    currentClientData.player.screenWidth = data.screenWidth;
-    currentClientData.player.screenHeight = data.screenHeight;
-  });
 
   /**
    * When client calls socket.disconnect() on their end, this event is automatically fired
@@ -127,8 +116,30 @@ socketIo.on('connection', function(socket){
     }
   });
 
+  /**
+   * 2.2 GAME RELATED SOCKET EVENTS
+   */
+
+  /**
+   * This is likely where client will send their movement input
+   * This is called at least once each time the client redraws the frame
+   */
+  socket.on('client_checkin',function(clientCheckinData){
+        currentClientData.player.userInput = clientCheckinData;
+        currentClientData.lastHeartbeat = new Date().getTime();
+  });
+
+  socket.on('windowResized', function (data) {
+    currentClientData.player.screenWidth = data.screenWidth;
+    currentClientData.player.screenHeight = data.screenHeight;
+  });
+
 });
 
+
+  /**
+   * 3.0 GAME RELATED FUNCTIONS AND LOOPS
+   */
 
 /**
  * Check the ping for all connected clients

@@ -59,34 +59,59 @@ class DrawingUtil{
             }
 
 
-            var totalNumberOfVerticalLines = 100; //dummy value for now
+            /**
+             * Calculate total number of vertical lines to be drawn.
+             */
+            var totalNumberOfVerticalLines;
+            if((global.screenWidth/2 + player.position.x) > global.gameWidth){
+                var distanceOverflowed = ((global.screenWidth/2 + player.position.x) - global.gameWidth);
+                var lastVerticalLine = global.screenWidth - distanceOverflowed;
+                totalNumberOfVerticalLines = Math.floor((lastVerticalLine - pixelsBeforeFirstVerticalLine)/background_props.cellWidth) + 1;
+                console.log("Overflow X", distanceOverflowed);
+            }else{
+                var lastVerticalLine = global.screenWidth;
+                totalNumberOfVerticalLines = Math.floor((lastVerticalLine - pixelsBeforeFirstVerticalLine)/background_props.cellWidth) + 1;
+            }
+
+            /**
+             * Calculate total number of horizontal lines to be drawn.
+             */
+            var totalNumberOfHorizontalLines;
+            if((global.screenHeight/2 + player.position.y) > global.gameHeight){
+                var distanceOverflowed = ((global.screenHeight/2 + player.position.y) - global.gameHeight);
+                var lastHorizontalLine = global.screenHeight - distanceOverflowed;
+                totalNumberOfHorizontalLines = Math.floor((lastHorizontalLine - pixelsBeforeFirstHorizontalLine)/background_props.cellHeight) + 1;
+                console.log("Overflow Y", distanceOverflowed);
+            }else{
+                var lastHorizontalLine = global.screenHeight;
+                totalNumberOfHorizontalLines = Math.floor((lastHorizontalLine - pixelsBeforeFirstHorizontalLine)/background_props.cellHeight) + 1;
+            }
 
             /**
              * Draw vertical lines
              */
-            for(var i = pixelsBeforeFirstVerticalLine; i < (totalNumberOfVerticalLines*background_props.cellWidth + pixelsBeforeFirstVerticalLine); i+=background_props.cellWidth){
+            for(var i = pixelsBeforeFirstVerticalLine; i < (totalNumberOfVerticalLines * background_props.cellWidth + pixelsBeforeFirstVerticalLine); i+=background_props.cellWidth){
                 this.context2D.beginPath();
                 if(topSideOfuserView < 0){
                     this.context2D.moveTo(i, pixelsBeforeFirstHorizontalLine);
                 }else{
                     this.context2D.moveTo(i, 0);
                 }
-                this.context2D.lineTo(i, this.canvas.height);
+                this.context2D.lineTo(i, lastHorizontalLine);
                 this.context2D.stroke();
             }
 
             /**
              * Draw horizontal lines
              */
-            var totalNumberOfHorizontalLines = 100;
-            for(var i = pixelsBeforeFirstHorizontalLine; i < (totalNumberOfHorizontalLines*background_props.cellHeight + pixelsBeforeFirstHorizontalLine); i+=background_props.cellHeight){
+            for(var i = pixelsBeforeFirstHorizontalLine; i < (totalNumberOfHorizontalLines * background_props.cellHeight + pixelsBeforeFirstHorizontalLine); i+=background_props.cellHeight){
                 this.context2D.beginPath();
                 if(leftSideOfUserView < 0){
                     this.context2D.moveTo(pixelsBeforeFirstVerticalLine, i);
                 }else{
                     this.context2D.moveTo(0, i);
                 }
-                this.context2D.lineTo(this.canvas.width, i);
+                this.context2D.lineTo(lastVerticalLine, i);
                 this.context2D.stroke();
             }
         }

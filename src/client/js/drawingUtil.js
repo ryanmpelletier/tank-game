@@ -62,30 +62,28 @@ class DrawingUtil{
             /**
              * Calculate total number of vertical lines to be drawn.
              */
-            var totalNumberOfVerticalLines;
+            var lastVerticalLine;
             if((global.screenWidth/2 + player.position.x) > global.gameWidth){
                 var distanceOverflowed = ((global.screenWidth/2 + player.position.x) - global.gameWidth);
-                var lastVerticalLine = global.screenWidth - distanceOverflowed;
-                totalNumberOfVerticalLines = Math.floor((lastVerticalLine - pixelsBeforeFirstVerticalLine)/background_props.cellWidth) + 1;
-                console.log("Overflow X", distanceOverflowed);
+                lastVerticalLine = global.screenWidth - distanceOverflowed;
             }else{
-                var lastVerticalLine = global.screenWidth;
-                totalNumberOfVerticalLines = Math.floor((lastVerticalLine - pixelsBeforeFirstVerticalLine)/background_props.cellWidth) + 1;
+                lastVerticalLine = global.screenWidth;
             }
+            var totalNumberOfVerticalLines = Math.floor((lastVerticalLine - pixelsBeforeFirstVerticalLine)/background_props.cellWidth) + 1;;
 
             /**
              * Calculate total number of horizontal lines to be drawn.
              */
-            var totalNumberOfHorizontalLines;
+            var lastHorizontalLine;
             if((global.screenHeight/2 + player.position.y) > global.gameHeight){
                 var distanceOverflowed = ((global.screenHeight/2 + player.position.y) - global.gameHeight);
-                var lastHorizontalLine = global.screenHeight - distanceOverflowed;
-                totalNumberOfHorizontalLines = Math.floor((lastHorizontalLine - pixelsBeforeFirstHorizontalLine)/background_props.cellHeight) + 1;
-                console.log("Overflow Y", distanceOverflowed);
+                lastHorizontalLine = global.screenHeight - distanceOverflowed;
             }else{
-                var lastHorizontalLine = global.screenHeight;
-                totalNumberOfHorizontalLines = Math.floor((lastHorizontalLine - pixelsBeforeFirstHorizontalLine)/background_props.cellHeight) + 1;
+                lastHorizontalLine = global.screenHeight;
             }
+            
+            var totalNumberOfHorizontalLines = Math.floor((lastHorizontalLine - pixelsBeforeFirstHorizontalLine)/background_props.cellHeight) + 1;
+
 
             /**
              * Draw vertical lines

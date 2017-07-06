@@ -15,8 +15,8 @@ class DrawingUtil{
          */
         this.server_timeDraw = function(serverTime){
             var context = this.context2D;
-            context.font = "30px Arial";
-            context.fillText(serverTime,10,50);
+            context.font = "20px Arial";
+            context.fillText(serverTime,10,30);
         };
 
         /**
@@ -25,28 +25,68 @@ class DrawingUtil{
         this.playerDraw = function(player){
             var background_props = global.background_props;
 
+
+            /**
+             * For debugging purposes, draw helpful data about screenSize, gameWidth, and user position
+             */
+
+            this.context2D.font = "20px Arial";
+            this.context2D.fillText('X: ' + player.position.x + ', Y: ' + player.position.y,10,50);
+            this.context2D.fillText('Screen Width: ' + global.screenWidth + ', Screen Height: ' + global.screenHeight,10,75);
+            this.context2D.fillText('Game Width: ' + global.gameWidth + ', Game Height: ' + global.gameHeight, 10, 100);
+
+
+            /**
+             * Calculate where vertical lines will start being drawn on left side of screen.
+             */
+            var leftSideOfUserView = player.position.x - global.screenWidth/2;
+            var pixelsBeforeFirstVerticalLine;
+            if(leftSideOfUserView < 0){
+                pixelsBeforeFirstVerticalLine = - leftSideOfUserView;
+            }else{
+                pixelsBeforeFirstVerticalLine = leftSideOfUserView % background_props.cellWidth;
+            }
+
+            /**
+             * Calculate where horizontal lines will start being drawn from the top of ths screen
+             */
+            var topSideOfuserView = player.position.y - global.screenHeight/2;
+            var pixelsBeforeFirstHorizontalLine;
+            if(topSideOfuserView < 0){
+                pixelsBeforeFirstHorizontalLine = -topSideOfuserView;
+            }else {
+                pixelsBeforeFirstHorizontalLine = topSideOfuserView % background_props.cellHeight;
+            }
+
+
+            var totalNumberOfVerticalLines = 100; //dummy value for now
+
             /**
              * Draw vertical lines
              */
-            var leftSideOfUserView = player.position.x - global.screenWidth/2;
-            var pixelsBeforeFirstVerticalLine = leftSideOfUserView % background_props.cellWidth;
-            //this loop should be limited by the amount of cells which will fit on the canvas
-            for(var i = 0; i < 100; i++){
+            for(var i = pixelsBeforeFirstVerticalLine; i < (totalNumberOfVerticalLines*background_props.cellWidth + pixelsBeforeFirstVerticalLine); i+=background_props.cellWidth){
                 this.context2D.beginPath();
-                this.context2D.moveTo(pixelsBeforeFirstVerticalLine + (i * background_props.cellWidth), 0);
-                this.context2D.lineTo(pixelsBeforeFirstVerticalLine + (i * background_props.cellWidth), this.canvas.height);
+                if(topSideOfuserView < 0){
+                    this.context2D.moveTo(i, pixelsBeforeFirstHorizontalLine);
+                }else{
+                    this.context2D.moveTo(i, 0);
+                }
+                this.context2D.lineTo(i, this.canvas.height);
                 this.context2D.stroke();
             }
 
             /**
              * Draw horizontal lines
              */
-            var topSideOfuserView = player.position.y - global.screenHeight/2;
-            var pixelsBeforeFirstHorizontalLine = topSideOfuserView % background_props.cellHeight;
-            for(var i = 0; i < 100; i++){
+            var totalNumberOfHorizontalLines = 100;
+            for(var i = pixelsBeforeFirstHorizontalLine; i < (totalNumberOfHorizontalLines*background_props.cellHeight + pixelsBeforeFirstHorizontalLine); i+=background_props.cellHeight){
                 this.context2D.beginPath();
-                this.context2D.moveTo(0,pixelsBeforeFirstHorizontalLine + (i * background_props.cellHeight));
-                this.context2D.lineTo(this.canvas.width, pixelsBeforeFirstHorizontalLine + (i * background_props.cellHeight));
+                if(leftSideOfUserView < 0){
+                    this.context2D.moveTo(pixelsBeforeFirstVerticalLine, i);
+                }else{
+                    this.context2D.moveTo(0, i);
+                }
+                this.context2D.lineTo(this.canvas.width, i);
                 this.context2D.stroke();
             }
         }

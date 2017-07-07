@@ -108,6 +108,11 @@ class DrawingUtil{
                 this.context2D.stroke();
             }
 
+            this.context2D.beginPath();
+            this.context2D.moveTo(lastVerticalLine, pixelsBeforeFirstHorizontalLine);
+            this.context2D.lineTo(lastVerticalLine, lastHorizontalLine);
+            this.context2D.stroke();
+
             /**
              * Draw horizontal lines
              */
@@ -121,6 +126,11 @@ class DrawingUtil{
                 this.context2D.lineTo(lastVerticalLine, i);
                 this.context2D.stroke();
             }
+
+            this.context2D.beginPath();
+            this.context2D.moveTo(pixelsBeforeFirstVerticalLine, lastHorizontalLine);
+            this.context2D.lineTo(lastVerticalLine, lastHorizontalLine);
+            this.context2D.stroke();
         }
     }
 

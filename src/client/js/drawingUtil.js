@@ -26,14 +26,21 @@ class DrawingUtil{
             var background_props = global.background_props;
 
 
+
             /**
              * For debugging purposes, draw helpful data about screenSize, gameWidth, and user position
+             * Also draw dot in the center representing user
              */
 
             this.context2D.font = "20px Arial";
             this.context2D.fillText('X: ' + player.position.x + ', Y: ' + player.position.y,10,50);
             this.context2D.fillText('Screen Width: ' + global.screenWidth + ', Screen Height: ' + global.screenHeight,10,75);
             this.context2D.fillText('Game Width: ' + global.gameWidth + ', Game Height: ' + global.gameHeight, 10, 100);
+
+            this.context2D.beginPath();
+            this.context2D.arc(global.screenWidth/2,global.screenHeight/2,15,0,2*Math.PI);
+            this.context2D.stroke();
+
 
 
             /**
@@ -60,7 +67,8 @@ class DrawingUtil{
 
 
             /**
-             * Calculate total number of vertical lines to be drawn.
+             * Calculate total number of vertical lines to be drawn based on 
+             * the total number of pixels between the first vertical line and the right edge of the game board.
              */
             var lastVerticalLine;
             if((global.screenWidth/2 + player.position.x) > global.gameWidth){
@@ -72,7 +80,8 @@ class DrawingUtil{
             var totalNumberOfVerticalLines = Math.floor((lastVerticalLine - pixelsBeforeFirstVerticalLine)/background_props.cellWidth) + 1;;
 
             /**
-             * Calculate total number of horizontal lines to be drawn.
+             * Calculate total number of horizontal lines to be drawn based on 
+             * the total number of pixels between the first horizontal line and the bottom of the game board.
              */
             var lastHorizontalLine;
             if((global.screenHeight/2 + player.position.y) > global.gameHeight){

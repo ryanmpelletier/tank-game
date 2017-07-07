@@ -13,7 +13,10 @@ class ClientData {
     this.player = {
       screenName: undefined,
       screenWidth: undefined,
-      screenHeight: undefined
+      screenHeight: undefined,
+      userInput:{
+        keysPressed:{}
+      }
     };
     //stuff the client does NOT give us or ever set, this is read by the server for game logic/managing
     this.id = id;

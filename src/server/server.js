@@ -161,6 +161,20 @@ var gameTick = function(clientData){
       sockets[clientData.id].emit('kick');
       sockets[clientData.id].disconnect();
   }
+
+  //update player position based on input
+  if(clientData.player.userInput.keysPressed['KEY_UP'] && !clientData.player.userInput.keysPressed['KEY_DOWN']){
+      clientData.position.y = clientData.position.y - config.player.speedFactor; 
+  }else if(clientData.player.userInput.keysPressed['KEY_DOWN'] && !clientData.player.userInput.keysPressed['KEY_UP']){
+      clientData.position.y = clientData.position.y + config.player.speedFactor; 
+  }
+
+  if(clientData.player.userInput.keysPressed['KEY_RIGHT'] && !clientData.player.userInput.keysPressed['KEY_LEFT']){
+      clientData.position.x = clientData.position.x + config.player.speedFactor; 
+  }else if(clientData.player.userInput.keysPressed['KEY_LEFT'] && !clientData.player.userInput.keysPressed['KEY_RIGHT']){
+      clientData.position.x = clientData.position.x - config.player.speedFactor; 
+  }
+
 }
 
 

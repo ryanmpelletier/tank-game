@@ -1,8 +1,8 @@
 {
     "port":8080,
     "maxLastHeartBeat":5000,
-    "gameWidth":750,
-    "gameHeight":750,
+    "gameWidth":1250,
+    "gameHeight":1250,
     "player":{
         "speedFactor": 3
     }

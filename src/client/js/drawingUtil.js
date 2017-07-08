@@ -24,9 +24,6 @@ class DrawingUtil{
          */
         this.playerDraw = function(player){
             var background_props = global.background_props;
-
-
-
             /**
              * For debugging purposes, draw helpful data about screenSize, gameWidth, and user position
              * Also draw dot in the center representing user
@@ -41,95 +38,43 @@ class DrawingUtil{
             this.context2D.arc(global.screenWidth/2,global.screenHeight/2,15,0,2*Math.PI);
             this.context2D.stroke();
 
+            //these calculations will let us know where our browser window is in relation to the game board
+            var leftViewToGameEdge = player.position.x - global.screenWidth/2;
+            var topViewToGameEdge = player.position.y - global.screenHeight/2;
+            var bottomViewToGameEdge = player.position.y + global.screenHeight/2;
+            var rightViewToGameEdge = player.position.x + global.screenWidth/2;
 
+            //these are the x and y values for where to draw the game board bounding box
+            //NOTE: the logic is not perfect here, this will break if the game board is not inside the user's window AT ALL, which we assume cannot happen
+            var firstVerticalLineXValue = (leftViewToGameEdge < 0 ? -leftViewToGameEdge : 0);
+            var firstHorizontalLineYValue = (topViewToGameEdge < 0 ? -topViewToGameEdge : 0);
+            var secondHorizontalLineYValue = (bottomViewToGameEdge > global.gameHeight ? (global.screenHeight - (bottomViewToGameEdge - global.gameHeight)) : this.canvas.height);
+            var secondVerticalLineXValue = (rightViewToGameEdge > global.gameWidth ? (global.screenWidth - (rightViewToGameEdge - global.gameWidth)) : this.canvas.width);
 
-            /**
-             * Calculate where vertical lines will start being drawn on left side of screen.
-             */
-            var leftSideOfUserView = player.position.x - global.screenWidth/2;
-            var pixelsBeforeFirstVerticalLine;
-            if(leftSideOfUserView < 0){
-                pixelsBeforeFirstVerticalLine = - leftSideOfUserView;
-            }else{
-                pixelsBeforeFirstVerticalLine = leftSideOfUserView % background_props.cellWidth;
-            }
+            //now I can draw the border
 
-            /**
-             * Calculate where horizontal lines will start being drawn from the top of ths screen
-             */
-            var topSideOfuserView = player.position.y - global.screenHeight/2;
-            var pixelsBeforeFirstHorizontalLine;
-            if(topSideOfuserView < 0){
-                pixelsBeforeFirstHorizontalLine = -topSideOfuserView;
-            }else {
-                pixelsBeforeFirstHorizontalLine = topSideOfuserView % background_props.cellHeight;
-            }
-
-
-            /**
-             * Calculate total number of vertical lines to be drawn based on 
-             * the total number of pixels between the first vertical line and the right edge of the game board.
-             */
-            var lastVerticalLine;
-            if((global.screenWidth/2 + player.position.x) > global.gameWidth){
-                var distanceOverflowed = ((global.screenWidth/2 + player.position.x) - global.gameWidth);
-                lastVerticalLine = global.screenWidth - distanceOverflowed;
-            }else{
-                lastVerticalLine = global.screenWidth;
-            }
-            var totalNumberOfVerticalLines = Math.floor((lastVerticalLine - pixelsBeforeFirstVerticalLine)/background_props.cellWidth) + 1;;
-
-            /**
-             * Calculate total number of horizontal lines to be drawn based on 
-             * the total number of pixels between the first horizontal line and the bottom of the game board.
-             */
-            var lastHorizontalLine;
-            if((global.screenHeight/2 + player.position.y) > global.gameHeight){
-                var distanceOverflowed = ((global.screenHeight/2 + player.position.y) - global.gameHeight);
-                lastHorizontalLine = global.screenHeight - distanceOverflowed;
-            }else{
-                lastHorizontalLine = global.screenHeight;
-            }
-            
-            var totalNumberOfHorizontalLines = Math.floor((lastHorizontalLine - pixelsBeforeFirstHorizontalLine)/background_props.cellHeight) + 1;
-
-
-            /**
-             * Draw vertical lines
-             */
-            for(var i = pixelsBeforeFirstVerticalLine; i < (totalNumberOfVerticalLines * background_props.cellWidth + pixelsBeforeFirstVerticalLine); i+=background_props.cellWidth){
-                this.context2D.beginPath();
-                if(topSideOfuserView < 0){
-                    this.context2D.moveTo(i, pixelsBeforeFirstHorizontalLine);
-                }else{
-                    this.context2D.moveTo(i, 0);
-                }
-                this.context2D.lineTo(i, lastHorizontalLine);
-                this.context2D.stroke();
-            }
-
+            //left border line
             this.context2D.beginPath();
-            this.context2D.moveTo(lastVerticalLine, pixelsBeforeFirstHorizontalLine);
-            this.context2D.lineTo(lastVerticalLine, lastHorizontalLine);
+            this.context2D.moveTo(firstVerticalLineXValue,firstHorizontalLineYValue);
+            this.context2D.lineTo(firstVerticalLineXValue,secondHorizontalLineYValue);
             this.context2D.stroke();
 
-            /**
-             * Draw horizontal lines
-             */
-            for(var i = pixelsBeforeFirstHorizontalLine; i < (totalNumberOfHorizontalLines * background_props.cellHeight + pixelsBeforeFirstHorizontalLine); i+=background_props.cellHeight){
-                this.context2D.beginPath();
-                if(leftSideOfUserView < 0){
-                    this.context2D.moveTo(pixelsBeforeFirstVerticalLine, i);
-                }else{
-                    this.context2D.moveTo(0, i);
-                }
-                this.context2D.lineTo(lastVerticalLine, i);
-                this.context2D.stroke();
-            }
-
+            //right border line
             this.context2D.beginPath();
-            this.context2D.moveTo(pixelsBeforeFirstVerticalLine, lastHorizontalLine);
-            this.context2D.lineTo(lastVerticalLine, lastHorizontalLine);
+            this.context2D.moveTo(secondVerticalLineXValue,firstHorizontalLineYValue);
+            this.context2D.lineTo(secondVerticalLineXValue, secondHorizontalLineYValue);
+            this.context2D.stroke();
+
+            //top border line
+            this.context2D.beginPath();
+            this.context2D.moveTo(firstVerticalLineXValue,firstHorizontalLineYValue);
+            this.context2D.lineTo(secondVerticalLineXValue, firstHorizontalLineYValue);
+            this.context2D.stroke();
+
+            //bottom border line
+            this.context2D.beginPath();
+            this.context2D.moveTo(firstVerticalLineXValue, secondHorizontalLineYValue);
+            this.context2D.lineTo(secondVerticalLineXValue, secondHorizontalLineYValue);
             this.context2D.stroke();
         }
     }

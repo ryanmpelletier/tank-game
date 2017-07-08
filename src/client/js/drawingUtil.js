@@ -26,17 +26,12 @@ class DrawingUtil{
             var background_props = global.background_props;
             /**
              * For debugging purposes, draw helpful data about screenSize, gameWidth, and user position
-             * Also draw dot in the center representing user
              */
 
             this.context2D.font = "20px Arial";
             this.context2D.fillText('X: ' + player.position.x + ', Y: ' + player.position.y,10,50);
             this.context2D.fillText('Screen Width: ' + global.screenWidth + ', Screen Height: ' + global.screenHeight,10,75);
             this.context2D.fillText('Game Width: ' + global.gameWidth + ', Game Height: ' + global.gameHeight, 10, 100);
-
-            this.context2D.beginPath();
-            this.context2D.arc(global.screenWidth/2,global.screenHeight/2,15,0,2*Math.PI);
-            this.context2D.stroke();
 
             //these calculations will let us know where our browser window is in relation to the game board
             var leftViewToGameEdge = player.position.x - global.screenWidth/2;
@@ -53,28 +48,55 @@ class DrawingUtil{
 
             //now I can draw the border
 
-            //left border line
-            this.context2D.beginPath();
-            this.context2D.moveTo(firstVerticalLineXValue,firstHorizontalLineYValue);
-            this.context2D.lineTo(firstVerticalLineXValue,secondHorizontalLineYValue);
-            this.context2D.stroke();
+            // //left border line
+            // this.context2D.beginPath();
+            // this.context2D.moveTo(firstVerticalLineXValue,firstHorizontalLineYValue);
+            // this.context2D.lineTo(firstVerticalLineXValue,secondHorizontalLineYValue);
+            // this.context2D.stroke();
 
-            //right border line
-            this.context2D.beginPath();
-            this.context2D.moveTo(secondVerticalLineXValue,firstHorizontalLineYValue);
-            this.context2D.lineTo(secondVerticalLineXValue, secondHorizontalLineYValue);
-            this.context2D.stroke();
+            // //right border line
+            // this.context2D.beginPath();
+            // this.context2D.moveTo(secondVerticalLineXValue,firstHorizontalLineYValue);
+            // this.context2D.lineTo(secondVerticalLineXValue, secondHorizontalLineYValue);
+            // this.context2D.stroke();
 
-            //top border line
-            this.context2D.beginPath();
-            this.context2D.moveTo(firstVerticalLineXValue,firstHorizontalLineYValue);
-            this.context2D.lineTo(secondVerticalLineXValue, firstHorizontalLineYValue);
-            this.context2D.stroke();
+            // //top border line
+            // this.context2D.beginPath();
+            // this.context2D.moveTo(firstVerticalLineXValue,firstHorizontalLineYValue);
+            // this.context2D.lineTo(secondVerticalLineXValue, firstHorizontalLineYValue);
+            // this.context2D.stroke();
 
-            //bottom border line
+            // //bottom border line
+            // this.context2D.beginPath();
+            // this.context2D.moveTo(firstVerticalLineXValue, secondHorizontalLineYValue);
+            // this.context2D.lineTo(secondVerticalLineXValue, secondHorizontalLineYValue);
+            // this.context2D.stroke();
+
+            //here is using a repeating background image to draw the background (This is experimental code at this point)
+            var img = document.getElementById('background_image');
+            var pattern = this.context2D.createPattern(img, 'repeat');
+            this.context2D.fillStyle = pattern;
+            //here is my mistake, these can't be based on first line values because these default to 0 or gamewidth/gameheight, I need the true value
+            //I think here the translation needs to go all the way out to the game board!
+            //so here I need to translate the canvas starting x,y coordinate out to the upper left corner of the game board
+            //then the pattern will be drawn correctly over the client screen
+            //but I still need to make sure I am only drawing a certain window of that view?
+
+            // this.context2D.translate(firstVerticalLineXValue, firstHorizontalLineYValue);
+            // this.context2D.fillRect(0,0,(secondVerticalLineXValue - firstVerticalLineXValue),(secondHorizontalLineYValue - firstHorizontalLineYValue));
+            // this.context2D.translate(-firstVerticalLineXValue, -firstHorizontalLineYValue);
+
+            //1. Canvas translation goes all the way out to the corner of the game boardwds
+            //2. Rather than start at 0,0 for rect, need to start at firstVerticalLineXValue, firstHorizontalLineYValue
+            var translateX = -(player.position.x - global.screenWidth/2);
+            var translateY = -(player.position.y - global.screenHeight/2);
+            //translate canvas to where the gameboard is
+            this.context2D.translate(translateX, translateY);
+            this.context2D.fillRect(0,0,(secondVerticalLineXValue - firstVerticalLineXValue),(secondHorizontalLineYValue - firstHorizontalLineYValue));
+            this.context2D.translate(-translateX,-translateY);
+            //draw dot in the center to represent person
             this.context2D.beginPath();
-            this.context2D.moveTo(firstVerticalLineXValue, secondHorizontalLineYValue);
-            this.context2D.lineTo(secondVerticalLineXValue, secondHorizontalLineYValue);
+            this.context2D.arc(global.screenWidth/2,global.screenHeight/2,15,0,2*Math.PI);
             this.context2D.stroke();
         }
     }

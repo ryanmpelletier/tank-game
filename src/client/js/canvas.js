@@ -28,6 +28,14 @@ class Canvas{
         this.canvas.focus();
     }
 
+    setHeight(height){
+        this.canvas.height = height;
+    }
+
+    setWidth(width){
+        this.canvas.width = width;
+    }
+
     //get a reference to the canvas element
     getCanvas(){
         return this.canvas;

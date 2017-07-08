@@ -84,7 +84,7 @@ function setupSocket(socket){
      * Client will respond when it is ready to play the game
      * 
      */
-    socket.on('welcome',function(clientInitData){
+    socket.on('welcome',function(clientInitData, gameConfig){
         /**
          * Here the client gets a chance to add any data that the server will need to
          * know in order to correctly computer game logic, such as the client's viewbox
@@ -92,6 +92,9 @@ function setupSocket(socket){
         clientInitData.player.screenName = "test" + new Date().getTime();
         clientInitData.player.screenHeight = global.screenHeight;
         clientInitData.player.screenWidth = global.screenWidth;
+
+        global.gameWidth = gameConfig.gameWidth;
+        global.gameHeight = gameConfig.gameHeight;
 
 
         socket.emit('welcome_recieved', clientInitData);
@@ -107,7 +110,6 @@ function setupSocket(socket){
     //server needs to draw what gets put into gameObjects
     socket.on('game_objects_update',function(gameObjects){
         clientGameObjects = gameObjects;
-        //I think it would be nice here to basically send the server back a clientData object, I think the client should have one of those
         socket.emit('client_checkin', canvasGameBoard.getUserInput());
     });
 
@@ -128,6 +130,8 @@ function setupSocket(socket){
 function resize(){
     global.screenWidth = window.innerWidth;
     global.screenHeight = window.innerHeight;
+    canvasGameBoard.setHeight(global.screenHeight);
+    canvasGameBoard.setWidth(global.screenWidth);
     socket.emit('windowResized',{screenWidth: global.screenWidth, screenHeight: global.screenHeight});
 }
 

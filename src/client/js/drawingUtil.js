@@ -23,7 +23,15 @@ class DrawingUtil{
          * For now this is where I am going to draw the background
          */
         this.playerDraw = function(player){
-            var background_props = global.background_props;
+
+            //set player position globally
+            global.player = {
+                position:{
+                    x: player.position.x,
+                    y: player.position.y
+                }
+            }
+            
 
             //here is using a repeating background image to draw the background
             var img = document.getElementById('background_image');
@@ -46,11 +54,25 @@ class DrawingUtil{
             this.context2D.fillText('X: ' + player.position.x + ', Y: ' + player.position.y,10,50);
             this.context2D.fillText('Screen Width: ' + global.screenWidth + ', Screen Height: ' + global.screenHeight,10,75);
             this.context2D.fillText('Game Width: ' + global.gameWidth + ', Game Height: ' + global.gameHeight, 10, 100);
-            //draw dot in the center to represent person
-            this.context2D.beginPath();
-            this.context2D.strokeStyle = 'white';
-            this.context2D.arc(global.screenWidth/2,global.screenHeight/2,15,0,2*Math.PI);
-            this.context2D.stroke();
+        }
+
+        /**
+         * Draw the positions of the other players
+         */
+        this.playersDraw = function(players){
+            var translateX = -(global.player.position.x - global.screenWidth/2);
+            var translateY = -(global.player.position.y - global.screenHeight/2);
+            
+            this.context2D.translate(translateX, translateY);
+            for(var i = 0; i < players.length; i++){
+                //draw dot in the center to represent person
+                this.context2D.beginPath();
+                this.context2D.strokeStyle = 'white';
+                this.context2D.arc(players[i].x, players[i].y, 15, 0, 2*Math.PI);
+                this.context2D.stroke();
+            }
+            this.context2D.translate(-translateX, -translateY);
+
         }
     }
 

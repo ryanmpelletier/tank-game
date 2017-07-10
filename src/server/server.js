@@ -193,11 +193,24 @@ var gameObjectUpdater = function(){
  */
 var clientUpdater = function(){
   currentClientDatas.forEach(function(clientData){
+
+      //visible players are players that are within the screen of the current player
+      //a quad tree should be used here
+      var visiblePlayers = currentClientDatas.map(function(player){
+          if(player.position.x > (clientData.position.x - clientData.player.screenWidth/2) &&
+             player.position.x < (clientData.position.x + clientData.player.screenWidth/2) &&
+             player.position.y > (clientData.position.y - clientData.player.screenHeight/2)&&
+             player.position.y < (clientData.position.y + clientData.player.screenHeight/2)){
+              return player.position;
+          }
+      }).filter(function(p){return p;});
+
       sockets[clientData.id].emit('game_objects_update', {
         "server_time":new Date().getTime(),
         "player":{
           "position":clientData.position
-        }
+        },
+        "players":visiblePlayers
       });
   });
 }

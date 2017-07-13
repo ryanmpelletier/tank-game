@@ -9,6 +9,20 @@ var gulp = require('gulp');
 var babel = require('gulp-babel');
 var webpack = require('webpack-stream');
 var nodemon = require('gulp-nodemon');
+var mocha = require('gulp-mocha');
+
+
+
+/**
+ * This tasks pipes our test files through mocha to run automated tests.
+ */
+gulp.task('test',function(){
+    gulp.src(['test/**/*.js'])
+        .pipe(mocha());
+});
+
+
+
 
 /**
  * This task moves everything EXCEPT for the js files over from src/client to /bin/client.

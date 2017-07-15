@@ -10,26 +10,31 @@ var SimpleQuadtree = require('simple-quadtree');
 
 class QuadtreeManager {
   constructor() {
-    //internally hold one quadtree
+    //internally hold one quadtree (I can see someone wanting to write a QuadtreeManager with multiple quadtrees)
     this.quadtree = new SimpleQuadtree(0, 0, config.gameWidth, config.gameHeight);
-
   }
     
-  //return all game objects in a drawable format (this might be hard to do, will quadtree have all the necessary information?)
-  queryGameObjects(x,y,w,h){
-    console.log("TODO - write query game objects");
-  }
+  //everything needed to draw
+  queryGameObjects(queryObject){
 
-  addObject(){
-    console.log("TODO - write add object");
-  }
+      /**
+      * visible players are players that are within the screen of the current player
+      * use quadtree for efficiency
+      */
+      var visiblePlayers = [];
+      
+      this.quadtree.get(queryObject, function(quadtreeObject){
+          visiblePlayers.push({x:quadtreeObject.x, y:quadtreeObject.y});
+          return true;
+      });
 
-  removeObject(){
-    console.log("TODO - write remove object");
-  }
-
-  updateObject(){
-    console.log("TODO - write update object");
+      return {
+        "perspective":{
+            x: queryObject.x + queryObject.w/2,
+            y: queryObject.y + queryObject.h/2
+        },
+        "players":visiblePlayers
+      };
   }
 
   getQuadtree(){

@@ -41,11 +41,13 @@ http.listen(config.port, function(){
 var ClientData = require('./lib/clientData');
 var util = require('./lib/util');
 var SimpleQuadtree = require('simple-quadtree');
+var QuadtreeManager = require('./lib/quadtreeManager');
 
 /**
  * Quadtree will hold all of the objects in the game that will need to be kept track of
  */
-var quadtree = new SimpleQuadtree(0, 0, config.gameWidth, config.gameHeight);
+var quadtreeManager = new QuadtreeManager();
+var quadtree = quadtreeManager.getQuadtree();
 
 
 
@@ -218,28 +220,17 @@ var clientUpdater = function(){
   currentClientDatas.forEach(function(clientData){
 
       /**
-      * visible players are players that are within the screen of the current player
-      * use quadtree for efficiency
-      */
-      var visiblePlayers = [];
-
-      /**
-       * query quadtree using players current position and their screenwidth, get all objects within
+       * Query quadtree using players current position and their screenwidth
+       * QuadtreeManager will return everything the client needs in order to draw the game objects
        */
-      var queryData = {x:clientData.position.x - clientData.player.screenWidth/2, y:clientData.position.y - clientData.player.screenHeight/2, w:clientData.player.screenWidth, h:clientData.player.screenHeight};
-      quadtree.get(queryData, function(objectToBeSeen){
-          visiblePlayers.push({x:objectToBeSeen.x, y:objectToBeSeen.y});
-          return true;
-      });
-
-
-      sockets[clientData.id].emit('game_objects_update', {
-        "server_time":new Date().getTime(),
-        "player":{
-          "position":clientData.position
-        },
-        "players":visiblePlayers
-      });
+      var queryArea = {
+        x:clientData.position.x - clientData.player.screenWidth/2,
+        y:clientData.position.y - clientData.player.screenHeight/2,
+        w:clientData.player.screenWidth,
+        h:clientData.player.screenHeight
+      };
+      
+      sockets[clientData.id].emit('game_objects_update', quadtreeManager.queryGameObjects(queryArea));
   });
 }
 

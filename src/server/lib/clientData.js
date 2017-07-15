@@ -23,14 +23,15 @@ class ClientData {
     this.id = id;
     this.ping = undefined;
     this.startPingTime = undefined;
-    this.position = {
+    this._position = {
       x: startXPosition,
       y: startYPosition
     };
     
     this.lastHeartbeat = new Date().getTime();
 
-    this.tank = new Tank(this);
+    //should probably make a setter for x and y which also changes the tank's x and y
+    this.tank = new Tank(this.id, this.position.x, this.position.y);
 
     /**
      * simple quadtree requires a basic format for object put onto the quadtree, I am trying to figure out the best way to mitigate this
@@ -38,16 +39,19 @@ class ClientData {
      * an interface I would implement, and I wouldn't have to change the internal representation of my object, this is my compromise
      */
     this.forQuadtree = function(){
-      return {
-        x: this.position.x,
-        y: this.position.y,
-        w: 0,
-        h: 0,
-        id: this.id,
-        type:'CLIENT_DATA',
-        object: this
-      }
+        return this.tank.forQuadtree();
     };
+  }
+
+  set position (position){
+    //set tank position also
+    this.tank.x = position.x;
+    this.tank.y = position.y;
+    this._position = position;
+  }
+
+  get position (){
+    return this._position;
   }
 
 }

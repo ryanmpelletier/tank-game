@@ -3,6 +3,9 @@
     "maxLastHeartBeat":5000,
     "gameWidth":500,
     "gameHeight":500,
+    "tankWidth":1,
+    "tankHeight":1,
+    "tankAmmoCapacity":4,
     "player":{
         "speedFactor": 3
     }

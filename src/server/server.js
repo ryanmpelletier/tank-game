@@ -175,6 +175,7 @@ var gameTick = function(clientData){
       sockets[clientData.id].emit('kick');
       sockets[clientData.id].disconnect();
   }
+  console.log(clientData.tank);
   
   /**
    * simpleQuadtree requires that the x,y,w, and h used to put the item be used to retrieve it

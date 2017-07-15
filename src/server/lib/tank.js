@@ -6,31 +6,16 @@
  * Other values as calculated by the server will be stored outside of the "player" nested object.
  */
 var config = require('../../../config.json');
-var Tank = require('./tank');
 
-class ClientData {
-  constructor(id, startXPosition, startYPosition) {
-    //stuff the client gives us
-    this.player = {
-      screenName: undefined,
-      screenWidth: undefined,
-      screenHeight: undefined,
-      userInput:{
-        keysPressed:{}
-      }
-    };
-    //stuff the client does NOT give us or ever set, this is read by the server for game logic/managing
-    this.id = id;
-    this.ping = undefined;
-    this.startPingTime = undefined;
-    this.position = {
-      x: startXPosition,
-      y: startYPosition
-    };
-    
-    this.lastHeartbeat = new Date().getTime();
+class Tank {
+  constructor(owner = undefined, gunAngle = 0, ammo = config.tankAmmoCapacity) {
 
-    this.tank = new Tank(this);
+    this.owner = owner;
+    this.gunAngle = gunAngle;
+    this.ammo = ammo;
+
+    //probably will have a bullet class
+    this.bullets = [];
 
     /**
      * simple quadtree requires a basic format for object put onto the quadtree, I am trying to figure out the best way to mitigate this
@@ -38,18 +23,17 @@ class ClientData {
      * an interface I would implement, and I wouldn't have to change the internal representation of my object, this is my compromise
      */
     this.forQuadtree = function(){
-      return {
-        x: this.position.x,
-        y: this.position.y,
-        w: 0,
-        h: 0,
-        id: this.id,
-        type:'CLIENT_DATA',
-        object: this
-      }
+        return {
+            x: this.owner.position.x,
+            y: this.owner.position.y,
+            w: config.tankWidth,
+            h: config.tankHeight,
+            id: this.owner.id,
+            type:'TANK',
+            object: this
+        }
     };
   }
-
 }
 
-module.exports = ClientData;
+module.exports = Tank;

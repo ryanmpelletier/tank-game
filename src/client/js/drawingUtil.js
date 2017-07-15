@@ -4,7 +4,7 @@ var global = require('./global');
  * Here we will write all the drawing functions.
  */
 class DrawingUtil{
-    constructor(canvas){
+    constructor(canvas, perspective = {x: global.gameWidth/2, y: global.gameHeight/2}){
         this.canvas = canvas;
         this.context2D = canvas.getContext("2d");
 
@@ -13,10 +13,7 @@ class DrawingUtil{
          * is necessary for almost all other drawing methods. This is the center of
          * where the client is 'looking' on the game board
          */
-        this.perspective = {
-            x: global.gameWidth/2,
-            y: global.gameHeight/2
-        };
+        this.perspective = perspective;
     }
 
     /**
@@ -48,9 +45,9 @@ class DrawingUtil{
          */
         this.context2D.font = "20px Arial";
         this.context2D.fillStyle = "red";
-        this.context2D.fillText('X: ' + perspective.x + ', Y: ' + perspective.y, 10, 50);
-        this.context2D.fillText('Screen Width: ' + global.screenWidth + ', Screen Height: ' + global.screenHeight,10,75);
-        this.context2D.fillText('Game Width: ' + global.gameWidth + ', Game Height: ' + global.gameHeight, 10, 100);
+        this.context2D.fillText(`X: ${perspective.x}, Y: ${perspective.y}`, 10, 50);
+        this.context2D.fillText(`Screen Width: ${global.screenWidth}, Screen Height: ${global.screenHeight}`,10,75);
+        this.context2D.fillText(`Game Width: ${global.gameWidth}, Game Height: ${global.gameHeight}`, 10, 100);
     }
 
     /**
@@ -77,17 +74,15 @@ class DrawingUtil{
      */
     drawGameObjects(gameObjects){
         for (var key in gameObjects) {
-            if (gameObjects.hasOwnProperty(key) && typeof this[key + 'Draw'] !== 'undefined') {
-                this[key + 'Draw'](gameObjects[key]);
+            if (gameObjects.hasOwnProperty(key) && typeof this[`${key}Draw`] !== 'undefined') {
+                this[`${key}Draw`](gameObjects[key]);
             }
         }
     }
 
     setPerspective(x,y){
-        this.perspective = {
-            x:x,
-            y:y
-        }
+        //shorthand ES6
+        this.perspective = {x,y};
     }
 }
 

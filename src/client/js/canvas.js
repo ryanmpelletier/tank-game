@@ -21,7 +21,7 @@ class Canvas{
         //will keep track of user input
         this.userInput = {
             keysPressed: {},
-            click:false,
+            mouseClicked:false,
             mouseAngle: 0
         }
         //set focus to canvas so that user input can be collected
@@ -80,11 +80,11 @@ class Canvas{
 
 
     onMouseDown(event){
-        this.parent.userInput.click = true;
+        this.parent.userInput.mouseClicked = true;
     }
 
     onMouseUp(event){
-        this.parent.userInput.click = false;
+        this.parent.userInput.mouseClicked = false;
     }
 
     //remember that y increases as you go DOWN the page, x increases as you go RIGHT on the page

@@ -42,6 +42,7 @@ var ClientData = require('./lib/clientData');
 var util = require('./lib/util');
 var SimpleQuadtree = require('simple-quadtree');
 var QuadtreeManager = require('./lib/quadtreeManager');
+var Bullet = require('./lib/bullet');
 
 /**
  * Quadtree will hold all of the objects in the game that will need to be kept track of
@@ -177,6 +178,26 @@ var gameTick = function(clientData){
   }
 
   /**
+   * Set tank gun angle
+   */
+  if(typeof clientData.player.userInput.mouseAngle != 'undefined'){
+      clientData.tank.gunAngle = clientData.player.userInput.mouseAngle;
+  }
+
+  /**
+   * Fire bullets if necessary
+   */
+  if(typeof clientData.player.userInput.mouseClicked != 'undefined'){
+    if(clientData.player.userInput.mouseClicked && (typeof clientData.tank.timeLastFired == 'undefined' || (new Date().getTime() - clientData.tank.timeLastFired > config.tankFireTimeWait))){
+      clientData.tank.timeLastFired = new Date().getTime();
+
+      var bullet = new Bullet(clientData.id, clientData.tank.x, clientData.tank.y, Math.cos(clientData.tank.gunAngle) * config.bulletVelocity, Math.sin(clientData.tank.gunAngle) * config.bulletVelocity);
+      quadtree.put(bullet.forQuadtree());
+      clientData.tank.bullets.push(bullet);
+    }
+  }
+
+  /**
    * simpleQuadtree requires that the x,y,w, and h used to put the item be used to retrieve it
    * here we get the old quadtree information
    */
@@ -198,15 +219,22 @@ var gameTick = function(clientData){
 
   clientData.position = newPosition;
 
-
-  if(typeof clientData.player.userInput.mouseAngle != 'undefined'){
-      clientData.tank.gunAngle = clientData.player.userInput.mouseAngle;
-  }
-
 /**
  * Update the item on the quadtree
  */
   quadtree.update(oldQuadreeInfo, 'id', clientData.forQuadtree());
+
+  /**
+   * Update positions of all the bullets
+   */
+
+  for(var i = 0; i < clientData.tank.bullets.length; i++){
+      let oldTreeInfo = clientData.tank.bullets[i].forQuadtree();
+      clientData.tank.bullets[i].x = clientData.tank.bullets[i].x + clientData.tank.bullets[i].velocityX;
+      clientData.tank.bullets[i].y = clientData.tank.bullets[i].y - clientData.tank.bullets[i].velocityY;
+      quadtree.update(oldTreeInfo, 'id', clientData.tank.bullets[i].forQuadtree());
+  }
+
 }
 
 

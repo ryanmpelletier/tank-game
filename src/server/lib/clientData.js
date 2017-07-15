@@ -7,6 +7,7 @@
  */
 var config = require('../../../config.json');
 var Tank = require('./tank');
+var Direction = require('./direction');
 
 class ClientData {
   constructor(id, startXPosition, startYPosition) {
@@ -27,6 +28,7 @@ class ClientData {
       x: startXPosition,
       y: startYPosition
     };
+    this.direction = Direction.N;
     
     this.lastHeartbeat = new Date().getTime();
 

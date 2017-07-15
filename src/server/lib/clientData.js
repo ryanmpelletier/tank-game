@@ -26,7 +26,24 @@ class ClientData {
       x: startXPosition,
       y: startYPosition
     };
+    
     this.lastHeartbeat = new Date().getTime();
+
+    /**
+     * simple quadtree requires a basic format for object put onto the quadtree, I am trying to figure out the best way to mitigate this
+     * I don't like a libary enforcing my object to have a certain structure, this is something I am not used to. In Java this would just be
+     * an interface I would implement, and I wouldn't have to change the internal representation of my object, this is my compromise
+     */
+    this.forQuadtree = function(){
+      return {
+        x: this.position.x,
+        y: this.position.y,
+        w: 1,
+        h: 1,
+        id: this.id,
+        object: this
+      }
+    };
   }
 
 }

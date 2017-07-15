@@ -40,6 +40,15 @@ http.listen(config.port, function(){
 //import game related classes
 var ClientData = require('./lib/clientData');
 var util = require('./lib/util');
+var SimpleQuadtree = require('simple-quadtree');
+var QuadtreeManager = require('./lib/quadtreeManager');
+
+/**
+ * Quadtree will hold all of the objects in the game that will need to be kept track of
+ */
+var quadtreeManager = new QuadtreeManager();
+var quadtree = quadtreeManager.getQuadtree();
+
 
 
 /**
@@ -94,6 +103,9 @@ socketIo.on('connection', function(socket){
       //add references for the clientData and for the socket 
       currentClientDatas.push(currentClientData); 
       sockets[clientUpdatedData.id] = socket;
+
+      //put client onto quadtree
+      quadtree.put(currentClientData.forQuadtree());
   });
 
    /**
@@ -114,6 +126,8 @@ socketIo.on('connection', function(socket){
       currentClientDatas.splice(playerIndex,1);
       console.log("[INFO] Player " + currentClientData.player.screenName + " has been removed from tracked players.");
     }
+    //remove player from quadtree
+    quadtree.remove(currentClientData.forQuadtree(), 'id');
   });
 
   /**
@@ -125,13 +139,13 @@ socketIo.on('connection', function(socket){
    * This is called at least once each time the client redraws the frame
    */
   socket.on('client_checkin',function(clientCheckinData){
-        currentClientData.player.userInput = clientCheckinData;
-        currentClientData.lastHeartbeat = new Date().getTime();
+      currentClientData.player.userInput = clientCheckinData;
+      currentClientData.lastHeartbeat = new Date().getTime();
   });
 
   socket.on('windowResized', function (data) {
-    currentClientData.player.screenWidth = data.screenWidth;
-    currentClientData.player.screenHeight = data.screenHeight;
+      currentClientData.player.screenWidth = data.screenWidth;
+      currentClientData.player.screenHeight = data.screenHeight;
   });
 
 });
@@ -161,6 +175,12 @@ var gameTick = function(clientData){
       sockets[clientData.id].emit('kick');
       sockets[clientData.id].disconnect();
   }
+  
+  /**
+   * simpleQuadtree requires that the x,y,w, and h used to put the item be used to retrieve it
+   * here we get the old quadtree information
+   */
+  var oldQuadreeInfo = clientData.forQuadtree(); 
 
   //update player position based on input
   if(clientData.player.userInput.keysPressed['KEY_UP'] && !clientData.player.userInput.keysPressed['KEY_DOWN']){
@@ -175,11 +195,16 @@ var gameTick = function(clientData){
       clientData.position.x = clientData.position.x - config.player.speedFactor; 
   }
 
+/**
+ * Update the item on the quadtree
+ */
+  quadtree.update(oldQuadreeInfo, 'id', clientData.forQuadtree());
 }
 
 
 /**
- * Iterate through players and update their game objects
+ * Iterate through players and update their game objects,
+ * this will include putting each currentClientData on the quadtree
  */
 var gameObjectUpdater = function(){
   //Iterate backwards, players may be removed from the array as the iteration occurs
@@ -194,24 +219,18 @@ var gameObjectUpdater = function(){
 var clientUpdater = function(){
   currentClientDatas.forEach(function(clientData){
 
-      //visible players are players that are within the screen of the current player
-      //a quad tree should be used here
-      var visiblePlayers = currentClientDatas.map(function(player){
-          if(player.position.x > (clientData.position.x - clientData.player.screenWidth/2) &&
-             player.position.x < (clientData.position.x + clientData.player.screenWidth/2) &&
-             player.position.y > (clientData.position.y - clientData.player.screenHeight/2)&&
-             player.position.y < (clientData.position.y + clientData.player.screenHeight/2)){
-              return player.position;
-          }
-      }).filter(function(p){return p;});
-
-      sockets[clientData.id].emit('game_objects_update', {
-        "server_time":new Date().getTime(),
-        "player":{
-          "position":clientData.position
-        },
-        "players":visiblePlayers
-      });
+      /**
+       * Query quadtree using players current position and their screenwidth
+       * QuadtreeManager will return everything the client needs in order to draw the game objects
+       */
+      var queryArea = {
+        x:clientData.position.x - clientData.player.screenWidth/2,
+        y:clientData.position.y - clientData.player.screenHeight/2,
+        w:clientData.player.screenWidth,
+        h:clientData.player.screenHeight
+      };
+      
+      sockets[clientData.id].emit('game_objects_update', quadtreeManager.queryGameObjects(queryArea));
   });
 }
 

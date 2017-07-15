@@ -67,6 +67,15 @@ function animationLoop(){
 function updateClientView(){
     //clear canvas
     canvasGameBoard.clear();
+
+    /**
+     * Trying to enforce the server sending a perspective object over
+     */
+    if(typeof clientGameObjects.perspective != 'undefined'){
+        drawingUtil.setPerspective(clientGameObjects.perspective.x, clientGameObjects.perspective.y);
+    }else{
+        throw new Error("unable to find perspective, make sure server is sending perspective object with x and y");
+    }
     drawingUtil.drawGameObjects(clientGameObjects);
 }
 

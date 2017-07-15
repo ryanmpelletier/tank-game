@@ -97,7 +97,7 @@ class Canvas{
         }else if(x <=0 && y >=0){
             angle = Math.atan(y/Math.abs(x));
         }else if(x >= 0 && y >= 0){
-            angle = Math.PI - Math.atan(y/x) * (180/Math.PI);
+            angle = Math.PI - Math.atan(y/x);
         }else if(x <= 0 && y <= 0){
             angle = 2*Math.PI - Math.atan(Math.abs(y)/Math.abs(x));
         }

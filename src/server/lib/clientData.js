@@ -6,6 +6,7 @@
  * Other values as calculated by the server will be stored outside of the "player" nested object.
  */
 var config = require('../../../config.json');
+var Tank = require('./tank');
 
 class ClientData {
   constructor(id, startXPosition, startYPosition) {
@@ -29,6 +30,8 @@ class ClientData {
     
     this.lastHeartbeat = new Date().getTime();
 
+    this.tank = new Tank(this);
+
     /**
      * simple quadtree requires a basic format for object put onto the quadtree, I am trying to figure out the best way to mitigate this
      * I don't like a libary enforcing my object to have a certain structure, this is something I am not used to. In Java this would just be
@@ -38,8 +41,8 @@ class ClientData {
       return {
         x: this.position.x,
         y: this.position.y,
-        w: 1,
-        h: 1,
+        w: 0,
+        h: 0,
         id: this.id,
         type:'CLIENT_DATA',
         object: this

@@ -25,8 +25,8 @@ class QuadtreeManager {
       * visible players are players that are within the screen of the current player
       * use quadtree for efficiency
       */
-      var visiblePlayers = [];
       var visibleTanks = [];
+
       
       this.quadtree.get(queryObject, function(quadtreeObject){
           if(quadtreeObject.type === 'TANK'){
@@ -36,7 +36,6 @@ class QuadtreeManager {
               gunAngle: quadtreeObject.object.gunAngle
             });
           }
-          visiblePlayers.push({x:quadtreeObject.x, y:quadtreeObject.y});
           return true;
       });
 

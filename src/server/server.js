@@ -175,25 +175,32 @@ var gameTick = function(clientData){
       sockets[clientData.id].emit('kick');
       sockets[clientData.id].disconnect();
   }
-  console.log(clientData.tank);
-  
+
   /**
    * simpleQuadtree requires that the x,y,w, and h used to put the item be used to retrieve it
    * here we get the old quadtree information
    */
   var oldQuadreeInfo = clientData.forQuadtree(); 
 
+  var newPosition = {x: clientData.position.x, y: clientData.position.y};
   //update player position based on input
   if(clientData.player.userInput.keysPressed['KEY_UP'] && !clientData.player.userInput.keysPressed['KEY_DOWN']){
-      clientData.position.y = clientData.position.y - config.player.speedFactor; 
+      newPosition.y = clientData.position.y - config.player.speedFactor; 
   }else if(clientData.player.userInput.keysPressed['KEY_DOWN'] && !clientData.player.userInput.keysPressed['KEY_UP']){
-      clientData.position.y = clientData.position.y + config.player.speedFactor; 
+      newPosition.y = clientData.position.y + config.player.speedFactor; 
   }
 
   if(clientData.player.userInput.keysPressed['KEY_RIGHT'] && !clientData.player.userInput.keysPressed['KEY_LEFT']){
-      clientData.position.x = clientData.position.x + config.player.speedFactor; 
+      newPosition.x = clientData.position.x + config.player.speedFactor; 
   }else if(clientData.player.userInput.keysPressed['KEY_LEFT'] && !clientData.player.userInput.keysPressed['KEY_RIGHT']){
-      clientData.position.x = clientData.position.x - config.player.speedFactor; 
+      newPosition.x = clientData.position.x - config.player.speedFactor; 
+  }
+
+  clientData.position = newPosition;
+
+
+  if(typeof clientData.player.userInput.mouseAngle != 'undefined'){
+      clientData.tank.gunAngle = clientData.player.userInput.mouseAngle;
   }
 
 /**

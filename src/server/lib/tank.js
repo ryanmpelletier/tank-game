@@ -8,10 +8,13 @@
 var config = require('../../../config.json');
 
 class Tank {
-  constructor(owner = undefined, gunAngle = 0, ammo = config.tankAmmoCapacity) {
+  constructor(id, xPosition, yPosition, screenName = 'test',gunAngle = 0, ammo = config.tankAmmoCapacity) {
 
-    this.owner = owner;
-    this.gunAngle = gunAngle;
+    this.id = id;
+    this.x = xPosition;
+    this.y = yPosition;
+    this.screenName = screenName;
+    this._gunAngle = gunAngle;
     this.ammo = ammo;
 
     //probably will have a bullet class
@@ -24,16 +27,26 @@ class Tank {
      */
     this.forQuadtree = function(){
         return {
-            x: this.owner.position.x,
-            y: this.owner.position.y,
+            x: this.x,
+            y: this.y,
             w: config.tankWidth,
             h: config.tankHeight,
-            id: this.owner.id,
+            id: this.id,
             type:'TANK',
             object: this
         }
     };
   }
+
+  set gunAngle (gunAngle){
+    this._gunAngle = gunAngle;
+  }
+
+  get gunAngle (){
+    return this._gunAngle;
+  }
+
+
 }
 
 module.exports = Tank;

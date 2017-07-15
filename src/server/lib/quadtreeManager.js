@@ -26,8 +26,16 @@ class QuadtreeManager {
       * use quadtree for efficiency
       */
       var visiblePlayers = [];
+      var visibleTanks = [];
       
       this.quadtree.get(queryObject, function(quadtreeObject){
+          if(quadtreeObject.type === 'TANK'){
+            visibleTanks.push({
+              x: quadtreeObject.object.x,
+              y: quadtreeObject.object.y,
+              gunAngle: quadtreeObject.object.gunAngle
+            });
+          }
           visiblePlayers.push({x:quadtreeObject.x, y:quadtreeObject.y});
           return true;
       });
@@ -37,7 +45,7 @@ class QuadtreeManager {
             x: queryObject.x + queryObject.w/2,
             y: queryObject.y + queryObject.h/2
         },
-        "players":visiblePlayers
+        "tanks":visibleTanks
       };
   }
 

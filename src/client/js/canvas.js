@@ -4,9 +4,9 @@ var global = require('./global');
  * Here we will attach event listeners, and even write our drawing functions. (I think)
  */
 class Canvas{
-    constructor(){
+    constructor(canvasId = 'game_canvas'){
         //let this object control the canvas on the HTML page
-        this.canvas = document.getElementById('game_canvas');
+        this.canvas = document.getElementById(canvasId);
         this.canvas.width = global.screenWidth;
         this.canvas.height = global.screenHeight;
         //set the canvas's parent, this will be used for accessing fields like "keysPressed"
@@ -22,7 +22,7 @@ class Canvas{
         this.userInput = {
             keysPressed: {},
             click:false,
-            mousePointAngleFromCenter: null
+            mouseAngle: 0
         }
         //set focus to canvas so that user input can be collected
         this.canvas.focus();
@@ -93,15 +93,15 @@ class Canvas{
         var y = this.height/2 - event.clientY;
         var angle;
         if(x >= 0 && y <= 0){
-            angle = 180 + Math.atan(Math.abs(y)/x) * (180/Math.PI);
+            angle = Math.PI + Math.atan(Math.abs(y)/x);
         }else if(x <=0 && y >=0){
-            angle = Math.atan(y/Math.abs(x)) * (180/Math.PI);
+            angle = Math.atan(y/Math.abs(x));
         }else if(x >= 0 && y >= 0){
-            angle = 180 - Math.atan(y/x) * (180/Math.PI);
+            angle = Math.PI - Math.atan(y/x) * (180/Math.PI);
         }else if(x <= 0 && y <= 0){
-            angle = 360 - Math.atan(Math.abs(y)/Math.abs(x)) * (180/Math.PI);
+            angle = 2*Math.PI - Math.atan(Math.abs(y)/Math.abs(x));
         }
-        this.parent.userInput.mousePointAngleFromCenter = angle;
+        this.parent.userInput.mouseAngle = angle;
     }
 }
 

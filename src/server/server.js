@@ -71,7 +71,7 @@ var sockets = {};
  * use the currentClientDatas array and index it by a socket id number
  */
 socketIo.on('connection', function(socket){
-  console.log('[LOG] user connected with socket id', socket.id);
+  console.log(`[LOG] user connected with socket id ${socket.id}`);
 
   /**
    * Here is where I need to perform any server-side logic to set up state for the newly connecting player.
@@ -124,7 +124,7 @@ socketIo.on('connection', function(socket){
     var playerIndex = util.findIndex(currentClientDatas,currentClientData.id);
     if(playerIndex > -1){
       currentClientDatas.splice(playerIndex,1);
-      console.log("[INFO] Player " + currentClientData.player.screenName + " has been removed from tracked players.");
+      console.log(`[INFO] Player ${currentClientData.player.screenName} has been removed from tracked players.`);
     }
     //remove player from quadtree
     quadtree.remove(currentClientData.forQuadtree(), 'id');
@@ -171,7 +171,7 @@ var checkPing = function(){
  */
 var gameTick = function(clientData){
   if(clientData.lastHeartbeat < new Date().getTime() - config.maxLastHeartBeat){
-      console.log("[INFO] Kicking player " + clientData.player.screenName);
+      console.log(`[INFO] Kicking player ${clientData.player.screenName}`);
       sockets[clientData.id].emit('kick');
       sockets[clientData.id].disconnect();
   }

@@ -41,6 +41,7 @@ class ClientData {
         w: 1,
         h: 1,
         id: this.id,
+        type:'CLIENT_DATA',
         object: this
       }
     };

@@ -72,7 +72,7 @@ function updateClientView(){
      * Trying to enforce the server sending a perspective object over
      */
     if(typeof clientGameObjects.perspective != 'undefined'){
-        drawingUtil.setPerspective(clientGameObjects.perspective.x, clientGameObjects.perspective.y);
+        drawingUtil.setPerspective(clientGameObjects.perspective.x,clientGameObjects.perspective.y);
     }else{
         throw new Error("unable to find perspective, make sure server is sending perspective object with x and y");
     }
@@ -98,7 +98,7 @@ function setupSocket(socket){
          * Here the client gets a chance to add any data that the server will need to
          * know in order to correctly computer game logic, such as the client's viewbox
          */
-        clientInitData.player.screenName = "test" + new Date().getTime();
+        clientInitData.player.screenName = `test${new Date().getTime()}`;
         clientInitData.player.screenHeight = global.screenHeight;
         clientInitData.player.screenWidth = global.screenWidth;
 

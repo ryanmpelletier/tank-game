@@ -42,6 +42,7 @@ var ClientData = require('./lib/clientData');
 var util = require('./lib/util');
 var SimpleQuadtree = require('simple-quadtree');
 var QuadtreeManager = require('./lib/quadtreeManager');
+var Direction = require('./lib/direction');
 
 /**
  * Quadtree will hold all of the objects in the game that will need to be kept track of
@@ -170,38 +171,46 @@ var checkPing = function(){
  * gameTick is called once per player on each gameObjectUpdater call  
  */
 var gameTick = function(clientData){
-  if(clientData.lastHeartbeat < new Date().getTime() - config.maxLastHeartBeat){
-      console.log(`[INFO] Kicking player ${clientData.player.screenName}`);
-      sockets[clientData.id].emit('kick');
-      sockets[clientData.id].disconnect();
-  }
+    if(clientData.lastHeartbeat < new Date().getTime() - config.maxLastHeartBeat){
+        console.log(`[INFO] Kicking player ${clientData.player.screenName}`);
+        sockets[clientData.id].emit('kick');
+        sockets[clientData.id].disconnect();
+    }
 
-  /**
-   * simpleQuadtree requires that the x,y,w, and h used to put the item be used to retrieve it
-   * here we get the old quadtree information
-   */
-  var oldQuadreeInfo = clientData.forQuadtree(); 
+    /**
+    * simpleQuadtree requires that the x,y,w, and h used to put the item be used to retrieve it
+    * here we get the old quadtree information
+    */
+    var oldQuadreeInfo = clientData.forQuadtree();
+    var oldPosition = clientData.position;
+    var newPosition = {x: clientData.position.x, y: clientData.position.y};
+    var direction = 0;
 
-  var newPosition = {x: clientData.position.x, y: clientData.position.y};
-  //update player position based on input
-  if(clientData.player.userInput.keysPressed['KEY_UP'] && !clientData.player.userInput.keysPressed['KEY_DOWN']){
-      newPosition.y = clientData.position.y - config.player.speedFactor; 
-  }else if(clientData.player.userInput.keysPressed['KEY_DOWN'] && !clientData.player.userInput.keysPressed['KEY_UP']){
-      newPosition.y = clientData.position.y + config.player.speedFactor; 
-  }
+    //update player position based on input
+    if(clientData.player.userInput.keysPressed['KEY_UP'] && !clientData.player.userInput.keysPressed['KEY_DOWN']){
+        newPosition.y = oldPosition.y - config.player.speedFactor;
+    }else if(clientData.player.userInput.keysPressed['KEY_DOWN'] && !clientData.player.userInput.keysPressed['KEY_UP']){
+        newPosition.y = oldPosition.y + config.player.speedFactor;
+    }
 
-  if(clientData.player.userInput.keysPressed['KEY_RIGHT'] && !clientData.player.userInput.keysPressed['KEY_LEFT']){
-      newPosition.x = clientData.position.x + config.player.speedFactor; 
-  }else if(clientData.player.userInput.keysPressed['KEY_LEFT'] && !clientData.player.userInput.keysPressed['KEY_RIGHT']){
-      newPosition.x = clientData.position.x - config.player.speedFactor; 
-  }
+    if(clientData.player.userInput.keysPressed['KEY_RIGHT'] && !clientData.player.userInput.keysPressed['KEY_LEFT']){
+        newPosition.x = oldPosition.x + config.player.speedFactor;
+    }else if(clientData.player.userInput.keysPressed['KEY_LEFT'] && !clientData.player.userInput.keysPressed['KEY_RIGHT']){
+        newPosition.x = oldPosition.x - config.player.speedFactor;
+    }
 
-  clientData.position = newPosition;
+    // Get direction tank is moving in
+    var angleInRadians = Math.atan2(newPosition.y - oldPosition.y, newPosition.x - oldPosition.x);
+    var angleInDeg = ((angleInRadians * 180 / Math.PI) + 360) % 360;
+    console.log(angleInDeg);
+    clientData.direction = angleInDeg;
+
+    clientData.position = newPosition;
 
 
-  if(typeof clientData.player.userInput.mouseAngle != 'undefined'){
-      clientData.tank.gunAngle = clientData.player.userInput.mouseAngle;
-  }
+    if(typeof clientData.player.userInput.mouseAngle != 'undefined'){
+        clientData.tank.gunAngle = clientData.player.userInput.mouseAngle;
+    }
 
 /**
  * Update the item on the quadtree

@@ -1,20 +1,24 @@
 /**
- * I want to abstract away the Quadtree from the server.js file. I would like this class to be the type of thing
- * that could be "implemented" on a per game basis. For example, I would like it if the server just said 
- * "give me all the objects I need to draw that are inside this area", then that same object was
- * sent directly to the client. 
- * This class itself doesn't need to do anything with game logic, all that will still be happening in the server (which makes me think...will I want more abstraction?)
+ * All the game logic happens on the server, this object
+ * is responsible for taking an area and giving back the information needed 
+ * for the client to draw the objects in that area
  */
 var config = require('../../../config.json');
 var SimpleQuadtree = require('simple-quadtree');
 
 class QuadtreeManager {
   constructor() {
-    //internally hold one quadtree (I can see someone wanting to write a QuadtreeManager with multiple quadtrees)
+    /**
+     * Internally hold one quadtree, I can see someone wanting to write one that had multiple but
+     * I'm not going to be concerned with that for now
+     */
     this.quadtree = new SimpleQuadtree(0, 0, config.gameWidth, config.gameHeight);
   }
     
-  //everything needed to draw
+  /**
+   * Use queryObject to query the internal quadtree
+   * return exactly what the client needs to draw based on the results
+   */
   queryGameObjects(queryObject){
 
       /**

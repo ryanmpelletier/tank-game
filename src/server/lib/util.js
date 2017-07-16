@@ -9,3 +9,12 @@ exports.findIndex = function(arr, id) {
 
     return -1;
 };
+
+exports.areCoordinatesEqual = function(coor1, coor2) {
+    if(coor1.x == coor2.x && coor1.y == coor2.y) {
+        return true;
+    }
+    else {
+        return false;
+    }
+};

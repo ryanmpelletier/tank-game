@@ -117,7 +117,7 @@ function setupSocket(socket){
     });
 
     //server needs to draw what gets put into gameObjects
-    socket.on('game_objects_update',function(gameObjects){
+    socket.on('game_objects_update', function(gameObjects){
         clientGameObjects = gameObjects;
         socket.emit('client_checkin', canvasGameBoard.getUserInput());
     });

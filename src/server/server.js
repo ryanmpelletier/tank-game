@@ -43,6 +43,7 @@ var util = require('./lib/util');
 var SimpleQuadtree = require('simple-quadtree');
 var QuadtreeManager = require('./lib/quadtreeManager');
 var Bullet = require('./lib/bullet');
+var Direction = require('./lib/direction');
 
 /**
  * Quadtree will hold all of the objects in the game that will need to be kept track of
@@ -164,25 +165,18 @@ var checkPing = function(){
     currentClientDatas[util.findIndex(currentClientDatas,clientData.id)].startPingTime = new Date().getTime();
     sockets[clientData.id].emit('pingcheck');
   })
-}
+};
 
 
 /**
  * gameTick is called once per player on each gameObjectUpdater call  
  */
 var gameTick = function(clientData){
-  if(clientData.lastHeartbeat < new Date().getTime() - config.maxLastHeartBeat){
-      console.log(`[INFO] Kicking player ${clientData.player.screenName}`);
-      sockets[clientData.id].emit('kick');
-      sockets[clientData.id].disconnect();
-  }
-
-  /**
-   * Set tank gun angle
-   */
-  if(typeof clientData.player.userInput.mouseAngle != 'undefined'){
-      clientData.tank.gunAngle = clientData.player.userInput.mouseAngle;
-  }
+    if(clientData.lastHeartbeat < new Date().getTime() - config.maxLastHeartBeat){
+        console.log(`[INFO] Kicking player ${clientData.player.screenName}`);
+        sockets[clientData.id].emit('kick');
+        sockets[clientData.id].disconnect();
+    }
 
   /**
    * Fire bullets if necessary
@@ -197,27 +191,42 @@ var gameTick = function(clientData){
     }
   }
 
-  /**
-   * simpleQuadtree requires that the x,y,w, and h used to put the item be used to retrieve it
-   * here we get the old quadtree information
-   */
-  var oldQuadreeInfo = clientData.forQuadtree(); 
+    /**
+    * simpleQuadtree requires that the x,y,w, and h used to put the item be used to retrieve it
+    * here we get the old quadtree information
+    */
+    var oldQuadreeInfo = clientData.forQuadtree();
+    var oldPosition = clientData.position;
+    var newPosition = {x: clientData.position.x, y: clientData.position.y};
 
-  var newPosition = {x: clientData.position.x, y: clientData.position.y};
-  //update player position based on input
-  if(clientData.player.userInput.keysPressed['KEY_UP'] && !clientData.player.userInput.keysPressed['KEY_DOWN']){
-      newPosition.y = clientData.position.y - config.player.speedFactor; 
-  }else if(clientData.player.userInput.keysPressed['KEY_DOWN'] && !clientData.player.userInput.keysPressed['KEY_UP']){
-      newPosition.y = clientData.position.y + config.player.speedFactor; 
-  }
+    //update player position based on input
+    if(clientData.player.userInput.keysPressed['KEY_UP'] && !clientData.player.userInput.keysPressed['KEY_DOWN']){
+        newPosition.y = oldPosition.y - config.player.speedFactor;
+    }else if(clientData.player.userInput.keysPressed['KEY_DOWN'] && !clientData.player.userInput.keysPressed['KEY_UP']){
+        newPosition.y = oldPosition.y + config.player.speedFactor;
+    }
 
-  if(clientData.player.userInput.keysPressed['KEY_RIGHT'] && !clientData.player.userInput.keysPressed['KEY_LEFT']){
-      newPosition.x = clientData.position.x + config.player.speedFactor; 
-  }else if(clientData.player.userInput.keysPressed['KEY_LEFT'] && !clientData.player.userInput.keysPressed['KEY_RIGHT']){
-      newPosition.x = clientData.position.x - config.player.speedFactor; 
-  }
+    if(clientData.player.userInput.keysPressed['KEY_RIGHT'] && !clientData.player.userInput.keysPressed['KEY_LEFT']){
+        newPosition.x = oldPosition.x + config.player.speedFactor;
+    }else if(clientData.player.userInput.keysPressed['KEY_LEFT'] && !clientData.player.userInput.keysPressed['KEY_RIGHT']){
+        newPosition.x = oldPosition.x - config.player.speedFactor;
+    }
 
-  clientData.position = newPosition;
+    // Check if tank has moved since last update
+    // (Necessary to check because otherwise tank's direction will keep going
+    // back to North every time that it stops moving)
+    if(!util.areCoordinatesEqual(oldPosition, newPosition)) {
+        // Tank has moved so update its direction
+        var angleInRadians = Math.atan2(newPosition.y - oldPosition.y, newPosition.x - oldPosition.x);
+        var angleInDeg = ((angleInRadians * 180 / Math.PI) + 360) % 360;
+        clientData.tank.hullDirection = angleInDeg;
+    }
+
+    clientData.position = newPosition;
+
+    if(typeof clientData.player.userInput.mouseAngle != 'undefined'){
+        clientData.tank.gunAngle = clientData.player.userInput.mouseAngle;
+    }
 
 /**
  * Update the item on the quadtree
@@ -247,28 +256,28 @@ var gameObjectUpdater = function(){
   for (var i = currentClientDatas.length - 1; i >= 0; --i) {
       gameTick(currentClientDatas[i]);
   }
-}
+};
 
 /**
  * For each player send the game objects that are visible to them.
  */
-var clientUpdater = function(){
-  currentClientDatas.forEach(function(clientData){
-
+var clientUpdater = function() {
+  currentClientDatas.forEach(function(clientData) {
       /**
        * Query quadtree using players current position and their screenwidth
        * QuadtreeManager will return everything the client needs in order to draw the game objects
        */
       var queryArea = {
-        x:clientData.position.x - clientData.player.screenWidth/2,
-        y:clientData.position.y - clientData.player.screenHeight/2,
-        w:clientData.player.screenWidth,
-        h:clientData.player.screenHeight
+        x: clientData.position.x - clientData.player.screenWidth/2,
+        y: clientData.position.y - clientData.player.screenHeight/2,
+        w: clientData.player.screenWidth,
+        h: clientData.player.screenHeight
       };
-      
-      sockets[clientData.id].emit('game_objects_update', quadtreeManager.queryGameObjects(queryArea));
+
+    sockets[clientData.id].emit('game_objects_update', quadtreeManager.queryGameObjects(queryArea));
+
   });
-}
+};
 
 
 /**

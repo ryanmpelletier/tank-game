@@ -7,19 +7,19 @@ var config = require('../../../config.json');
 var SimpleQuadtree = require('simple-quadtree');
 
 class QuadtreeManager {
-  constructor() {
+    constructor() {
+        /**
+         * Internally hold one quadtree, I can see someone wanting to write one that had multiple but
+         * I'm not going to be concerned with that for now
+         */
+        this.quadtree = new SimpleQuadtree(0, 0, config.gameWidth, config.gameHeight);
+    }
+
     /**
-     * Internally hold one quadtree, I can see someone wanting to write one that had multiple but
-     * I'm not going to be concerned with that for now
-     */
-    this.quadtree = new SimpleQuadtree(0, 0, config.gameWidth, config.gameHeight);
-  }
-    
-  /**
-   * Use queryObject to query the internal quadtree
-   * return exactly what the client needs to draw based on the results
-   */
-  queryGameObjects(queryObject){
+    * Use queryObject to query the internal quadtree
+    * return exactly what the client needs to draw based on the results
+    */
+    queryGameObjects(queryObject) {
 
       /**
       * visible players are players that are within the screen of the current player
@@ -31,10 +31,13 @@ class QuadtreeManager {
       
       this.quadtree.get(queryObject, function(quadtreeObject){
           if(quadtreeObject.type === 'TANK'){
+            var tank = quadtreeObject.object;
             visibleTanks.push({
-              x: quadtreeObject.object.x,
-              y: quadtreeObject.object.y,
-              gunAngle: quadtreeObject.object.gunAngle
+                id: tank.id,
+                x: tank.x,
+                y: tank.y,
+                hullDirection: tank.hullDirection,
+                gunAngle: tank.gunAngle
             });
           }else if(quadtreeObject.type === 'BULLET'){
             visibleBullets.push(quadtreeObject.object);
@@ -52,9 +55,9 @@ class QuadtreeManager {
       };
   }
 
-  getQuadtree(){
-    return this.quadtree;
-  }
+    getQuadtree() {
+        return this.quadtree;
+    }
 }
 
 module.exports = QuadtreeManager;

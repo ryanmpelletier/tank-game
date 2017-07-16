@@ -164,7 +164,7 @@ var checkPing = function(){
     currentClientDatas[util.findIndex(currentClientDatas,clientData.id)].startPingTime = new Date().getTime();
     sockets[clientData.id].emit('pingcheck');
   })
-}
+};
 
 
 /**

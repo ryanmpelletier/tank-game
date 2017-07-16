@@ -8,43 +8,43 @@
 var config = require('../../../config.json');
 
 class Tank {
-  constructor(id, xPosition, yPosition, screenName = 'test', gunAngle = 0, ammo = config.tankAmmoCapacity) {
+    constructor(id, xPosition, yPosition, screenName = 'test', gunAngle = 0, ammo = config.tankAmmoCapacity) {
+        this.id = id;
+        this.x = xPosition;
+        this.y = yPosition;
+        this.screenName = screenName;
+        this.hullDirection = 0;
+        this._gunAngle = gunAngle;
+        this.ammo = ammo;
 
-    this.id = id;
-    this.x = xPosition;
-    this.y = yPosition;
-    this.screenName = screenName;
-    this._gunAngle = gunAngle;
-    this.ammo = ammo;
+        //probably will have a bullet class
+        this.bullets = [];
 
-    //probably will have a bullet class
-    this.bullets = [];
+        /**
+         * simple quadtree requires a basic format for object put onto the quadtree, I am trying to figure out the best way to mitigate this
+         * I don't like a libary enforcing my object to have a certain structure, this is something I am not used to. In Java this would just be
+         * an interface I would implement, and I wouldn't have to change the internal representation of my object, this is my compromise
+         */
+        this.forQuadtree = function(){
+            return {
+                x: this.x,
+                y: this.y,
+                w: config.tankWidth,
+                h: config.tankHeight,
+                id: this.id,
+                type:'TANK',
+                object: this
+            }
+        };
+    }
 
-    /**
-     * simple quadtree requires a basic format for object put onto the quadtree, I am trying to figure out the best way to mitigate this
-     * I don't like a libary enforcing my object to have a certain structure, this is something I am not used to. In Java this would just be
-     * an interface I would implement, and I wouldn't have to change the internal representation of my object, this is my compromise
-     */
-    this.forQuadtree = function(){
-        return {
-            x: this.x,
-            y: this.y,
-            w: config.tankWidth,
-            h: config.tankHeight,
-            id: this.id,
-            type:'TANK',
-            object: this
-        }
-    };
-  }
+    set gunAngle(gunAngle) {
+        this._gunAngle = gunAngle;
+    }
 
-  set gunAngle (gunAngle){
-    this._gunAngle = gunAngle;
-  }
-
-  get gunAngle (){
-    return this._gunAngle;
-  }
+    get gunAngle() {
+        return this._gunAngle;
+    }
 
 
 }

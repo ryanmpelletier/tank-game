@@ -184,7 +184,6 @@ var gameTick = function(clientData){
     var oldQuadreeInfo = clientData.forQuadtree();
     var oldPosition = clientData.position;
     var newPosition = {x: clientData.position.x, y: clientData.position.y};
-    var direction = 0;
 
     //update player position based on input
     if(clientData.player.userInput.keysPressed['KEY_UP'] && !clientData.player.userInput.keysPressed['KEY_DOWN']){
@@ -199,14 +198,17 @@ var gameTick = function(clientData){
         newPosition.x = oldPosition.x - config.player.speedFactor;
     }
 
-    // Get direction tank is moving in
-    var angleInRadians = Math.atan2(newPosition.y - oldPosition.y, newPosition.x - oldPosition.x);
-    var angleInDeg = ((angleInRadians * 180 / Math.PI) + 360) % 360;
-    console.log(angleInDeg);
-    clientData.direction = angleInDeg;
+    // Check if tank has moved since last update
+    // (Necessary to check because otherwise tank's direction will keep going
+    // back to North every time that it stops moving)
+    if(!util.areCoordinatesEqual(oldPosition, newPosition)) {
+        // Tank has moved so update its direction
+        var angleInRadians = Math.atan2(newPosition.y - oldPosition.y, newPosition.x - oldPosition.x);
+        var angleInDeg = ((angleInRadians * 180 / Math.PI) + 360) % 360;
+        clientData.tank.hullDirection = angleInDeg;
+    }
 
     clientData.position = newPosition;
-
 
     if(typeof clientData.player.userInput.mouseAngle != 'undefined'){
         clientData.tank.gunAngle = clientData.player.userInput.mouseAngle;
@@ -228,28 +230,36 @@ var gameObjectUpdater = function(){
   for (var i = currentClientDatas.length - 1; i >= 0; --i) {
       gameTick(currentClientDatas[i]);
   }
-}
+};
 
 /**
  * For each player send the game objects that are visible to them.
  */
-var clientUpdater = function(){
-  currentClientDatas.forEach(function(clientData){
-
+var clientUpdater = function() {
+  currentClientDatas.forEach(function(clientData) {
       /**
        * Query quadtree using players current position and their screenwidth
        * QuadtreeManager will return everything the client needs in order to draw the game objects
        */
       var queryArea = {
-        x:clientData.position.x - clientData.player.screenWidth/2,
-        y:clientData.position.y - clientData.player.screenHeight/2,
-        w:clientData.player.screenWidth,
-        h:clientData.player.screenHeight
+        x: clientData.position.x - clientData.player.screenWidth/2,
+        y: clientData.position.y - clientData.player.screenHeight/2,
+        w: clientData.player.screenWidth,
+        h: clientData.player.screenHeight
+      };
+
+      var visibleTanks = quadtreeManager.queryGameObjects(queryArea);
+      var gameObjects = {
+          "perspective": {
+              x: clientData.position.x,
+              y: clientData.position.y
+          },
+          "tanks": visibleTanks
       };
       
-      sockets[clientData.id].emit('game_objects_update', quadtreeManager.queryGameObjects(queryArea));
+      sockets[clientData.id].emit('game_objects_update', gameObjects);
   });
-}
+};
 
 
 /**

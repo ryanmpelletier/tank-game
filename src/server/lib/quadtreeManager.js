@@ -27,7 +27,6 @@ class QuadtreeManager {
       */
       var visibleTanks = [];
       var visibleBullets = [];
-
       
       this.quadtree.get(queryObject, function(quadtreeObject){
           if(quadtreeObject.type === 'TANK'){
@@ -37,7 +36,8 @@ class QuadtreeManager {
                 x: tank.x,
                 y: tank.y,
                 hullDirection: tank.hullDirection,
-                gunAngle: tank.gunAngle
+                gunAngle: tank.gunAngle,
+                isMoving: tank.isMoving
             });
           }else if(quadtreeObject.type === 'BULLET'){
             visibleBullets.push(quadtreeObject.object);

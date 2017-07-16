@@ -19,37 +19,30 @@ class QuadtreeManager {
    * Use queryObject to query the internal quadtree
    * return exactly what the client needs to draw based on the results
    */
-  queryGameObjects(queryObject){
+  queryGameObjects(queryObject) {
 
       /**
-      * visible players are players that are within the screen of the current player
+      * Visible tanks are tanks that are within the screen of the current player
       * use quadtree for efficiency
       */
-      var visiblePlayers = [];
       var visibleTanks = [];
       
-      this.quadtree.get(queryObject, function(quadtreeObject){
+      this.quadtree.get(queryObject, function(quadtreeObject) {
           if(quadtreeObject.type === 'TANK'){
             visibleTanks.push({
               x: quadtreeObject.object.x,
               y: quadtreeObject.object.y,
+              hullDirection: quadtreeObject.object.hullDirection,
               gunAngle: quadtreeObject.object.gunAngle
             });
           }
-          visiblePlayers.push({x:quadtreeObject.x, y:quadtreeObject.y});
           return true;
       });
 
-      return {
-        "perspective":{
-            x: queryObject.x + queryObject.w/2,
-            y: queryObject.y + queryObject.h/2
-        },
-        "tanks":visibleTanks
-      };
+      return visibleTanks;
   }
 
-  getQuadtree(){
+  getQuadtree() {
     return this.quadtree;
   }
 }

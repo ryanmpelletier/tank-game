@@ -53,27 +53,30 @@ class DrawingUtil{
     /**
      * Draw the other tanks
      */
-    tanksDraw(tanks){
-        var translateX = -(this.perspective.x - global.screenWidth/2);
-        var translateY = -(this.perspective.y - global.screenHeight/2);
+    tanksDraw(tanks) {
+        var translateX = -(this.perspective.x - global.screenWidth / 2);
+        var translateY = -(this.perspective.y - global.screenHeight / 2);
         
         this.context2D.translate(translateX, translateY);
-        for(var i = 0; i < tanks.length; i++){
+
+        for(var i = 0; i < tanks.length; i++) {
+            var tank = tanks[i];
+
             //draw circle in the center to represent tank
             this.context2D.beginPath();
             this.context2D.strokeStyle = 'red';
-            this.context2D.arc(tanks[i].x, tanks[i].y, 15, 0, 2*Math.PI);
+            this.context2D.arc(tank.x, tank.y, 15, 0, 2 * Math.PI);
             this.context2D.stroke();
 
             //draw tank gun
-            x1 = tanks[i].x;
-            y1 = tanks[i].y;
-            r =  25;
-            theta = tanks[i].gunAngle;
-            this.context2D.moveTo(x1, y1);
-            this.context2D.lineTo(x1 + r * Math.cos(theta), y1 - r * Math.sin(theta));
-            this.context2D.stroke();
+            var x = tanks[i].x;
+            var y = tanks[i].y;
+            var r =  25;
+            var theta = tanks[i].gunAngle;
 
+            this.context2D.moveTo(x, y);
+            this.context2D.lineTo(x + r * Math.cos(theta), y - r * Math.sin(theta));
+            this.context2D.stroke();
         }
         this.context2D.translate(-translateX, -translateY);
     }

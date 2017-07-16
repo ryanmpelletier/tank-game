@@ -8,12 +8,13 @@
 var config = require('../../../config.json');
 
 class Tank {
-    constructor(id, xPosition, yPosition, screenName = 'test', gunAngle = 0, ammo = config.tankAmmoCapacity) {
+    constructor(id, xPosition, yPosition, screenName = 'test', hullDirection = 0, gunAngle = 0,
+                ammo = config.tankAmmoCapacity) {
         this.id = id;
         this.x = xPosition;
         this.y = yPosition;
         this.screenName = screenName;
-        this.hullDirection = 0;
+        this.hullDirection = hullDirection;
         this._gunAngle = gunAngle;
         this.ammo = ammo;
 

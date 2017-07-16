@@ -28,7 +28,6 @@ class ClientData {
       x: startXPosition,
       y: startYPosition
     };
-    this.direction = Direction.N;
     
     this.lastHeartbeat = new Date().getTime();
 

@@ -4,6 +4,8 @@
  * with its static assets
  */
 
+'use strict';
+
 var express = require('express');
 var app = express();
 var http = require('http').Server(app);
@@ -22,14 +24,14 @@ app.use('/img',express.static(path.join(__dirname, '../client/img')));
  * Serve index.html when the user visits the site in their browser
  */
 app.get('/', function(req, res){
-  res.sendFile(path.join(__dirname,'/../client/index.html'));
+    res.sendFile(path.join(__dirname,'/../client/index.html'));
 });
 
 /**
  * Start listening, I'm not sure how the details of this are working
  */
 http.listen(config.port, function(){
-  console.log('listening on port:' + config.port);
+    console.log('listening on port:' + config.port);
 });
 
 
@@ -72,84 +74,83 @@ var sockets = {};
  * when accessing currentClientData from outside the context of a socket event from that client (like in the gameObjectUpdater loop),
  * use the currentClientDatas array and index it by a socket id number
  */
-socketIo.on('connection', function(socket){
-  console.log(`[LOG] user connected with socket id ${socket.id}`);
+socketIo.on('connection', function(socket) {
+    console.log(`[LOG] user connected with socket id ${socket.id}`);
 
-  /**
-   * Here is where I need to perform any server-side logic to set up state for the newly connecting player.
-   * For example: calculate players starting position, get their ID, etc.
-   */
-  var currentClientData = new ClientData(socket.id, config.gameWidth/2, config.gameHeight/2);
-
-
-  /**
-   * 2.1 "HANDSHAKE"/MANAGEMENT RELATED SOCKET EVENTS
-   */
-
-  /**
-   * Client broadcasts this init event after it has set up its socket to respond to
-   * events from the server socket.
-   */
-  socket.on('init',function(){
-    socket.emit('welcome',currentClientData, {gameWidth: config.gameWidth, gameHeight: config.gameHeight});
-  });
-
-  /**
-   * Client broadcasts this event after they have received the welcome event from the server
-   * They send back some information the server needs to properly manage this user
-   */
-  socket.on('welcome_recieved', function(clientUpdatedData){
-      //copy over player nested object to clientData reference for this socket
-      currentClientData.player = clientUpdatedData.player;
-
-      //add references for the clientData and for the socket 
-      currentClientDatas.push(currentClientData); 
-      sockets[clientUpdatedData.id] = socket;
-
-      //put client onto quadtree
-      quadtree.put(currentClientData.forQuadtree());
-  });
-
-   /**
-   * Client responded to pingcheck event,
-   * calculate how long it took
-   */
-  socket.on('pongcheck',function(){
-      currentClientData.ping = new Date().getTime() - currentClientData.startPingTime;
-  });
+    /**
+    * Here is where I need to perform any server-side logic to set up state for the newly connecting player.
+    * For example: calculate players starting position, get their ID, etc.
+    */
+    var currentClientData = new ClientData(socket.id, config.gameWidth/2, config.gameHeight/2);
 
 
-  /**
-   * When client calls socket.disconnect() on their end, this event is automatically fired
-   */
-  socket.on('disconnect',function(){
-    var playerIndex = util.findIndex(currentClientDatas,currentClientData.id);
-    if(playerIndex > -1){
-      currentClientDatas.splice(playerIndex,1);
-      console.log(`[INFO] Player ${currentClientData.player.screenName} has been removed from tracked players.`);
-    }
-    //remove player from quadtree
-    quadtree.remove(currentClientData.forQuadtree(), 'id');
-  });
+    /**
+    * 2.1 "HANDSHAKE"/MANAGEMENT RELATED SOCKET EVENTS
+    */
 
-  /**
-   * 2.2 GAME RELATED SOCKET EVENTS
-   */
+    /**
+    * Client broadcasts this init event after it has set up its socket to respond to
+    * events from the server socket.
+    */
+    socket.on('init',function() {
+        socket.emit('welcome',currentClientData, {gameWidth: config.gameWidth, gameHeight: config.gameHeight});
+    });
 
-  /**
-   * This is likely where client will send their movement input
-   * This is called at least once each time the client redraws the frame
-   */
-  socket.on('client_checkin',function(clientCheckinData){
-      currentClientData.player.userInput = clientCheckinData;
-      currentClientData.lastHeartbeat = new Date().getTime();
-  });
+    /**
+    * Client broadcasts this event after they have received the welcome event from the server
+    * They send back some information the server needs to properly manage this user
+    */
+    socket.on('welcome_recieved', function(clientUpdatedData) {
+        //copy over player nested object to clientData reference for this socket
+        currentClientData.player = clientUpdatedData.player;
 
-  socket.on('windowResized', function (data) {
-      currentClientData.player.screenWidth = data.screenWidth;
-      currentClientData.player.screenHeight = data.screenHeight;
-  });
+        //add references for the clientData and for the socket
+        currentClientDatas.push(currentClientData);
+        sockets[clientUpdatedData.id] = socket;
 
+        //put client onto quadtree
+        quadtree.put(currentClientData.forQuadtree());
+    });
+
+    /**
+    * Client responded to pingcheck event,
+    * calculate how long it took
+    */
+    socket.on('pongcheck',function() {
+        currentClientData.ping = new Date().getTime() - currentClientData.startPingTime;
+    });
+
+
+    /**
+    * When client calls socket.disconnect() on their end, this event is automatically fired
+    */
+    socket.on('disconnect',function() {
+        var playerIndex = util.findIndex(currentClientDatas,currentClientData.id);
+        if(playerIndex > -1) {
+            currentClientDatas.splice(playerIndex,1);
+            console.log(`[INFO] Player ${currentClientData.player.screenName} has been removed from tracked players.`);
+        }
+        //remove player from quadtree
+        quadtree.remove(currentClientData.forQuadtree(), 'id');
+    });
+
+    /**
+    * 2.2 GAME RELATED SOCKET EVENTS
+    */
+
+    /**
+    * This is likely where client will send their movement input
+    * This is called at least once each time the client redraws the frame
+    */
+    socket.on('client_checkin',function(clientCheckinData) {
+        currentClientData.player.userInput = clientCheckinData;
+        currentClientData.lastHeartbeat = new Date().getTime();
+    });
+
+    socket.on('windowResized', function (data) {
+        currentClientData.player.screenWidth = data.screenWidth;
+        currentClientData.player.screenHeight = data.screenHeight;
+    });
 });
 
 
@@ -160,36 +161,41 @@ socketIo.on('connection', function(socket){
 /**
  * Check the ping for all connected clients
  */
-var checkPing = function(){
-  currentClientDatas.forEach(function(clientData){
-    currentClientDatas[util.findIndex(currentClientDatas,clientData.id)].startPingTime = new Date().getTime();
-    sockets[clientData.id].emit('pingcheck');
-  })
+var checkPing = function() {
+    currentClientDatas.forEach(function(clientData) {
+        currentClientDatas[util.findIndex(currentClientDatas,clientData.id)].startPingTime = new Date().getTime();
+        sockets[clientData.id].emit('pingcheck');
+    })
 };
 
 
 /**
  * gameTick is called once per player on each gameObjectUpdater call  
  */
-var gameTick = function(clientData){
-    if(clientData.lastHeartbeat < new Date().getTime() - config.maxLastHeartBeat){
+var gameTick = function(clientData) {
+    if(clientData.lastHeartbeat < new Date().getTime() - config.maxLastHeartBeat) {
         console.log(`[INFO] Kicking player ${clientData.player.screenName}`);
         sockets[clientData.id].emit('kick');
         sockets[clientData.id].disconnect();
     }
 
-  /**
-   * Fire bullets if necessary
-   */
-  if(typeof clientData.player.userInput.mouseClicked != 'undefined'){
-    if(clientData.player.userInput.mouseClicked && (typeof clientData.tank.timeLastFired == 'undefined' || (new Date().getTime() - clientData.tank.timeLastFired > config.tankFireTimeWait))){
-      clientData.tank.timeLastFired = new Date().getTime();
+    /**
+    * Fire bullets if necessary
+    */
+    if(typeof clientData.player.userInput.mouseClicked != 'undefined') {
+        if(clientData.player.userInput.mouseClicked &&
+            (typeof clientData.tank.timeLastFired == 'undefined' ||
+            (new Date().getTime() - clientData.tank.timeLastFired > config.tankFireTimeWait))) {
+            clientData.tank.timeLastFired = new Date().getTime();
 
-      var bullet = new Bullet(clientData.id, clientData.tank.x, clientData.tank.y, Math.cos(clientData.tank.gunAngle) * config.bulletVelocity, Math.sin(clientData.tank.gunAngle) * config.bulletVelocity);
-      quadtree.put(bullet.forQuadtree());
-      clientData.tank.bullets.push(bullet);
+            var bullet = new Bullet(clientData.id, clientData.tank.x, clientData.tank.y,
+                Math.cos(clientData.tank.gunAngle) * config.bulletVelocity,
+                Math.sin(clientData.tank.gunAngle) * config.bulletVelocity);
+
+            quadtree.put(bullet.forQuadtree());
+            clientData.tank.bullets.push(bullet);
+        }
     }
-  }
 
     /**
     * simpleQuadtree requires that the x,y,w, and h used to put the item be used to retrieve it
@@ -197,18 +203,32 @@ var gameTick = function(clientData){
     */
     var oldQuadreeInfo = clientData.forQuadtree();
     var oldPosition = clientData.position;
-    var newPosition = {x: clientData.position.x, y: clientData.position.y};
+    var newPosition = {
+        x: clientData.position.x,
+        y: clientData.position.y
+    };
 
-    //update player position based on input
-    if(clientData.player.userInput.keysPressed['KEY_UP'] && !clientData.player.userInput.keysPressed['KEY_DOWN']){
+    // Update player position based on input
+
+    // Check if user's position should move UP
+    if(clientData.player.userInput.keysPressed['KEY_UP'] &&
+        !clientData.player.userInput.keysPressed['KEY_DOWN']) {
         newPosition.y = oldPosition.y - config.player.speedFactor;
-    }else if(clientData.player.userInput.keysPressed['KEY_DOWN'] && !clientData.player.userInput.keysPressed['KEY_UP']){
+    }
+    // Check if user's position should move DOWN
+    else if(clientData.player.userInput.keysPressed['KEY_DOWN'] &&
+        !clientData.player.userInput.keysPressed['KEY_UP']) {
         newPosition.y = oldPosition.y + config.player.speedFactor;
     }
 
-    if(clientData.player.userInput.keysPressed['KEY_RIGHT'] && !clientData.player.userInput.keysPressed['KEY_LEFT']){
+    // Check if user's position should move RIGHT
+    if(clientData.player.userInput.keysPressed['KEY_RIGHT'] &&
+        !clientData.player.userInput.keysPressed['KEY_LEFT']) {
         newPosition.x = oldPosition.x + config.player.speedFactor;
-    }else if(clientData.player.userInput.keysPressed['KEY_LEFT'] && !clientData.player.userInput.keysPressed['KEY_RIGHT']){
+    }
+    // Check if user's position should move LEFT
+    else if(clientData.player.userInput.keysPressed['KEY_LEFT'] &&
+        !clientData.player.userInput.keysPressed['KEY_RIGHT']) {
         newPosition.x = oldPosition.x - config.player.speedFactor;
     }
 
@@ -220,6 +240,13 @@ var gameTick = function(clientData){
         var angleInRadians = Math.atan2(newPosition.y - oldPosition.y, newPosition.x - oldPosition.x);
         var angleInDeg = ((angleInRadians * 180 / Math.PI) + 360) % 360;
         clientData.tank.hullDirection = angleInDeg;
+
+        // Update that tank is moving (so animation will start)
+        clientData.tank.isMoving = true;
+    }
+    else {
+        // Update that tank is NOT moving (so animation will stop)
+        clientData.tank.isMoving = false;
     }
 
     clientData.position = newPosition;
@@ -228,55 +255,53 @@ var gameTick = function(clientData){
         clientData.tank.gunAngle = clientData.player.userInput.mouseAngle;
     }
 
-/**
- * Update the item on the quadtree
- */
-  quadtree.update(oldQuadreeInfo, 'id', clientData.forQuadtree());
+    /**
+    * Update the item on the quadtree
+    */
+    quadtree.update(oldQuadreeInfo, 'id', clientData.forQuadtree());
 
-  /**
-   * Update positions of all the bullets
-   */
+    /**
+    * Update positions of all the bullets
+    */
+    for(let i = 0; i < clientData.tank.bullets.length; i++) {
+        let oldTreeInfo = clientData.tank.bullets[i].forQuadtree();
+        clientData.tank.bullets[i].x = clientData.tank.bullets[i].x + clientData.tank.bullets[i].velocityX;
+        clientData.tank.bullets[i].y = clientData.tank.bullets[i].y - clientData.tank.bullets[i].velocityY;
+        quadtree.update(oldTreeInfo, 'id', clientData.tank.bullets[i].forQuadtree());
+    }
 
-  for(var i = 0; i < clientData.tank.bullets.length; i++){
-      let oldTreeInfo = clientData.tank.bullets[i].forQuadtree();
-      clientData.tank.bullets[i].x = clientData.tank.bullets[i].x + clientData.tank.bullets[i].velocityX;
-      clientData.tank.bullets[i].y = clientData.tank.bullets[i].y - clientData.tank.bullets[i].velocityY;
-      quadtree.update(oldTreeInfo, 'id', clientData.tank.bullets[i].forQuadtree());
-  }
-
-}
+};
 
 
 /**
  * Iterate through players and update their game objects,
  * this will include putting each currentClientData on the quadtree
  */
-var gameObjectUpdater = function(){
-  //Iterate backwards, players may be removed from the array as the iteration occurs
-  for (var i = currentClientDatas.length - 1; i >= 0; --i) {
-      gameTick(currentClientDatas[i]);
-  }
+var gameObjectUpdater = function() {
+    //Iterate backwards, players may be removed from the array as the iteration occurs
+    for (let i = currentClientDatas.length - 1; i >= 0; --i) {
+        gameTick(currentClientDatas[i]);
+    }
 };
 
 /**
  * For each player send the game objects that are visible to them.
  */
 var clientUpdater = function() {
-  currentClientDatas.forEach(function(clientData) {
-      /**
-       * Query quadtree using players current position and their screenwidth
-       * QuadtreeManager will return everything the client needs in order to draw the game objects
-       */
-      var queryArea = {
-        x: clientData.position.x - clientData.player.screenWidth/2,
-        y: clientData.position.y - clientData.player.screenHeight/2,
-        w: clientData.player.screenWidth,
-        h: clientData.player.screenHeight
-      };
+    currentClientDatas.forEach(function(clientData) {
+        /**
+        * Query quadtree using players current position and their screenwidth
+        * QuadtreeManager will return everything the client needs in order to draw the game objects
+        */
+        var queryArea = {
+            x: clientData.position.x - clientData.player.screenWidth/2,
+            y: clientData.position.y - clientData.player.screenHeight/2,
+            w: clientData.player.screenWidth,
+            h: clientData.player.screenHeight
+        };
 
-    sockets[clientData.id].emit('game_objects_update', quadtreeManager.queryGameObjects(queryArea));
-
-  });
+        sockets[clientData.id].emit('game_objects_update', quadtreeManager.queryGameObjects(queryArea));
+    });
 };
 
 

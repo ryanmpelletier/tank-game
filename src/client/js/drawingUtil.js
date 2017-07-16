@@ -77,7 +77,10 @@ class DrawingUtil {
                 this.tankSprites[tank.id] = tankSprite;
             }
             else {
-                this.tankSprites[tank.id].update();
+                if(tank.isMoving) {
+                    // Update animation frame since tank is moving
+                    this.tankSprites[tank.id].update();
+                }
                 this.tankSprites[tank.id].render(tank.x, tank.y, tank.hullDirection);
             }
 

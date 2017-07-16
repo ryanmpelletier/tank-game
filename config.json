@@ -5,7 +5,11 @@
     "gameHeight":500,
     "tankWidth":1,
     "tankHeight":1,
+    "bulletHeight":1,
+    "bulletWidth":1,
     "tankAmmoCapacity":4,
+    "tankFireTimeWait":500,
+    "bulletVelocity": 5,
     "player":{
         "speedFactor": 3
     }

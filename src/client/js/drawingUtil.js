@@ -101,6 +101,26 @@ class DrawingUtil {
     }
 
     /**
+     * Draw the bullets
+     */
+    bulletsDraw(bullets){
+        var translateX = -(this.perspective.x - global.screenWidth/2);
+        var translateY = -(this.perspective.y - global.screenHeight/2);
+        this.context2D.translate(translateX, translateY);
+
+        for(var i = 0; i < bullets.length; i++){
+            //draw circle in the center to represent bullet
+            this.context2D.beginPath();
+            this.context2D.strokeStyle = 'green';
+            this.context2D.arc(bullets[i].x, bullets[i].y, 5, 0, 2*Math.PI);
+            this.context2D.stroke();  
+        }
+
+        this.context2D.translate(-translateX, -translateY);
+
+    }
+
+    /**
      * Given gameObjects, call the appropriate method on the drawingUtil
      * to draw that object.
      */

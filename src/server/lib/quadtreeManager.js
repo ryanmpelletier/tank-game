@@ -21,28 +21,39 @@ class QuadtreeManager {
     */
     queryGameObjects(queryObject) {
 
-        /**
-        * Visible tanks are tanks that are within the screen of the current player
-        * use quadtree for efficiency
-        */
-        var visibleTanks = [];
+      /**
+      * visible players are players that are within the screen of the current player
+      * use quadtree for efficiency
+      */
+      var visibleTanks = [];
+      var visibleBullets = [];
 
-        this.quadtree.get(queryObject, function(quadtreeObject) {
-            if(quadtreeObject.type === 'TANK') {
-                var tank = quadtreeObject.object;
-                visibleTanks.push({
-                    id: tank.id,
-                    x: tank.x,
-                    y: tank.y,
-                    hullDirection: tank.hullDirection,
-                    gunAngle: tank.gunAngle
-                });
-            }
-            return true;
-        });
+      
+      this.quadtree.get(queryObject, function(quadtreeObject){
+          if(quadtreeObject.type === 'TANK'){
+            var tank = quadtreeObject.object;
+            visibleTanks.push({
+                id: tank.id,
+                x: tank.x,
+                y: tank.y,
+                hullDirection: tank.hullDirection,
+                gunAngle: tank.gunAngle
+            });
+          }else if(quadtreeObject.type === 'BULLET'){
+            visibleBullets.push(quadtreeObject.object);
+          }
+          return true;
+      });
 
-        return visibleTanks;
-    }
+      return {
+        "perspective":{
+            x: queryObject.x + queryObject.w/2,
+            y: queryObject.y + queryObject.h/2
+        },
+        "tanks":visibleTanks,
+        "bullets":visibleBullets
+      };
+  }
 
     getQuadtree() {
         return this.quadtree;

@@ -42,6 +42,7 @@ var ClientData = require('./lib/clientData');
 var util = require('./lib/util');
 var SimpleQuadtree = require('simple-quadtree');
 var QuadtreeManager = require('./lib/quadtreeManager');
+var Bullet = require('./lib/bullet');
 var Direction = require('./lib/direction');
 
 /**
@@ -177,6 +178,19 @@ var gameTick = function(clientData){
         sockets[clientData.id].disconnect();
     }
 
+  /**
+   * Fire bullets if necessary
+   */
+  if(typeof clientData.player.userInput.mouseClicked != 'undefined'){
+    if(clientData.player.userInput.mouseClicked && (typeof clientData.tank.timeLastFired == 'undefined' || (new Date().getTime() - clientData.tank.timeLastFired > config.tankFireTimeWait))){
+      clientData.tank.timeLastFired = new Date().getTime();
+
+      var bullet = new Bullet(clientData.id, clientData.tank.x, clientData.tank.y, Math.cos(clientData.tank.gunAngle) * config.bulletVelocity, Math.sin(clientData.tank.gunAngle) * config.bulletVelocity);
+      quadtree.put(bullet.forQuadtree());
+      clientData.tank.bullets.push(bullet);
+    }
+  }
+
     /**
     * simpleQuadtree requires that the x,y,w, and h used to put the item be used to retrieve it
     * here we get the old quadtree information
@@ -218,6 +232,18 @@ var gameTick = function(clientData){
  * Update the item on the quadtree
  */
   quadtree.update(oldQuadreeInfo, 'id', clientData.forQuadtree());
+
+  /**
+   * Update positions of all the bullets
+   */
+
+  for(var i = 0; i < clientData.tank.bullets.length; i++){
+      let oldTreeInfo = clientData.tank.bullets[i].forQuadtree();
+      clientData.tank.bullets[i].x = clientData.tank.bullets[i].x + clientData.tank.bullets[i].velocityX;
+      clientData.tank.bullets[i].y = clientData.tank.bullets[i].y - clientData.tank.bullets[i].velocityY;
+      quadtree.update(oldTreeInfo, 'id', clientData.tank.bullets[i].forQuadtree());
+  }
+
 }
 
 
@@ -248,16 +274,8 @@ var clientUpdater = function() {
         h: clientData.player.screenHeight
       };
 
-      var visibleTanks = quadtreeManager.queryGameObjects(queryArea);
-      var gameObjects = {
-          "perspective": {
-              x: clientData.position.x,
-              y: clientData.position.y
-          },
-          "tanks": visibleTanks
-      };
-      
-      sockets[clientData.id].emit('game_objects_update', gameObjects);
+    sockets[clientData.id].emit('game_objects_update', quadtreeManager.queryGameObjects(queryArea));
+
   });
 };
 

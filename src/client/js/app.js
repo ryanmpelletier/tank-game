@@ -42,7 +42,13 @@ window.onload = function(){
 
     //socket says it is ready to start playing.
     socket.emit('init');
-    startGame();
+
+    canvasGameBoard = new Canvas();
+    drawingUtil = new DrawingUtil(canvasGameBoard.getCanvas());
+
+    setTimeout(function(){
+        startGame();
+    }, 1000);
 };
 
 /**
@@ -50,8 +56,6 @@ window.onload = function(){
  * and will likely also be where we do some last minute (millisecond) checking to make sure we are good to go
  */
 function startGame(){
-    canvasGameBoard = new Canvas();
-    drawingUtil = new DrawingUtil(canvasGameBoard.getCanvas());
     animationLoop();
 }
 
@@ -106,7 +110,7 @@ function setupSocket(socket){
         global.gameHeight = gameConfig.gameHeight;
 
 
-        socket.emit('welcome_recieved', clientInitData);
+        socket.emit('welcome_received', clientInitData);
     });
 
     /**

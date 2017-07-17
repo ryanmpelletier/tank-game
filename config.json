@@ -1,15 +1,15 @@
 {
     "port":8080,
     "maxLastHeartBeat":5000,
-    "gameWidth":500,
-    "gameHeight":500,
+    "gameWidth":1000,
+    "gameHeight":1000,
     "tankWidth":1,
     "tankHeight":1,
     "bulletHeight":1,
     "bulletWidth":1,
     "tankBarrelLength":60,
     "tankAmmoCapacity":4,
-    "tankFireTimeWait":500,
+    "tankFireTimeWait":100,
     "bulletVelocity": 5,
     "player":{
         "speedFactor": 3

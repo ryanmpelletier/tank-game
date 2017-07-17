@@ -184,9 +184,12 @@ var gameTick = function(clientData) {
     */
     if(typeof clientData.player.userInput.mouseClicked != 'undefined') {
         if(clientData.player.userInput.mouseClicked &&
+            clientData.tank.ammo > 0 &&
             (typeof clientData.tank.timeLastFired == 'undefined' ||
             (new Date().getTime() - clientData.tank.timeLastFired > config.tankFireTimeWait))) {
+
             clientData.tank.timeLastFired = new Date().getTime();
+            clientData.tank.ammo = clientData.tank.ammo - 1;
 
             var xComponent = Math.cos(clientData.tank.gunAngle);
             var yComponent = Math.sin(clientData.tank.gunAngle);

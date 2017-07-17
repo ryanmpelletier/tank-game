@@ -188,9 +188,13 @@ var gameTick = function(clientData) {
             (new Date().getTime() - clientData.tank.timeLastFired > config.tankFireTimeWait))) {
             clientData.tank.timeLastFired = new Date().getTime();
 
-            var bullet = new Bullet(clientData.id, clientData.tank.x, clientData.tank.y,
-                Math.cos(clientData.tank.gunAngle) * config.bulletVelocity,
-                Math.sin(clientData.tank.gunAngle) * config.bulletVelocity);
+            var xComponent = Math.cos(clientData.tank.gunAngle);
+            var yComponent = Math.sin(clientData.tank.gunAngle);
+
+
+            var bullet = new Bullet(clientData.id, clientData.tank.x + (xComponent * config.tankBarrelLength), clientData.tank.y - (yComponent * config.tankBarrelLength),
+                xComponent * config.bulletVelocity,
+                yComponent * config.bulletVelocity);
 
             quadtree.put(bullet.forQuadtree());
             clientData.tank.bullets.push(bullet);

@@ -93,14 +93,14 @@ socketIo.on('connection', function(socket) {
     * events from the server socket.
     */
     socket.on('init',function() {
-        socket.emit('welcome',currentClientData, {gameWidth: config.gameWidth, gameHeight: config.gameHeight});
+        socket.emit('welcome', currentClientData, {gameWidth: config.gameWidth, gameHeight: config.gameHeight});
     });
 
     /**
     * Client broadcasts this event after they have received the welcome event from the server
     * They send back some information the server needs to properly manage this user
     */
-    socket.on('welcome_recieved', function(clientUpdatedData) {
+    socket.on('welcome_received', function(clientUpdatedData) {
         //copy over player nested object to clientData reference for this socket
         currentClientData.player = clientUpdatedData.player;
 

@@ -173,10 +173,23 @@ var checkPing = function() {
  * gameTick is called once per player on each gameObjectUpdater call  
  */
 var gameTick = function(clientData) {
-    if(clientData.lastHeartbeat < new Date().getTime() - config.maxLastHeartBeat) {
+
+    //lets just calculate the current time once, should be close enough to actual and will be more efficient
+    var now = new Date().getTime();
+
+    if(clientData.lastHeartbeat < now - config.maxLastHeartBeat) {
         console.log(`[INFO] Kicking player ${clientData.player.screenName}`);
         sockets[clientData.id].emit('kick');
         sockets[clientData.id].disconnect();
+    }
+
+
+    /**
+     * Increase ammo if necessary
+     */
+    if(clientData.tank.ammo < config.tankAmmoCapacity && ((now - clientData.tank.lastAmmoEarned > config.tankTimeToGainAmmo) || typeof clientData.tank.lastAmmoEarned == 'undefined')){
+        clientData.tank.ammo = clientData.tank.ammo + 1;
+        clientData.tank.lastAmmoEarned = now;
     }
 
     /**
@@ -185,10 +198,10 @@ var gameTick = function(clientData) {
     if(typeof clientData.player.userInput.mouseClicked != 'undefined') {
         if(clientData.player.userInput.mouseClicked &&
             clientData.tank.ammo > 0 &&
-            (typeof clientData.tank.timeLastFired == 'undefined' ||
-            (new Date().getTime() - clientData.tank.timeLastFired > config.tankFireTimeWait))) {
+            (typeof clientData.tank.lastFireTime == 'undefined' ||
+            (now - clientData.tank.lastFireTime > config.tankFireTimeWait))) {
 
-            clientData.tank.timeLastFired = new Date().getTime();
+            clientData.tank.lastFireTime = now;
             clientData.tank.ammo = clientData.tank.ammo - 1;
 
             var xComponent = Math.cos(clientData.tank.gunAngle);

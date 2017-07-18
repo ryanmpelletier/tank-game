@@ -7,9 +7,10 @@
     "tankHeight":1,
     "bulletHeight":1,
     "bulletWidth":1,
+    "tankTimeToGainAmmo":1000,
     "tankBarrelLength":60,
     "tankAmmoCapacity":4,
-    "tankFireTimeWait":100,
+    "tankFireTimeWait":250,
     "bulletVelocity": 5,
     "player":{
         "speedFactor": 3

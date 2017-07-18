@@ -18,7 +18,7 @@ class Tank {
         this._gunAngle = gunAngle;
         this.isMoving = isMoving;
         this.ammo = ammo;
-        this.timeLastFired = undefined;
+        this.lastFireTime = undefined;
 
         //probably will have a bullet class
         this.bullets = [];

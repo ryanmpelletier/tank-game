@@ -175,9 +175,9 @@ var checkPing = function() {
 var gameTick = function(clientData) {
 
     //lets just calculate the current time once, should be close enough to actual and will be more efficient
-    var now = new Date().getTime();
+    var currentTime = new Date().getTime();
 
-    if(clientData.lastHeartbeat < now - config.maxLastHeartBeat) {
+    if(clientData.lastHeartbeat < currentTime - config.maxLastHeartBeat) {
         console.log(`[INFO] Kicking player ${clientData.player.screenName}`);
         sockets[clientData.id].emit('kick');
         sockets[clientData.id].disconnect();
@@ -187,9 +187,9 @@ var gameTick = function(clientData) {
     /**
      * Increase ammo if necessary
      */
-    if(clientData.tank.ammo < config.tankAmmoCapacity && ((now - clientData.tank.lastAmmoEarned > config.tankTimeToGainAmmo) || typeof clientData.tank.lastAmmoEarned == 'undefined')){
+    if(clientData.tank.ammo < config.tankAmmoCapacity && ((currentTime - clientData.tank.lastAmmoEarned > config.tankTimeToGainAmmo) || typeof clientData.tank.lastAmmoEarned == 'undefined')){
         clientData.tank.ammo = clientData.tank.ammo + 1;
-        clientData.tank.lastAmmoEarned = now;
+        clientData.tank.lastAmmoEarned = currentTime;
     }
 
     /**
@@ -199,9 +199,9 @@ var gameTick = function(clientData) {
         if(clientData.player.userInput.mouseClicked &&
             clientData.tank.ammo > 0 &&
             (typeof clientData.tank.lastFireTime == 'undefined' ||
-            (now - clientData.tank.lastFireTime > config.tankFireTimeWait))) {
+            (currentTime - clientData.tank.lastFireTime > config.tankFireTimeWait))) {
 
-            clientData.tank.lastFireTime = now;
+            clientData.tank.lastFireTime = currentTime;
             clientData.tank.ammo = clientData.tank.ammo - 1;
 
             var xComponent = Math.cos(clientData.tank.gunAngle);
@@ -289,6 +289,24 @@ var gameTick = function(clientData) {
         clientData.tank.bullets[i].y = clientData.tank.bullets[i].y - clientData.tank.bullets[i].velocityY;
         quadtree.update(oldTreeInfo, 'id', clientData.tank.bullets[i].forQuadtree());
     }
+
+
+
+    /**
+     * Check any collisions on tank
+     */
+    quadtree.get(clientData.tank.forQuadtree(),function(objectInTankArea){
+        if(objectInTankArea.type === 'BULLET'){
+            var bullet = objectInTankArea.object;
+            var playerIndex = util.findIndex(currentClientDatas,bullet.ownerId);
+            if(playerIndex > -1) {
+                var bulletIndex = util.findIndex(currentClientDatas[playerIndex].tank.bullets, bullet.id);
+                currentClientDatas[playerIndex].tank.bullets.splice(bullet.id,1);
+                quadtree.remove(bullet.forQuadtree(), 'id');
+            }
+        }
+        return true;
+    });
 
 };
 

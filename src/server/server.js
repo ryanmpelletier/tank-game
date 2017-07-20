@@ -46,12 +46,28 @@ var SimpleQuadtree = require('simple-quadtree');
 var QuadtreeManager = require('./lib/quadtreeManager');
 var Bullet = require('./lib/bullet');
 var Direction = require('./lib/direction');
+var Wall = require('./lib/wall');
 
 /**
  * Quadtree will hold all of the objects in the game that will need to be kept track of
  */
 var quadtreeManager = new QuadtreeManager();
 var quadtree = quadtreeManager.getQuadtree();
+
+/**
+ * Initialize border walls, put them in the quadtree
+ * I'm still not sure I want to use the quadtree to store data for the borders.
+ * I don't know how much it will help us, it might even not help. 
+ */
+var leftBorderWall = new Wall(0, 0, 25, config.gameHeight);
+var topBorderWall = new Wall(0, 0, config.gameWidth, 25);
+var rightBorderWall = new Wall(config.gameWidth, 0, 25, config.gameHeight);
+var bottomBorderWall = new Wall(0, config.gameHeight, config.gameWidth, 25);
+
+quadtree.put(leftBorderWall.forQuadtree());
+quadtree.put(topBorderWall.forQuadtree());
+quadtree.put(rightBorderWall.forQuadtree());
+quadtree.put(bottomBorderWall.forQuadtree());
 
 
 

@@ -41,6 +41,8 @@ class QuadtreeManager {
             });
           }else if(quadtreeObject.type === 'BULLET'){
             visibleBullets.push(quadtreeObject.object);
+          }else if(quadtreeObject.type === 'WALL'){
+            console.log("wall");
           }
           return true;
       });

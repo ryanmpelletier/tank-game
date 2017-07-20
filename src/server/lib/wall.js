@@ -1,12 +1,13 @@
 /**
  * Wall object, for now will just be used for the game barriers.
+ * Default wall is a square 25 * 25;
  */
 var config = require('../../../config.json');
 const crypto = require("crypto");
 
 
 class Wall {
-    constructor(x, y, w, h){
+    constructor(x, y, w = 25, h = 25){
         this.x = x;
         this.y = y;
         this.w = w;

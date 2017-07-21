@@ -306,6 +306,20 @@ var gameTick = function(clientData) {
         quadtree.update(oldTreeInfo, 'id', clientData.tank.bullets[i].forQuadtree());
     }
 
+    /**
+     * Remove any bullets that are now out of bounds.
+     */
+    for(var bullet of clientData.tank.bullets) {
+        if(bullet.x > config.gameWidth || bullet.x < 0 || bullet.y > config.gameHeight || bullet.y < 0){
+            var playerIndex = util.findIndex(currentClientDatas,bullet.ownerId);
+            if(playerIndex > -1) {
+                var bulletIndex = util.findIndex(currentClientDatas[playerIndex].tank.bullets, bullet.id);
+                currentClientDatas[playerIndex].tank.bullets.splice(bullet.id,1);
+                quadtree.remove(bullet.forQuadtree(), 'id');
+            }
+        }
+    }
+
 
 
     /**

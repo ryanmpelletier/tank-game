@@ -59,10 +59,10 @@ var quadtree = quadtreeManager.getQuadtree();
  * I'm still not sure I want to use the quadtree to store data for the borders.
  * I don't know how much it will help us, it might even not help. 
  */
-var leftBorderWall = new Wall(0, 0, 25, config.gameHeight + 25);
-var topBorderWall = new Wall(25, 0, config.gameWidth - 25, 25);
-var rightBorderWall = new Wall(config.gameWidth - 25, 0, 25, config.gameHeight);
-var bottomBorderWall = new Wall(25, config.gameHeight, config.gameWidth - 25, 25);
+var leftBorderWall = new Wall(0, 0, config.wallWidth, config.gameHeight + config.wallWidth);
+var topBorderWall = new Wall(config.wallWidth, 0, config.gameWidth - config.wallWidth, config.wallWidth);
+var rightBorderWall = new Wall(config.gameWidth - config.wallWidth, 0, config.wallWidth, config.gameHeight);
+var bottomBorderWall = new Wall(config.wallWidth, config.gameHeight, config.gameWidth - config.wallWidth, config.wallWidth);
 
 quadtree.put(leftBorderWall.forQuadtree());
 quadtree.put(topBorderWall.forQuadtree());
@@ -319,8 +319,6 @@ var gameTick = function(clientData) {
             }
         }
     }
-
-
 
     /**
      * Check any collisions on tank

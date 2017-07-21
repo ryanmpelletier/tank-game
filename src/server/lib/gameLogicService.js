@@ -76,23 +76,16 @@ class GameLogicService {
             newPosition.x = oldPosition.x - config.player.speedFactor;
         }
 
-
-
-                // Check if tank has moved since last update
+        // Check if tank has moved since last update
         // (Necessary to check because otherwise tank's direction will keep going
         // back to North every time that it stops moving)
         if(!util.areCoordinatesEqual(oldPosition, newPosition)) {
             // Tank has moved so update its direction
             var angleInRadians = Math.atan2(newPosition.y - oldPosition.y, newPosition.x - oldPosition.x);
-            var angleInDeg = ((angleInRadians * 180 / Math.PI) + 360) % 360;
-            clientData.tank.hullDirection = angleInDeg;
+            clientData.tank.hullDirection = angleInRadians;
 
-            // Update that tank is moving (so animation will start)
-            clientData.tank.isMoving = true;
-        }
-        else {
-            // Update that tank is NOT moving (so animation will stop)
-            clientData.tank.isMoving = false;
+            // Update tank's frame since tank is moving
+            clientData.tank.sprite.update();
         }
 
         clientData.position = newPosition;
@@ -153,7 +146,7 @@ class GameLogicService {
             clientData.tank.gunAngle = clientData.player.userInput.mouseAngle;
         }
 
-            /**
+     /**
      * Remove any bullets that are now out of bounds.
      */
     for(var bullet of clientData.tank.bullets) {

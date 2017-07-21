@@ -59,10 +59,10 @@ var quadtree = quadtreeManager.getQuadtree();
  * I'm still not sure I want to use the quadtree to store data for the borders.
  * I don't know how much it will help us, it might even not help. 
  */
-var leftBorderWall = new Wall(0, 0, config.wallWidth, config.gameHeight + config.wallWidth);
-var topBorderWall = new Wall(config.wallWidth, 0, config.gameWidth - config.wallWidth, config.wallWidth);
+var leftBorderWall = new Wall(0, 0, config.wallWidth, config.gameHeight);
+var topBorderWall = new Wall(config.wallWidth, 0, config.gameWidth - 2 * config.wallWidth, config.wallWidth);
 var rightBorderWall = new Wall(config.gameWidth - config.wallWidth, 0, config.wallWidth, config.gameHeight);
-var bottomBorderWall = new Wall(config.wallWidth, config.gameHeight, config.gameWidth - config.wallWidth, config.wallWidth);
+var bottomBorderWall = new Wall(config.wallWidth, config.gameHeight - config.wallWidth, config.gameWidth - 2 * config.wallWidth, config.wallWidth);
 
 quadtree.put(leftBorderWall.forQuadtree());
 quadtree.put(topBorderWall.forQuadtree());
@@ -310,7 +310,7 @@ var gameTick = function(clientData) {
      * Remove any bullets that are now out of bounds.
      */
     for(var bullet of clientData.tank.bullets) {
-        if(bullet.x > config.gameWidth || bullet.x < 0 || bullet.y > config.gameHeight || bullet.y < 0){
+        if(bullet.x > config.gameWidth - config.wallWidth || bullet.x < config.wallWidth || bullet.y > config.gameHeight - config.wallWidth || bullet.y < config.wallWidth){
             var playerIndex = util.findIndex(currentClientDatas,bullet.ownerId);
             if(playerIndex > -1) {
                 var bulletIndex = util.findIndex(currentClientDatas[playerIndex].tank.bullets, bullet.id);

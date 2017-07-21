@@ -123,6 +123,21 @@ class DrawingUtil {
 
     }
 
+    wallsDraw(walls){
+        var translateX = -(this.perspective.x - global.screenWidth/2);
+        var translateY = -(this.perspective.y - global.screenHeight/2);
+        this.context2D.translate(translateX, translateY);
+        this.context2D.fillStyle = 'black';
+
+        for(var wall of walls){
+            
+            this.context2D.fillRect(wall.x, wall.y, wall.w, wall.h);
+        }
+        
+        this.context2D.translate(-translateX, -translateY);
+
+    }
+
     /**
      * Given gameObjects, call the appropriate method on the drawingUtil
      * to draw that object.

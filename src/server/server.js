@@ -46,12 +46,28 @@ var SimpleQuadtree = require('simple-quadtree');
 var QuadtreeManager = require('./lib/quadtreeManager');
 var Bullet = require('./lib/bullet');
 var Direction = require('./lib/direction');
+var Wall = require('./lib/wall');
 
 /**
  * Quadtree will hold all of the objects in the game that will need to be kept track of
  */
 var quadtreeManager = new QuadtreeManager();
 var quadtree = quadtreeManager.getQuadtree();
+
+/**
+ * Initialize border walls, put them in the quadtree
+ * I'm still not sure I want to use the quadtree to store data for the borders.
+ * I don't know how much it will help us, it might even not help. 
+ */
+var leftBorderWall = new Wall(0, 0, config.wallWidth, config.gameHeight);
+var topBorderWall = new Wall(config.wallWidth, 0, config.gameWidth - 2 * config.wallWidth, config.wallWidth);
+var rightBorderWall = new Wall(config.gameWidth - config.wallWidth, 0, config.wallWidth, config.gameHeight);
+var bottomBorderWall = new Wall(config.wallWidth, config.gameHeight - config.wallWidth, config.gameWidth - 2 * config.wallWidth, config.wallWidth);
+
+quadtree.put(leftBorderWall.forQuadtree());
+quadtree.put(topBorderWall.forQuadtree());
+quadtree.put(rightBorderWall.forQuadtree());
+quadtree.put(bottomBorderWall.forQuadtree());
 
 
 
@@ -173,10 +189,23 @@ var checkPing = function() {
  * gameTick is called once per player on each gameObjectUpdater call  
  */
 var gameTick = function(clientData) {
-    if(clientData.lastHeartbeat < new Date().getTime() - config.maxLastHeartBeat) {
+
+    //lets just calculate the current time once, should be close enough to actual and will be more efficient
+    var currentTime = new Date().getTime();
+
+    if(clientData.lastHeartbeat < currentTime - config.maxLastHeartBeat) {
         console.log(`[INFO] Kicking player ${clientData.player.screenName}`);
         sockets[clientData.id].emit('kick');
         sockets[clientData.id].disconnect();
+    }
+
+
+    /**
+     * Increase ammo if necessary
+     */
+    if(clientData.tank.ammo < config.tankAmmoCapacity && ((currentTime - clientData.tank.lastAmmoEarned > config.tankTimeToGainAmmo) || typeof clientData.tank.lastAmmoEarned == 'undefined')){
+        clientData.tank.ammo = clientData.tank.ammo + 1;
+        clientData.tank.lastAmmoEarned = currentTime;
     }
 
     /**
@@ -184,13 +213,20 @@ var gameTick = function(clientData) {
     */
     if(typeof clientData.player.userInput.mouseClicked != 'undefined') {
         if(clientData.player.userInput.mouseClicked &&
-            (typeof clientData.tank.timeLastFired == 'undefined' ||
-            (new Date().getTime() - clientData.tank.timeLastFired > config.tankFireTimeWait))) {
-            clientData.tank.timeLastFired = new Date().getTime();
+            clientData.tank.ammo > 0 &&
+            (typeof clientData.tank.lastFireTime == 'undefined' ||
+            (currentTime - clientData.tank.lastFireTime > config.tankFireTimeWait))) {
 
-            var bullet = new Bullet(clientData.id, clientData.tank.x, clientData.tank.y,
-                Math.cos(clientData.tank.gunAngle) * config.bulletVelocity,
-                Math.sin(clientData.tank.gunAngle) * config.bulletVelocity);
+            clientData.tank.lastFireTime = currentTime;
+            clientData.tank.ammo = clientData.tank.ammo - 1;
+
+            var xComponent = Math.cos(clientData.tank.gunAngle);
+            var yComponent = Math.sin(clientData.tank.gunAngle);
+
+
+            var bullet = new Bullet(clientData.id, clientData.tank.x + (xComponent * config.tankBarrelLength), clientData.tank.y - (yComponent * config.tankBarrelLength),
+                xComponent * config.bulletVelocity,
+                yComponent * config.bulletVelocity);
 
             quadtree.put(bullet.forQuadtree());
             clientData.tank.bullets.push(bullet);
@@ -269,6 +305,36 @@ var gameTick = function(clientData) {
         clientData.tank.bullets[i].y = clientData.tank.bullets[i].y - clientData.tank.bullets[i].velocityY;
         quadtree.update(oldTreeInfo, 'id', clientData.tank.bullets[i].forQuadtree());
     }
+
+    /**
+     * Remove any bullets that are now out of bounds.
+     */
+    for(var bullet of clientData.tank.bullets) {
+        if(bullet.x > config.gameWidth - config.wallWidth || bullet.x < config.wallWidth || bullet.y > config.gameHeight - config.wallWidth || bullet.y < config.wallWidth){
+            var playerIndex = util.findIndex(currentClientDatas,bullet.ownerId);
+            if(playerIndex > -1) {
+                var bulletIndex = util.findIndex(currentClientDatas[playerIndex].tank.bullets, bullet.id);
+                currentClientDatas[playerIndex].tank.bullets.splice(bullet.id,1);
+                quadtree.remove(bullet.forQuadtree(), 'id');
+            }
+        }
+    }
+
+    /**
+     * Check any collisions on tank
+     */
+    quadtree.get(clientData.tank.forQuadtree(),function(objectInTankArea){
+        if(objectInTankArea.type === 'BULLET'){
+            var bullet = objectInTankArea.object;
+            var playerIndex = util.findIndex(currentClientDatas,bullet.ownerId);
+            if(playerIndex > -1) {
+                var bulletIndex = util.findIndex(currentClientDatas[playerIndex].tank.bullets, bullet.id);
+                currentClientDatas[playerIndex].tank.bullets.splice(bullet.id,1);
+                quadtree.remove(bullet.forQuadtree(), 'id');
+            }
+        }
+        return true;
+    });
 
 };
 

@@ -27,6 +27,7 @@ class QuadtreeManager {
       */
       var visibleTanks = [];
       var visibleBullets = [];
+      var visibleWalls = [];
       
       this.quadtree.get(queryObject, function(quadtreeObject){
           if(quadtreeObject.type === 'TANK'){
@@ -41,6 +42,8 @@ class QuadtreeManager {
             });
           }else if(quadtreeObject.type === 'BULLET'){
             visibleBullets.push(quadtreeObject.object);
+          }else if(quadtreeObject.type === 'WALL'){
+            visibleWalls.push(quadtreeObject.object);
           }
           return true;
       });
@@ -51,7 +54,8 @@ class QuadtreeManager {
             y: queryObject.y + queryObject.h/2
         },
         "tanks":visibleTanks,
-        "bullets":visibleBullets
+        "bullets":visibleBullets,
+        "walls": visibleWalls
       };
   }
 

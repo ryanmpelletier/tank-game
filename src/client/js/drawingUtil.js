@@ -1,5 +1,5 @@
 var global = require('./global');
-var TankSprite = require('../../../../tank-game/src/client/js/tankSprite');
+var Sprite = require('../../server/lib/sprite');
 
 /**
  * This is the class that holds a reference to the canvas.
@@ -17,7 +17,8 @@ class DrawingUtil {
          */
         this.perspective = perspective;
 
-        this.tankSprites = {};
+        this.tankImage = new Image();
+        this.tankImage.src = "/img/tank-sprite.png";
     }
 
     /**
@@ -55,7 +56,7 @@ class DrawingUtil {
     }
 
     /**
-     * Draw the other tanks
+     * Draw all tanks (including user's tank).
      */
     tanksDraw(tanks) {
         var translateX = -(this.perspective.x - global.screenWidth / 2);
@@ -63,26 +64,9 @@ class DrawingUtil {
 
         this.context2D.translate(translateX, translateY);
 
-        for(var i = 0; i < tanks.length; i++) {
-            var tank = tanks[i];
-
-            if(!this.tankSprites[tank.id]) {
-                var tankSprite = new TankSprite({
-                    width: 384,
-                    height: 128,
-                    numberOfFrames: 3,
-                    ticksPerFrame: 4,
-                    context: this.context2D
-                });
-                this.tankSprites[tank.id] = tankSprite;
-            }
-            else {
-                if(tank.isMoving) {
-                    // Update animation frame since tank is moving
-                    this.tankSprites[tank.id].update();
-                }
-                this.tankSprites[tank.id].render(tank.x, tank.y, tank.hullDirection);
-            }
+        for(let tank of tanks) {
+            // Draw tank
+            Sprite.render(tank.sprite, this.context2D, this.tankImage, tank.x, tank.y, tank.hullDirection);
 
             //draw circle in the center to represent tank
             this.context2D.beginPath();
@@ -100,6 +84,7 @@ class DrawingUtil {
             this.context2D.lineTo(x + r * Math.cos(theta), y - r * Math.sin(theta));
             this.context2D.stroke();
         }
+
         this.context2D.translate(-translateX, -translateY);
     }
 

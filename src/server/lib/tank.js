@@ -6,27 +6,30 @@
  * Other values as calculated by the server will be stored outside of the "player" nested object.
  */
 var config = require('../../../config.json');
+var Sprite = require('./sprite');
 
 class Tank {
-    constructor(id, xPosition, yPosition, screenName = 'test', hullDirection = 0, gunAngle = 0, isMoving = false,
-                ammo = config.tankAmmoCapacity) {
+    constructor(id, xPosition, yPosition, screenName = 'test', hullDirection = 0,
+                gunAngle = 0, isMoving = false, ammo = config.tankAmmoCapacity) {
         this.id = id;
         this.x = xPosition;
         this.y = yPosition;
         this.screenName = screenName;
         this.hullDirection = hullDirection;
         this._gunAngle = gunAngle;
-        this.isMoving = isMoving;
         this.ammo = ammo;
         this.lastFireTime = undefined;
 
         //probably will have a bullet class
         this.bullets = [];
 
+        this.sprite = new Sprite(384, 128, 3, 4);
+
         /**
-         * simple quadtree requires a basic format for object put onto the quadtree, I am trying to figure out the best way to mitigate this
-         * I don't like a libary enforcing my object to have a certain structure, this is something I am not used to. In Java this would just be
-         * an interface I would implement, and I wouldn't have to change the internal representation of my object, this is my compromise
+         * simple quadtree requires a basic format for object put onto the quadtree, I am trying to figure out the best
+         * way to mitigate this I don't like a libary enforcing my object to have a certain structure, this is something
+         * I am not used to. In Java this would just be an interface I would implement, and I wouldn't have to change
+         * the internal representation of my object, this is my compromise
          */
         this.forQuadtree = function(){
             return {
@@ -48,8 +51,6 @@ class Tank {
     get gunAngle() {
         return this._gunAngle;
     }
-
-
 }
 
 module.exports = Tank;

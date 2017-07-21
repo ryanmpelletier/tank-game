@@ -9,11 +9,11 @@ var util = require('./util');
 
 
 class GameLogicService {
-    constructor(quadtree){
+    constructor(quadtree) {
         this.quadtree = quadtree;
     }
 
-    initializeGame(){
+    initializeGame() {
         /**
          * Initialize border walls, put them in the quadtree
          * I'm still not sure I want to use the quadtree to store data for the borders.
@@ -30,7 +30,7 @@ class GameLogicService {
         this.quadtree.put(bottomBorderWall.forQuadtree());
     }
 
-    gameTick(clientData, socket, currentClientDatas){
+    gameTick(clientData, socket, currentClientDatas) {
         var currentTime = new Date().getTime();
 
         /**
@@ -41,7 +41,6 @@ class GameLogicService {
             socket.emit('kick');
             socket.disconnect();
         }
-
 
         var oldQuadreeInfo = clientData.forQuadtree();
         var oldPosition = clientData.position;
@@ -146,36 +145,35 @@ class GameLogicService {
             clientData.tank.gunAngle = clientData.player.userInput.mouseAngle;
         }
 
-     /**
-     * Remove any bullets that are now out of bounds.
-     */
-    for(var bullet of clientData.tank.bullets) {
-        if(bullet.x > config.gameWidth - config.wallWidth || bullet.x < config.wallWidth || bullet.y > config.gameHeight - config.wallWidth || bullet.y < config.wallWidth){
-            var playerIndex = util.findIndex(currentClientDatas,bullet.ownerId);
-            if(playerIndex > -1) {
-                var bulletIndex = util.findIndex(currentClientDatas[playerIndex].tank.bullets, bullet.id);
-                currentClientDatas[playerIndex].tank.bullets.splice(bullet.id,1);
-                this.quadtree.remove(bullet.forQuadtree(), 'id');
+        /**
+        * Remove any bullets that are now out of bounds.
+        */
+        for(var bullet of clientData.tank.bullets) {
+            if(bullet.x > config.gameWidth - config.wallWidth || bullet.x < config.wallWidth || bullet.y > config.gameHeight - config.wallWidth || bullet.y < config.wallWidth){
+                var playerIndex = util.findIndex(currentClientDatas,bullet.ownerId);
+                if(playerIndex > -1) {
+                    var bulletIndex = util.findIndex(currentClientDatas[playerIndex].tank.bullets, bullet.id);
+                    currentClientDatas[playerIndex].tank.bullets.splice(bullet.id,1);
+                    this.quadtree.remove(bullet.forQuadtree(), 'id');
+                }
             }
         }
-    }
 
-    /**
-     * Check any collisions on tank
-     */
-    var objectsInTankArea = this.quadtree.get(clientData.tank.forQuadtree());
-    for(var objectInTankArea of objectsInTankArea){
-        if(objectInTankArea.type === 'BULLET'){
-            var bullet = objectInTankArea.object;
-            var playerIndex = util.findIndex(currentClientDatas,bullet.ownerId);
-            if(playerIndex > -1) {
-                var bulletIndex = util.findIndex(currentClientDatas[playerIndex].tank.bullets, bullet.id);
-                currentClientDatas[playerIndex].tank.bullets.splice(bullet.id,1);
-                this.quadtree.remove(bullet.forQuadtree(), 'id');
+        /**
+        * Check any collisions on tank
+        */
+        var objectsInTankArea = this.quadtree.get(clientData.tank.forQuadtree());
+            for(var objectInTankArea of objectsInTankArea){
+                if(objectInTankArea.type === 'BULLET'){
+                    var bullet = objectInTankArea.object;
+                    var playerIndex = util.findIndex(currentClientDatas,bullet.ownerId);
+                if(playerIndex > -1) {
+                    var bulletIndex = util.findIndex(currentClientDatas[playerIndex].tank.bullets, bullet.id);
+                    currentClientDatas[playerIndex].tank.bullets.splice(bullet.id,1);
+                    this.quadtree.remove(bullet.forQuadtree(), 'id');
+                }
             }
-        }
-    };
-
+        };
     }
 }
 

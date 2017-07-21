@@ -76,7 +76,7 @@ function updateClientView(){
      * Trying to enforce the server sending a perspective object over
      */
     if(typeof clientGameObjects.perspective != 'undefined'){
-        drawingUtil.setPerspective(clientGameObjects.perspective.x,clientGameObjects.perspective.y);
+        drawingUtil.setPerspective(clientGameObjects.perspective.x, clientGameObjects.perspective.y);
     }else{
         throw new Error("unable to find perspective, make sure server is sending perspective object with x and y");
     }

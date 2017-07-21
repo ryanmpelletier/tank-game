@@ -29,8 +29,8 @@ class QuadtreeManager {
       var visibleBullets = [];
       var visibleWalls = [];
       
-      this.quadtree.get(queryObject, function(quadtreeObject){
-          if(quadtreeObject.type === 'TANK'){
+      this.quadtree.get(queryObject, function(quadtreeObject) {
+          if(quadtreeObject.type === 'TANK') {
             var tank = quadtreeObject.object;
             visibleTanks.push({
                 id: tank.id,
@@ -38,11 +38,13 @@ class QuadtreeManager {
                 y: tank.y,
                 hullDirection: tank.hullDirection,
                 gunAngle: tank.gunAngle,
-                isMoving: tank.isMoving
+                sprite: tank.sprite
             });
-          }else if(quadtreeObject.type === 'BULLET'){
+          }
+          else if(quadtreeObject.type === 'BULLET') {
             visibleBullets.push(quadtreeObject.object);
-          }else if(quadtreeObject.type === 'WALL'){
+          }
+          else if(quadtreeObject.type === 'WALL') {
             visibleWalls.push(quadtreeObject.object);
           }
           return true;

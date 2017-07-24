@@ -17,8 +17,11 @@ class DrawingUtil {
          */
         this.perspective = perspective;
 
-        this.tankImage = new Image();
-        this.tankImage.src = "/img/tank-sprite.png";
+        this.tankHullImage = new Image();
+        this.tankHullImage.src = "/img/sprite-tank-hull-256.png";
+
+        this.tankGunImage = new Image();
+        this.tankGunImage.src = "/img/sprite-tank-gun-256.png";
     }
 
     /**
@@ -65,24 +68,27 @@ class DrawingUtil {
         this.context2D.translate(translateX, translateY);
 
         for(let tank of tanks) {
-            // Draw tank
-            Sprite.render(tank.sprite, this.context2D, this.tankImage, tank.x, tank.y, tank.hullDirection);
+            // Draw tank hull
+            Sprite.render(tank.spriteTankHull, this.context2D, this.tankHullImage, tank.x, tank.y, 2, 2, 0);
 
-            //draw circle in the center to represent tank
-            this.context2D.beginPath();
-            this.context2D.strokeStyle = 'red';
-            this.context2D.arc(tank.x, tank.y, 15, 0, 2 * Math.PI);
-            this.context2D.stroke();
+            // Draw tank gun
+            Sprite.render(tank.spriteTankGun, this.context2D, this.tankGunImage, tank.x, tank.y, 2, 2, tank.rotationCorrection);
 
-            //draw tank gun
-            var x = tank.x;
-            var y = tank.y;
-            var r =  25;
-            var theta = tank.gunAngle;
-
-            this.context2D.moveTo(x, y);
-            this.context2D.lineTo(x + r * Math.cos(theta), y - r * Math.sin(theta));
-            this.context2D.stroke();
+            // //draw circle in the center to represent tank
+            // this.context2D.beginPath();
+            // this.context2D.strokeStyle = 'red';
+            // this.context2D.arc(tank.x, tank.y, 15, 0, 2 * Math.PI);
+            // this.context2D.stroke();
+            //
+            // //draw tank gun
+            // var x = tank.x;
+            // var y = tank.y;
+            // var r =  25;
+            // var theta = tank.gunAngle;
+            //
+            // this.context2D.moveTo(x, y);
+            // this.context2D.lineTo(x + r * Math.cos(theta), y - r * Math.sin(theta));
+            // this.context2D.stroke();
         }
 
         this.context2D.translate(-translateX, -translateY);

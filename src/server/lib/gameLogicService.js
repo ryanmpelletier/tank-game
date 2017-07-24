@@ -81,10 +81,10 @@ class GameLogicService {
         if(!util.areCoordinatesEqual(oldPosition, newPosition)) {
             // Tank has moved so update its direction
             var angleInRadians = Math.atan2(newPosition.y - oldPosition.y, newPosition.x - oldPosition.x);
-            clientData.tank.hullDirection = angleInRadians;
+            clientData.tank.hullAngle = angleInRadians;
 
             // Update tank's frame since tank is moving
-            clientData.tank.sprite.update();
+            clientData.tank.spriteTankHull.update();
         }
 
         clientData.position = newPosition;

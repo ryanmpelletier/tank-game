@@ -128,15 +128,34 @@ socketIo.on('connection', function(socket) {
 
     /**
     * When client calls socket.disconnect() on their end, this event is automatically fired
+    * It is important to clean up anything that was put into the quadtree for this particular client
     */
     socket.on('disconnect',function() {
+
+        /**
+         * Remove player's bullets
+         * Eventually it may be better to do this somewhere else, for now this will do
+         */
+
+         for(let bullet of currentClientData.tank.bullets){
+             quadtree.remove(bullet.forQuadtree());
+         }
+
+         /**
+          * Remove player from quadtree
+          */
+        quadtree.remove(currentClientData.forQuadtree(), 'id');
+
+
         var playerIndex = util.findIndex(currentClientDatas,currentClientData.id);
         if(playerIndex > -1) {
             currentClientDatas.splice(playerIndex,1);
             console.log(`[INFO] Player ${currentClientData.player.screenName} has been removed from tracked players.`);
         }
-        //remove player from quadtree
-        quadtree.remove(currentClientData.forQuadtree(), 'id');
+
+        var allItemsInQuadtree = quadtree.get({x:0,y:0,w:config.gameWidth,h:config.gameHeight});
+        console.log('quadtree size', allItemsInQuadtree.length);
+
     });
 
     /**

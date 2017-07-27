@@ -30,16 +30,42 @@ class GameLogicService {
         this.quadtree.put(bottomBorderWall.forQuadtree());
     }
 
+    handleCollisionsOnTank(clientData, currentClientDatas, quadtree){
+        /**
+        * Check any collisions on tank
+        */
+        var objectsInTankArea = quadtree.get(clientData.tank.forQuadtree());
+            for(var objectInTankArea of objectsInTankArea){
+                if(objectInTankArea.type === 'BULLET'){
+                    var bullet = objectInTankArea.object;
+                    var playerIndex = util.findIndex(currentClientDatas,bullet.ownerId);
+                if(playerIndex > -1) {
+                    var bulletIndex = util.findIndex(currentClientDatas[playerIndex].tank.bullets, bullet.id);
+                    currentClientDatas[playerIndex].tank.bullets.splice(bullet.id,1);
+                    quadtree.remove(bullet.forQuadtree(), 'id');
+                }
+            }
+        };
+    }
+
     gameTick(clientData, socket, currentClientDatas) {
         var currentTime = new Date().getTime();
 
+        this.kickPlayerIfIdle(clientData, socket, currentTime);
+        this.updatePlayerPosition(clientData, this.quadtree);
+        this.increaseAmmoIfNecessary(clientData,currentTime);
+        this.updatePositionsOfBullets(clientData, this.quadtree);
+        this.fireBulletsIfNecessary(clientData, this.quadtree, currentTime);
+        this.removeBulletsThatAreOutOfBounds(clientData, currentClientDatas, this.quadtree);
+        this.handleCollisionsOnTank(clientData, currentClientDatas, this.quadtree);
+    }
+
+    updatePlayerPosition(clientData, quadtree){
         /**
-         * Kick player if necessary
+         * Set tank gun angle
          */
-        if(clientData.lastHeartbeat < currentTime - config.maxLastHeartBeat) {
-            console.log(`[INFO] Kicking player ${clientData.player.screenName}`);
-            socket.emit('kick');
-            socket.disconnect();
+        if(typeof clientData.player.userInput.mouseAngle != 'undefined'){
+            clientData.tank.gunAngle = clientData.player.userInput.mouseAngle;
         }
 
         var oldQuadreeInfo = clientData.forQuadtree();
@@ -92,16 +118,31 @@ class GameLogicService {
         /**
         * Update the item on the quadtree
         */
-        this.quadtree.update(oldQuadreeInfo, 'id', clientData.forQuadtree());
+        quadtree.update(oldQuadreeInfo, 'id', clientData.forQuadtree());
+    };
 
+    kickPlayerIfIdle(clientData, socket, time){
+        /**
+         * Kick player if idle
+         */
+        if(clientData.lastHeartbeat < time - config.maxLastHeartBeat) {
+            console.log(`[INFO] Kicking player ${clientData.player.screenName}`);
+            socket.emit('kick');
+            socket.disconnect();
+        }
+    };
+
+    increaseAmmoIfNecessary(clientData, time){
         /**
          * Increase ammo if necessary
          */
-        if(clientData.tank.ammo < config.tankAmmoCapacity && ((currentTime - clientData.tank.lastAmmoEarned > config.tankTimeToGainAmmo) || typeof clientData.tank.lastAmmoEarned == 'undefined')){
+        if(clientData.tank.ammo < config.tankAmmoCapacity && ((time - clientData.tank.lastAmmoEarned > config.tankTimeToGainAmmo) || typeof clientData.tank.lastAmmoEarned == 'undefined')){
             clientData.tank.ammo = clientData.tank.ammo + 1;
-            clientData.tank.lastAmmoEarned = currentTime;
+            clientData.tank.lastAmmoEarned = time;
         }
+    };
 
+    updatePositionsOfBullets(clientData, quadtree){
         /**
         * Update positions of all the bullets
         */
@@ -109,9 +150,11 @@ class GameLogicService {
             let oldTreeInfo = bullet.forQuadtree();
             bullet.x = bullet.x + bullet.velocityX;
             bullet.y = bullet.y - bullet.velocityY;
-            this.quadtree.update(oldTreeInfo, 'id', bullet.forQuadtree());
+            quadtree.update(oldTreeInfo, 'id', bullet.forQuadtree());
         }
+    };
 
+    fireBulletsIfNecessary(clientData, quadtree, time){
         /**
         * Fire bullets if necessary
         */
@@ -119,9 +162,9 @@ class GameLogicService {
             if(clientData.player.userInput.mouseClicked &&
                 clientData.tank.ammo > 0 &&
                 (typeof clientData.tank.lastFireTime == 'undefined' ||
-                (currentTime - clientData.tank.lastFireTime > config.tankFireTimeWait))) {
+                (time - clientData.tank.lastFireTime > config.tankFireTimeWait))) {
 
-                clientData.tank.lastFireTime = currentTime;
+                clientData.tank.lastFireTime = time;
                 clientData.tank.ammo = clientData.tank.ammo - 1;
 
                 var xComponent = Math.cos(clientData.tank.gunAngle);
@@ -137,14 +180,9 @@ class GameLogicService {
                 clientData.tank.bullets.push(bullet);
             }
         }
-
-        /**
-         * Set tank gun angle
-         */
-        if(typeof clientData.player.userInput.mouseAngle != 'undefined'){
-            clientData.tank.gunAngle = clientData.player.userInput.mouseAngle;
-        }
-
+    };
+    
+    removeBulletsThatAreOutOfBounds(clientData, currentClientDatas, quadtree){
         /**
         * Remove any bullets that are now out of bounds.
         */
@@ -154,27 +192,12 @@ class GameLogicService {
                 if(playerIndex > -1) {
                     var bulletIndex = util.findIndex(currentClientDatas[playerIndex].tank.bullets, bullet.id);
                     currentClientDatas[playerIndex].tank.bullets.splice(bullet.id,1);
-                    this.quadtree.remove(bullet.forQuadtree(), 'id');
+                    quadtree.remove(bullet.forQuadtree(), 'id');
                 }
             }
         }
+    };
 
-        /**
-        * Check any collisions on tank
-        */
-        var objectsInTankArea = this.quadtree.get(clientData.tank.forQuadtree());
-            for(var objectInTankArea of objectsInTankArea){
-                if(objectInTankArea.type === 'BULLET'){
-                    var bullet = objectInTankArea.object;
-                    var playerIndex = util.findIndex(currentClientDatas,bullet.ownerId);
-                if(playerIndex > -1) {
-                    var bulletIndex = util.findIndex(currentClientDatas[playerIndex].tank.bullets, bullet.id);
-                    currentClientDatas[playerIndex].tank.bullets.splice(bullet.id,1);
-                    this.quadtree.remove(bullet.forQuadtree(), 'id');
-                }
-            }
-        };
-    }
 }
 
 module.exports = GameLogicService;

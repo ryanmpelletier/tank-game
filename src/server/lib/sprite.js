@@ -3,34 +3,32 @@
  */
 class Sprite {
 
-    constructor(width, height, frameCount = 1, ticksPerFrame = 0, frameIndex = 0, tickCount = 1) {
+    constructor(width = 0, height = 0, ticksPerFrame = 0,
+                rowFrameCount = 1, colFrameCount = 1,
+                rowFrameIndex = 0, colFrameIndex = 0) {
         this.width = width;
         this.height = height;
-        this.numberOfFrames = frameCount;
+        this.rowFrameCount = rowFrameCount;
+        this.colFrameCount = colFrameCount;
         this.ticksPerFrame = ticksPerFrame;
-        this.frameIndex = frameIndex;
-        this.tickCount = tickCount;
+        this.rowFrameIndex = rowFrameIndex;
+        this.colFrameIndex = colFrameIndex;
+        this.tickCount = 1;
     }
 
     update() {
         this.tickCount += 1;
 
+        // Check if time to update frame
         if (this.tickCount > this.ticksPerFrame) {
+            // Reset tick count
             this.tickCount = 0;
 
-            // If the current frame index is in range
-            if (this.frameIndex < this.numberOfFrames - 1) {
-                // Go to the next frame
-                this.frameIndex += 1;
-            }
-            else {
-                // Reset to first frame
-                this.frameIndex = 0;
-            }
+            this.colFrameIndex = ((this.colFrameIndex + 1) % this.colFrameCount);
         }
     };
 
-    static render(sprite, context, image, destX, destY, radians = 0) {
+    static render(sprite, context, image, destX, destY, scaleFactorWidth = 1, scaleFactorHeight = 1, radians = 0) {
         // Save current context to prevent rotating everything drawn after this occurs
         context.save();
 
@@ -48,14 +46,14 @@ class Sprite {
         // Draw tank sprite at destination coordinates
         context.drawImage(
             image,
-            sprite.frameIndex * sprite.width / sprite.numberOfFrames,
-            0,
-            sprite.width / sprite.numberOfFrames,
-            sprite.height,
+            sprite.rowFrameIndex * sprite.width / sprite.rowFrameCount,
+            sprite.colFrameIndex * sprite.height / sprite.colFrameCount,
+            sprite.width / sprite.rowFrameCount,
+            sprite.height / sprite.colFrameCount,
             destX - 64,
             destY - 64,
-            sprite.width / sprite.numberOfFrames,
-            sprite.height
+            sprite.width / sprite.rowFrameCount / scaleFactorWidth,
+            sprite.height / sprite.colFrameCount / scaleFactorHeight
         );
 
         context.restore();

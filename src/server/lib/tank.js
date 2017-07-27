@@ -9,13 +9,13 @@ var config = require('../../../config.json');
 var Sprite = require('./sprite');
 
 class Tank {
-    constructor(id, xPosition, yPosition, screenName = 'test', hullDirection = 0,
+    constructor(id, xPosition, yPosition, screenName = 'test', hullAngle = 0,
                 gunAngle = 0, isMoving = false, ammo = config.tankAmmoCapacity) {
         this.id = id;
         this.x = xPosition;
         this.y = yPosition;
         this.screenName = screenName;
-        this.hullDirection = hullDirection;
+        this._hullAngle = hullAngle;
         this._gunAngle = gunAngle;
         this.ammo = ammo;
         this.lastFireTime = undefined;
@@ -23,7 +23,10 @@ class Tank {
         //probably will have a bullet class
         this.bullets = [];
 
-        this.sprite = new Sprite(384, 128, 3, 4);
+        this.spriteTankHull = new Sprite(2048, 768, 4, 8, 3);
+        this.spriteTankGun = new Sprite(2048, 256, 4, 8);
+
+        this.rotationCorrection = 0;
 
         /**
          * simple quadtree requires a basic format for object put onto the quadtree, I am trying to figure out the best
@@ -44,8 +47,32 @@ class Tank {
         };
     }
 
+    set hullAngle(hullAngle) {
+        this._hullAngle = hullAngle;
+
+        // Convert radians to positive if negative
+        hullAngle = (hullAngle + 2 * Math.PI) % (2 * Math.PI);
+
+        // Determine correct sprite frame from angle
+        this.spriteTankHull.rowFrameIndex = Math.ceil(hullAngle / (Math.PI / 4)) % 4;
+    }
+
     set gunAngle(gunAngle) {
         this._gunAngle = gunAngle;
+
+        // Modify gun angle window (i.e. range of degrees which a single sprite frame corresponds to)
+        var modifiedGunAngle = (((gunAngle - Math.PI / 8) + 2 * Math.PI) % (2 * Math.PI));
+
+        // Determine correct sprite frame from angle
+        var frameIndex = Math.floor(modifiedGunAngle / (Math.PI / 4));
+        frameIndex = Math.abs(frameIndex - 7);
+        this.spriteTankGun.rowFrameIndex = frameIndex;
+
+        // Correct gun angle
+        // (i.e. gun image angle is different from mouse angle determine how much to rotate image to match mouse angle)
+        var actualAngle = Math.floor(Math.abs((gunAngle * 180 / Math.PI) - 360));
+        var desiredAngle = (frameIndex * 45);
+        this.rotationCorrection = (actualAngle - desiredAngle) * (Math.PI / 180);
     }
 
     get gunAngle() {

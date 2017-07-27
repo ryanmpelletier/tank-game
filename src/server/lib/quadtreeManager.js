@@ -38,7 +38,9 @@ class QuadtreeManager {
                 y: tank.y,
                 hullDirection: tank.hullDirection,
                 gunAngle: tank.gunAngle,
-                sprite: tank.sprite
+                rotationCorrection: tank.rotationCorrection,
+                spriteTankHull: tank.spriteTankHull,
+                spriteTankGun: tank.spriteTankGun
             });
           }
           else if(quadtreeObject.type === 'BULLET') {

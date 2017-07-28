@@ -6,6 +6,7 @@ var config = require('../../../config.json');
 var Wall = require('./wall');
 var Bullet = require('./bullet');
 var util = require('./util');
+var winston = require('winston');
 
 
 class GameLogicService {
@@ -30,24 +31,6 @@ class GameLogicService {
         this.quadtree.put(bottomBorderWall.forQuadtree());
     }
 
-    handleCollisionsOnTank(clientData, currentClientDatas, quadtree){
-        /**
-        * Check any collisions on tank
-        */
-        var objectsInTankArea = quadtree.get(clientData.tank.forQuadtree());
-            for(var objectInTankArea of objectsInTankArea){
-                if(objectInTankArea.type === 'BULLET'){
-                    var bullet = objectInTankArea.object;
-                    var playerIndex = util.findIndex(currentClientDatas,bullet.ownerId);
-                if(playerIndex > -1) {
-                    var bulletIndex = util.findIndex(currentClientDatas[playerIndex].tank.bullets, bullet.id);
-                    currentClientDatas[playerIndex].tank.bullets.splice(bullet.id,1);
-                    quadtree.remove(bullet.forQuadtree(), 'id');
-                }
-            }
-        };
-    }
-
     gameTick(clientData, socket, currentClientDatas) {
         var currentTime = new Date().getTime();
 
@@ -60,11 +43,22 @@ class GameLogicService {
         this.handleCollisionsOnTank(clientData, currentClientDatas, this.quadtree);
     }
 
+    kickPlayerIfIdle(clientData, socket, time){
+        /**
+         * Kick player if idle
+         */
+        if(clientData.lastHeartbeat < time - config.maxLastHeartBeat) {
+            winston.info(`[INFO] Kicking player ${clientData.player.screenName}`);
+            socket.emit('kick');
+            socket.disconnect();
+        }
+    };
+
     updatePlayerPosition(clientData, quadtree){
         /**
          * Set tank gun angle
          */
-        if(typeof clientData.player.userInput.mouseAngle != 'undefined'){
+        if(typeof clientData.player.userInput.mouseAngle !== 'undefined'){
             clientData.tank.gunAngle = clientData.player.userInput.mouseAngle;
         }
 
@@ -121,22 +115,11 @@ class GameLogicService {
         quadtree.update(oldQuadreeInfo, 'id', clientData.forQuadtree());
     };
 
-    kickPlayerIfIdle(clientData, socket, time){
-        /**
-         * Kick player if idle
-         */
-        if(clientData.lastHeartbeat < time - config.maxLastHeartBeat) {
-            console.log(`[INFO] Kicking player ${clientData.player.screenName}`);
-            socket.emit('kick');
-            socket.disconnect();
-        }
-    };
-
     increaseAmmoIfNecessary(clientData, time){
         /**
          * Increase ammo if necessary
          */
-        if(clientData.tank.ammo < config.tankAmmoCapacity && ((time - clientData.tank.lastAmmoEarned > config.tankTimeToGainAmmo) || typeof clientData.tank.lastAmmoEarned == 'undefined')){
+        if(clientData.tank.ammo < config.tankAmmoCapacity && ((time - clientData.tank.lastAmmoEarned > config.tankTimeToGainAmmo) || typeof clientData.tank.lastAmmoEarned === 'undefined')){
             clientData.tank.ammo = clientData.tank.ammo + 1;
             clientData.tank.lastAmmoEarned = time;
         }
@@ -147,10 +130,14 @@ class GameLogicService {
         * Update positions of all the bullets
         */
         for(var bullet of clientData.tank.bullets) {
+
             let oldTreeInfo = bullet.forQuadtree();
             bullet.x = bullet.x + bullet.velocityX;
             bullet.y = bullet.y - bullet.velocityY;
-            quadtree.update(oldTreeInfo, 'id', bullet.forQuadtree());
+            let forQuadtree = bullet.forQuadtree();
+            if(!quadtree.update(oldTreeInfo, 'id', forQuadtree)){
+                throw new Error(`Unable to update bullet ${bullet.id} in quadtree, this should not happen.`);
+            }
         }
     };
 
@@ -158,10 +145,10 @@ class GameLogicService {
         /**
         * Fire bullets if necessary
         */
-        if(typeof clientData.player.userInput.mouseClicked != 'undefined') {
+        if(typeof clientData.player.userInput.mouseClicked !== 'undefined') {
             if(clientData.player.userInput.mouseClicked &&
                 clientData.tank.ammo > 0 &&
-                (typeof clientData.tank.lastFireTime == 'undefined' ||
+                (typeof clientData.tank.lastFireTime === 'undefined' ||
                 (time - clientData.tank.lastFireTime > config.tankFireTimeWait))) {
 
                 clientData.tank.lastFireTime = time;
@@ -171,7 +158,7 @@ class GameLogicService {
                 var yComponent = Math.sin(clientData.tank.gunAngle);
 
                 var bullet = new Bullet(clientData.id, 
-                    clientData.tank.x + (xComponent * config.tankBarrelLength), 
+                    clientData.tank.x + (xComponent * config.tankBarrelLength),
                     clientData.tank.y - (yComponent * config.tankBarrelLength),
                     xComponent * config.bulletVelocity,
                     yComponent * config.bulletVelocity);
@@ -191,12 +178,42 @@ class GameLogicService {
                 var playerIndex = util.findIndex(currentClientDatas,bullet.ownerId);
                 if(playerIndex > -1) {
                     var bulletIndex = util.findIndex(currentClientDatas[playerIndex].tank.bullets, bullet.id);
-                    currentClientDatas[playerIndex].tank.bullets.splice(bullet.id,1);
-                    quadtree.remove(bullet.forQuadtree(), 'id');
+                    if(bulletIndex > -1){
+                        currentClientDatas[playerIndex].tank.bullets.splice(bulletIndex,1);
+                        quadtree.remove(bullet.forQuadtree(), 'id');
+                    }else{
+                        throw new Error(`Bullet index is ${bulletIndex}, how you gonna remove that??`);
+                    }
+                }else{
+                    throw new Error(`Player index is ${playerIndex}, how you gonna remove that??`);
                 }
             }
         }
     };
+
+    handleCollisionsOnTank(clientData, currentClientDatas, quadtree){
+        /**
+         * Check any collisions on tank
+         */
+        var objectsInTankArea = quadtree.get(clientData.tank.forQuadtree());
+        for(var objectInTankArea of objectsInTankArea){
+            if(objectInTankArea.type === 'BULLET'){
+                var bullet = objectInTankArea.object;
+                var playerIndex = util.findIndex(currentClientDatas,bullet.ownerId);
+                if(playerIndex > -1) {
+                    var bulletIndex = util.findIndex(currentClientDatas[playerIndex].tank.bullets, bullet.id);
+                    if(bulletIndex > -1){
+                        currentClientDatas[playerIndex].tank.bullets.splice(bulletIndex,1);
+                        quadtree.remove(bullet.forQuadtree(), 'id');
+                    }else{
+                        throw new Error(`Bullet index is ${bulletIndex}, how you gonna remove that??`);
+                    }
+                }else{
+                    throw new Error(`Player index is ${playerIndex}, how you gonna remove that??`);
+                }
+            }
+        }
+    }
 
 }
 

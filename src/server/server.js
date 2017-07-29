@@ -231,7 +231,31 @@ var clientUpdater = function() {
             h: clientData.player.screenHeight
         };
 
-        sockets[clientData.id].emit('game_objects_update', quadtreeManager.queryGameObjects(queryArea));
+        var perspective = {
+            "perspective":{
+                x: clientData.position.x,
+                y: clientData.position.y
+            }
+        };
+
+        var ammo = {
+            "ammo":{
+                capacity: config.tankAmmoCapacity,
+                count: clientData.tank.ammo
+            }
+        };
+
+        /**
+         * Note there is some dumbness going on here. The JSON spec says that
+         * JSON objects have unordered properties. However, we are counting on these properties
+         * being ordered when they are sent to the client, because the client will draw them in this order.
+         * The order we put the objects into the Object.assign function is the order they are merged, so
+         * in this case, perspective is drawn before what is returned by the quadtree.
+         *
+         * This is a poor choice, as an example, socket.io has every "right" to send the JSON object
+         * over unordered, which could break our app!
+         */
+        sockets[clientData.id].emit('game_objects_update', Object.assign({}, perspective, quadtreeManager.queryGameObjects(queryArea), ammo));
     });
 };
 

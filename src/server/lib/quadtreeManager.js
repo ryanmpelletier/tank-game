@@ -28,7 +28,7 @@ class QuadtreeManager {
       var visibleTanks = [];
       var visibleBullets = [];
       var visibleWalls = [];
-      
+
       this.quadtree.get(queryObject, function(quadtreeObject) {
           if(quadtreeObject.type === 'TANK') {
             var tank = quadtreeObject.object;
@@ -52,11 +52,16 @@ class QuadtreeManager {
           return true;
       });
 
+        /**
+         * Note there is some dumbness going on here. The JSON spec says that
+         * JSON objects have unordered properties. However, we are counting on these properties
+         * being ordered when they are sent to the client, because the client will draw them in this order.
+         * So for example, here tanks are drawn, then bullets, then walls.
+         *
+         * This is a poor choice, as an example, socket.io has every "right" to send the JSON object
+         * over unordered, which could break our app!
+         */
       return {
-        "perspective":{
-            x: queryObject.x + queryObject.w/2,
-            y: queryObject.y + queryObject.h/2
-        },
         "tanks":visibleTanks,
         "bullets":visibleBullets,
         "walls": visibleWalls

@@ -7,6 +7,7 @@ var Wall = require('./wall');
 var Bullet = require('./bullet');
 var util = require('./util');
 var winston = require('winston');
+winston.level = 'debug';
 
 
 class GameLogicService {
@@ -48,7 +49,7 @@ class GameLogicService {
          * Kick player if idle
          */
         if(clientData.lastHeartbeat < time - config.maxLastHeartBeat) {
-            winston.info(`[INFO] Kicking player ${clientData.player.screenName}`);
+            winston.log('debug',`Kicking player ${clientData.player.screenName}`);
             socket.emit('kick');
             socket.disconnect();
         }
@@ -157,7 +158,7 @@ class GameLogicService {
                 var xComponent = Math.cos(clientData.tank.gunAngle);
                 var yComponent = Math.sin(clientData.tank.gunAngle);
 
-                var bullet = new Bullet(clientData.id, 
+                var bullet = new Bullet(clientData.id,
                     clientData.tank.x + (xComponent * config.tankBarrelLength),
                     clientData.tank.y - (yComponent * config.tankBarrelLength),
                     xComponent * config.bulletVelocity,

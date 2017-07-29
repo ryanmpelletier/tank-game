@@ -139,6 +139,22 @@ class DrawingUtil {
         this.context2D.translate(-translateX, -translateY);
     }
 
+    playerInfoDraw(playerInfo){
+        var translateX = -(this.perspective.x - global.screenWidth/2);
+        var translateY = -(this.perspective.y - global.screenHeight/2);
+        this.context2D.translate(translateX, translateY);
+
+        let startX = this.perspective.x + global.drawing.playerInfo.tankXOffset;
+        let startY = this.perspective.y + global.drawing.playerInfo.tankYOffset;
+
+        this.context2D.font = global.drawing.playerInfo.font;
+        this.context2D.fillStyle = global.drawing.playerInfo.fontColor;
+        this.context2D.fillText(`${playerInfo.screenName} - ${playerInfo.score}`,startX, startY);
+
+
+        this.context2D.translate(-translateX, -translateY);
+    }
+
     /**
      * Given gameObjects, call the appropriate method on the drawingUtil
      * to draw that object.
@@ -150,6 +166,8 @@ class DrawingUtil {
             }
         }
     }
+
+
 
     setPerspective(x,y) {
         //shorthand ES6

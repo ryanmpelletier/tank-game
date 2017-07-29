@@ -245,6 +245,13 @@ var clientUpdater = function() {
             }
         };
 
+        var playerInfo = {
+            "playerInfo":{
+                screenName: clientData.player.screenName,
+                score: clientData.score
+            }
+        };
+
         /**
          * Note there is some dumbness going on here. The JSON spec says that
          * JSON objects have unordered properties. However, we are counting on these properties
@@ -255,7 +262,7 @@ var clientUpdater = function() {
          * This is a poor choice, as an example, socket.io has every "right" to send the JSON object
          * over unordered, which could break our app!
          */
-        sockets[clientData.id].emit('game_objects_update', Object.assign({}, perspective, quadtreeManager.queryGameObjects(queryArea), ammo));
+        sockets[clientData.id].emit('game_objects_update', Object.assign({}, perspective, quadtreeManager.queryGameObjects(queryArea), ammo, playerInfo));
     });
 };
 

@@ -43,17 +43,20 @@ class Sprite {
         // (necessary otherwise tank is drawn at wrong location since canvas has been rotated)
         context.translate(-destX, -destY);
 
+        var singleFrameWidth = sprite.width / sprite.rowFrameCount;
+        var singleFrameHeight = sprite.height / sprite.colFrameCount;
+
         // Draw tank sprite at destination coordinates
         context.drawImage(
             image,
-            sprite.rowFrameIndex * sprite.width / sprite.rowFrameCount,
-            sprite.colFrameIndex * sprite.height / sprite.colFrameCount,
+            sprite.rowFrameIndex * singleFrameWidth,
+            sprite.colFrameIndex * singleFrameHeight,
             sprite.width / sprite.rowFrameCount,
             sprite.height / sprite.colFrameCount,
-            destX - 64,
-            destY - 64,
-            sprite.width / sprite.rowFrameCount / scaleFactorWidth,
-            sprite.height / sprite.colFrameCount / scaleFactorHeight
+            destX - singleFrameWidth / scaleFactorWidth / 2,
+            destY - singleFrameHeight / scaleFactorHeight / 2,
+            singleFrameWidth / scaleFactorWidth,
+            singleFrameHeight / scaleFactorHeight
         );
 
         context.restore();

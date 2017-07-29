@@ -23,7 +23,7 @@ class Canvas{
             keysPressed: {},
             mouseClicked:false,
             mouseAngle: 0
-        }
+        };
         //set focus to canvas so that user input can be collected
         this.canvas.focus();
     }

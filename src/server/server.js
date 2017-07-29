@@ -12,6 +12,7 @@ var http = require('http').Server(app);
 var socketIo = require('socket.io')(http);
 var path = require('path');
 var winston = require('winston');
+winston.level = 'debug';
 
 
 // Import application config
@@ -33,7 +34,7 @@ app.get('/', function(req, res){
  * Start listening, I'm not sure how the details of this are working
  */
 http.listen(config.port, function(){
-    winston.info('listening on port:' + config.port);
+    winston.log('debug','listening on port:' + config.port);
 });
 
 
@@ -82,7 +83,7 @@ var sockets = {};
  * use the currentClientDatas array and index it by a socket id number
  */
 socketIo.on('connection', function(socket) {
-    winston.info(`[LOG] user connected with socket id ${socket.id}`);
+    winston.log('debug',`user connected with socket id ${socket.id}`);
 
     /**
     * Here is where I need to perform any server-side logic to set up state for the newly connecting player.
@@ -152,11 +153,11 @@ socketIo.on('connection', function(socket) {
         var playerIndex = util.findIndex(currentClientDatas,currentClientData.id);
         if(playerIndex > -1) {
             currentClientDatas.splice(playerIndex,1);
-            winston.info(`[INFO] Player ${currentClientData.player.screenName} has been removed from tracked players.`);
+            winston.log('debug',`Player ${currentClientData.player.screenName} has been removed from tracked players.`);
         }
 
         var allItemsInQuadtree = quadtree.get({x:0,y:0,w:config.gameWidth,h:config.gameHeight});
-        winston.info('quadtree size', allItemsInQuadtree.length);
+        winston.log('debug', 'quadtree size', allItemsInQuadtree.length);
 
     });
 

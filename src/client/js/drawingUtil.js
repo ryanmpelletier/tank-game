@@ -36,9 +36,7 @@ class DrawingUtil {
      */
     perspectiveDraw(perspective) {
         //here is using a repeating background image to draw the background
-        var img = document.getElementById('background_image');
-        var pattern = this.context2D.createPattern(img, 'repeat');
-        this.context2D.fillStyle = pattern;
+        this.context2D.fillStyle = this.context2D.createPattern(document.getElementById('background_image'), 'repeat');
 
         //translate canvas to where the edge of the game board is
         var translateX = -(perspective.x - global.screenWidth/2);
@@ -73,22 +71,6 @@ class DrawingUtil {
 
             // Draw tank gun
             Sprite.render(tank.spriteTankGun, this.context2D, this.tankGunImage, tank.x, tank.y, 2, 2, tank.rotationCorrection);
-
-            // //draw circle in the center to represent tank
-            // this.context2D.beginPath();
-            // this.context2D.strokeStyle = 'red';
-            // this.context2D.arc(tank.x, tank.y, 15, 0, 2 * Math.PI);
-            // this.context2D.stroke();
-            //
-            // //draw tank gun
-            // var x = tank.x;
-            // var y = tank.y;
-            // var r =  25;
-            // var theta = tank.gunAngle;
-            //
-            // this.context2D.moveTo(x, y);
-            // this.context2D.lineTo(x + r * Math.cos(theta), y - r * Math.sin(theta));
-            // this.context2D.stroke();
         }
 
         this.context2D.translate(-translateX, -translateY);

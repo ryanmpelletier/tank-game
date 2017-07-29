@@ -68,17 +68,14 @@ class DrawingUtil {
         this.context2D.translate(translateX, translateY);
 
         for(let tank of tanks) {
-            // Draw tank hull
-            Sprite.render(tank.spriteTankHull, this.context2D, this.tankHullImage, tank.x, tank.y, 2, 2, 0);
 
-            // Draw tank gun
-            Sprite.render(tank.spriteTankGun, this.context2D, this.tankGunImage, tank.x, tank.y, 2, 2, tank.rotationCorrection);
-
-            // //draw circle in the center to represent tank
-            // this.context2D.beginPath();
-            // this.context2D.strokeStyle = 'red';
-            // this.context2D.arc(tank.x, tank.y, 15, 0, 2 * Math.PI);
-            // this.context2D.stroke();
+            // for(let location of tank.locationHistory) {
+            //     //draw circle in the center to represent track
+            //     this.context2D.beginPath();
+            //     this.context2D.strokeStyle = 'red';
+            //     this.context2D.arc(location.x, location.y, 5, 0, 2 * Math.PI);
+            //     this.context2D.stroke();
+            // }
             //
             // //draw tank gun
             // var x = tank.x;
@@ -89,6 +86,12 @@ class DrawingUtil {
             // this.context2D.moveTo(x, y);
             // this.context2D.lineTo(x + r * Math.cos(theta), y - r * Math.sin(theta));
             // this.context2D.stroke();
+
+            // Draw tank hull
+            Sprite.render(tank.spriteTankHull, this.context2D, this.tankHullImage, tank.x, tank.y, 2, 2);
+
+            // Draw tank gun
+            Sprite.render(tank.spriteTankGun, this.context2D, this.tankGunImage, tank.x, tank.y, 2, 2, tank.rotationCorrection);
         }
 
         this.context2D.translate(-translateX, -translateY);

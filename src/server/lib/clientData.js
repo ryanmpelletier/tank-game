@@ -48,6 +48,7 @@ class ClientData {
     //set tank position also
     this.tank.x = position.x;
     this.tank.y = position.y;
+    this.tank.addLocation({x: position.x, y: position.y});
     this._position = position;
   }
 

@@ -6,7 +6,7 @@ var Sprite = require('../../server/lib/sprite');
  * Here we will write all the drawing functions.
  */
 class DrawingUtil {
-    constructor(canvas, perspective = {x: global.gameWidth / 2, y: global.gameHeight / 2}) {
+    constructor(canvas, perspective = {x: global.gameWidth / 2, y: global.gameHeight / 2}, drawingOrder = global.drawing.drawingOrder) {
         this.canvas = canvas;
         this.context2D = canvas.getContext("2d");
 
@@ -16,6 +16,7 @@ class DrawingUtil {
          * where the client is 'looking' on the game board
          */
         this.perspective = perspective;
+        this.drawingOrder = drawingOrder;
 
         this.tankHullImage = new Image();
         this.tankHullImage.src = "/img/sprite-tank-hull-256.png";
@@ -143,7 +144,7 @@ class DrawingUtil {
      * to draw that object.
      */
     drawGameObjects(gameObjects) {
-        for (var key in gameObjects) {
+        for (var key of this.drawingOrder) {
             if (gameObjects.hasOwnProperty(key) && typeof this[`${key}Draw`] !== 'undefined') {
                 this[`${key}Draw`](gameObjects[key]);
             }

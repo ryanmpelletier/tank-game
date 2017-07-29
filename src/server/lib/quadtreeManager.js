@@ -40,7 +40,8 @@ class QuadtreeManager {
                 gunAngle: tank.gunAngle,
                 rotationCorrection: tank.rotationCorrection,
                 spriteTankHull: tank.spriteTankHull,
-                spriteTankGun: tank.spriteTankGun
+                spriteTankGun: tank.spriteTankGun,
+                locationHistory: tank.locationHistory
             });
           }
           else if(quadtreeObject.type === 'BULLET') {

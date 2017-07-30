@@ -38,8 +38,8 @@ class Tank {
          */
         this.forQuadtree = function(){
             return {
-                x: this.x,
-                y: this.y,
+                x: this.x - config.tankWidth/2,
+                y: this.y - config.tankHeight/2,
                 w: config.tankWidth,
                 h: config.tankHeight,
                 id: this.id,

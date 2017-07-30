@@ -97,8 +97,9 @@ class DrawingUtil {
             //draw circle in the center to represent bullet
             this.context2D.beginPath();
             this.context2D.strokeStyle = 'green';
+            this.context2D.fillStyle = 'black';
             this.context2D.arc(bullets[i].x, bullets[i].y, 5, 0, 2*Math.PI);
-            this.context2D.stroke();  
+            this.context2D.fill();
         }
 
         this.context2D.translate(-translateX, -translateY);

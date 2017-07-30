@@ -39,7 +39,7 @@ class GameLogicService {
         this.updatePlayerPosition(clientData, this.quadtree);
         this.increaseAmmoIfNecessary(clientData,currentTime);
         this.updatePositionsOfBullets(clientData, this.quadtree);
-        this.fireBulletsIfNecessary(clientData, this.quadtree, currentTime);
+        this.fireBulletsIfNecessary(clientData, currentTime);
         this.removeBulletsThatAreOutOfBounds(clientData, currentClientDatas, this.quadtree);
         this.handleCollisionsOnTank(clientData, currentClientDatas, this.quadtree);
     }
@@ -142,7 +142,7 @@ class GameLogicService {
         }
     };
 
-    fireBulletsIfNecessary(clientData, quadtree, time){
+    fireBulletsIfNecessary(clientData, time){
         /**
         * Fire bullets if necessary
         */
@@ -201,6 +201,10 @@ class GameLogicService {
             if(objectInTankArea.type === 'BULLET'){
                 var bullet = objectInTankArea.object;
                 var playerIndex = util.findIndex(currentClientDatas,bullet.ownerId);
+
+                //update that player's score
+                currentClientDatas[playerIndex].score = currentClientDatas[playerIndex].score + 1;
+                
                 if(playerIndex > -1) {
                     var bulletIndex = util.findIndex(currentClientDatas[playerIndex].tank.bullets, bullet.id);
                     if(bulletIndex > -1){

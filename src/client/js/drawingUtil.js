@@ -66,7 +66,7 @@ class DrawingUtil {
 
         this.context2D.translate(translateX, translateY);
 
-        for(let tank of tanks) {
+        for(var tank of tanks) {
             // for(let location of tank.locationHistory) {
             //     //draw circle in the center to represent track
             //     this.context2D.beginPath();
@@ -80,6 +80,14 @@ class DrawingUtil {
 
             // Draw tank gun
             Sprite.render(tank.spriteTankGun, this.context2D, this.tankGunImage, tank.x, tank.y, 2, 2, tank.rotationCorrection);
+
+            //Draw screen names and kills
+            let startX = tank.x + global.drawing.playerInfo.tankXOffset;
+            let startY = tank.y + global.drawing.playerInfo.tankYOffset;
+
+            this.context2D.font = global.drawing.playerInfo.font;
+            this.context2D.fillStyle = global.drawing.playerInfo.fontColor;
+            this.context2D.fillText(`${tank.screenName} - ${tank.kills}`,startX, startY);
         }
 
         this.context2D.translate(-translateX, -translateY);
@@ -137,22 +145,6 @@ class DrawingUtil {
                 this.context2D.rect((startX + (i *(global.drawing.ammo.width + global.drawing.ammo.spacing))), startY, global.drawing.ammo.width, global.drawing.ammo.height);
             }
         }
-        this.context2D.translate(-translateX, -translateY);
-    }
-
-    playerInfoDraw(playerInfo){
-        var translateX = -(this.perspective.x - global.screenWidth/2);
-        var translateY = -(this.perspective.y - global.screenHeight/2);
-        this.context2D.translate(translateX, translateY);
-
-        let startX = this.perspective.x + global.drawing.playerInfo.tankXOffset;
-        let startY = this.perspective.y + global.drawing.playerInfo.tankYOffset;
-
-        this.context2D.font = global.drawing.playerInfo.font;
-        this.context2D.fillStyle = global.drawing.playerInfo.fontColor;
-        this.context2D.fillText(`${playerInfo.screenName} - ${playerInfo.score}`,startX, startY);
-
-
         this.context2D.translate(-translateX, -translateY);
     }
 

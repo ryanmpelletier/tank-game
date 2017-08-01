@@ -36,6 +36,8 @@ class QuadtreeManager {
                 id: tank.id,
                 x: tank.x,
                 y: tank.y,
+                screenName: tank.screenName,
+                kills: tank.kills,
                 hullDirection: tank.hullDirection,
                 gunAngle: tank.gunAngle,
                 rotationCorrection: tank.rotationCorrection,

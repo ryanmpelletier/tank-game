@@ -262,7 +262,7 @@ var clientUpdater = function() {
          * This is a poor choice, as an example, socket.io has every "right" to send the JSON object
          * over unordered, which could break our app!
          */
-        sockets[clientData.id].emit('game_objects_update', Object.assign({}, perspective, quadtreeManager.queryGameObjects(queryArea), ammo, playerInfo));
+        sockets[clientData.id].emit('game_objects_update', Object.assign({}, perspective, quadtreeManager.queryGameObjects(queryArea), ammo));
     });
 };
 

@@ -14,6 +14,7 @@ class Tank {
         this.id = id;
         this.x = xPosition;
         this.y = yPosition;
+        this.kills = 0;
         this.screenName = screenName;
         this._hullAngle = hullAngle;
         this._gunAngle = gunAngle;
@@ -29,6 +30,7 @@ class Tank {
         this.rotationCorrection = 0;
 
         this.locationHistory = [];
+
 
         /**
          * simple quadtree requires a basic format for object put onto the quadtree, I am trying to figure out the best

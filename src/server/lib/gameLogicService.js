@@ -203,8 +203,8 @@ class GameLogicService {
                 var playerIndex = util.findIndex(currentClientDatas,bullet.ownerId);
 
                 //update that player's score
-                currentClientDatas[playerIndex].score = currentClientDatas[playerIndex].score + 1;
-                
+                currentClientDatas[playerIndex].tank.kills = currentClientDatas[playerIndex].tank.kills + 1;
+
                 if(playerIndex > -1) {
                     var bulletIndex = util.findIndex(currentClientDatas[playerIndex].tank.bullets, bullet.id);
                     if(bulletIndex > -1){

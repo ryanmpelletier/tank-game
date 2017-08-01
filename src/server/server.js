@@ -245,13 +245,6 @@ var clientUpdater = function() {
             }
         };
 
-        var playerInfo = {
-            "playerInfo":{
-                screenName: clientData.player.screenName,
-                score: clientData.score
-            }
-        };
-
         /**
          * Note there is some dumbness going on here. The JSON spec says that
          * JSON objects have unordered properties. However, we are counting on these properties

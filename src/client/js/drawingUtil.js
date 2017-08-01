@@ -6,7 +6,7 @@ var Sprite = require('../../server/lib/sprite');
  * Here we will write all the drawing functions.
  */
 class DrawingUtil {
-    constructor(canvas, perspective = {x: global.gameWidth / 2, y: global.gameHeight / 2}) {
+    constructor(canvas, perspective = {x: global.gameWidth / 2, y: global.gameHeight / 2}, drawingOrder = global.drawing.drawingOrder) {
         this.canvas = canvas;
         this.context2D = canvas.getContext("2d");
 
@@ -16,6 +16,7 @@ class DrawingUtil {
          * where the client is 'looking' on the game board
          */
         this.perspective = perspective;
+        this.drawingOrder = drawingOrder;
 
         this.tankHullImage = new Image();
         this.tankHullImage.src = "/img/sprite-tank-hull-256.png";
@@ -65,7 +66,7 @@ class DrawingUtil {
 
         this.context2D.translate(translateX, translateY);
 
-        for(let tank of tanks) {
+        for(var tank of tanks) {
             // for(let location of tank.locationHistory) {
             //     //draw circle in the center to represent track
             //     this.context2D.beginPath();
@@ -79,6 +80,14 @@ class DrawingUtil {
 
             // Draw tank gun
             Sprite.render(tank.spriteTankGun, this.context2D, this.tankGunImage, tank.x, tank.y, 2, 2, tank.rotationCorrection);
+
+            //Draw screen names and kills
+            let startX = tank.x + global.drawing.playerInfo.tankXOffset;
+            let startY = tank.y + global.drawing.playerInfo.tankYOffset;
+
+            this.context2D.font = global.drawing.playerInfo.font;
+            this.context2D.fillStyle = global.drawing.playerInfo.fontColor;
+            this.context2D.fillText(`${tank.screenName} - ${tank.kills}`,startX, startY);
         }
 
         this.context2D.translate(-translateX, -translateY);
@@ -96,8 +105,9 @@ class DrawingUtil {
             //draw circle in the center to represent bullet
             this.context2D.beginPath();
             this.context2D.strokeStyle = 'green';
+            this.context2D.fillStyle = 'black';
             this.context2D.arc(bullets[i].x, bullets[i].y, 5, 0, 2*Math.PI);
-            this.context2D.stroke();  
+            this.context2D.fill();
         }
 
         this.context2D.translate(-translateX, -translateY);
@@ -143,12 +153,14 @@ class DrawingUtil {
      * to draw that object.
      */
     drawGameObjects(gameObjects) {
-        for (var key in gameObjects) {
+        for (var key of this.drawingOrder) {
             if (gameObjects.hasOwnProperty(key) && typeof this[`${key}Draw`] !== 'undefined') {
                 this[`${key}Draw`](gameObjects[key]);
             }
         }
     }
+
+
 
     setPerspective(x,y) {
         //shorthand ES6

@@ -15,6 +15,7 @@
     "bulletVelocity": 5,
     "defaultWallWidth": 25,
     "defaultWallHeight":25,
+    "scoreBoardLength": 2,
     "player":{
         "speedFactor": 3
     }

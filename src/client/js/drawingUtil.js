@@ -148,6 +148,20 @@ class DrawingUtil {
         this.context2D.translate(-translateX, -translateY);
     }
 
+    scoreboardDraw(scoreboardList){
+        //Draw screen names and kills
+        let startX = global.screenWidth - 100;
+        let startY = 100;
+
+        this.context2D.font = global.drawing.playerInfo.font;
+        this.context2D.fillStyle = global.drawing.playerInfo.fontColor;
+
+        for(var score of scoreboardList){
+            this.context2D.fillText(`${score.screenName} - ${score.kills}`,startX, startY);
+            startY += 25;
+        }
+    }
+
     /**
      * Given gameObjects, call the appropriate method on the drawingUtil
      * to draw that object.
@@ -159,8 +173,6 @@ class DrawingUtil {
             }
         }
     }
-
-
 
     setPerspective(x,y) {
         //shorthand ES6

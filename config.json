@@ -1,8 +1,8 @@
 {
     "port":8080,
     "maxLastHeartBeat":5000,
-    "gameWidth":750,
-    "gameHeight":750,
+    "gameWidth":1200,
+    "gameHeight":1200,
     "tankWidth":50,
     "tankHeight":50,
     "bulletHeight":1,

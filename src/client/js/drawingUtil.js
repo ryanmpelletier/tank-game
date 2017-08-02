@@ -149,16 +149,21 @@ class DrawingUtil {
     }
 
     scoreboardDraw(scoreboardList){
-        //Draw screen names and kills
-        let startX = global.screenWidth - 100;
-        let startY = 100;
 
-        this.context2D.font = global.drawing.playerInfo.font;
-        this.context2D.fillStyle = global.drawing.playerInfo.fontColor;
+        this.context2D.font = global.drawing.scoreboard.scoreboardHeadingFont;
+        this.context2D.fillText('Leaderboard', global.screenWidth - global.drawing.scoreboard.heading.x, global.drawing.scoreboard.heading.y);
+
+
+        //Draw screen names and kills
+        let startX = global.screenWidth - global.drawing.scoreboard.scoreboardXOffset;
+        let startY = global.drawing.scoreboard.scoreboardYOffset;
+
+        this.context2D.font = global.drawing.scoreboard.font;
+        this.context2D.fillStyle = global.drawing.scoreboard.fontColor;
 
         for(var score of scoreboardList){
             this.context2D.fillText(`${score.screenName} - ${score.kills}`,startX, startY);
-            startY += 25;
+            startY += global.drawing.scoreboard.scoreboardLineSpacing;
         }
     }
 

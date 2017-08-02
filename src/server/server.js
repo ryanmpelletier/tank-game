@@ -277,4 +277,4 @@ setInterval(gameObjectUpdater, 1000/60);
 setInterval(clientUpdater, 1000/40);
 
 //update scoreboard
-setInterval(updateScoreboard, 1500);
+setInterval(updateScoreboard, 500);

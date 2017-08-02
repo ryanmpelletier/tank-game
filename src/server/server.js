@@ -45,12 +45,9 @@ http.listen(config.port, function(){
 //import game related classes
 var ClientData = require('./lib/clientData');
 var util = require('./lib/util');
-var SimpleQuadtree = require('simple-quadtree');
 var QuadtreeManager = require('./lib/quadtreeManager');
 var GameLogicService = require('./lib/gameLogicService');
-var Bullet = require('./lib/bullet');
-var Direction = require('./lib/direction');
-var Wall = require('./lib/wall');
+var Heap = require('heap');
 
 /**
  * Quadtree will hold all of the objects in the game that will need to be kept track of
@@ -69,6 +66,7 @@ gameLogicService.initializeGame();
  */
 var currentClientDatas = [];
 var sockets = {};
+var scoreboardList = [];
 
 /**
  * 2. SOCKET CONNECTION CALLBACKS
@@ -255,8 +253,16 @@ var clientUpdater = function() {
          * This is a poor choice, as an example, socket.io has every "right" to send the JSON object
          * over unordered, which could break our app!
          */
-        sockets[clientData.id].emit('game_objects_update', Object.assign({}, perspective, quadtreeManager.queryGameObjects(queryArea), ammo));
+        sockets[clientData.id].emit('game_objects_update', Object.assign({}, perspective, quadtreeManager.queryGameObjects(queryArea), ammo, {scoreboard: scoreboardList}));
     });
+};
+
+var updateScoreboard = function(){
+    scoreboardList = Heap.nlargest(currentClientDatas.map(function(clientData){
+        return clientData.tank;
+    }), Math.min(currentClientDatas.length,config.scoreBoardLength), function(tank1, tank2){
+        return tank1.kills - tank2.kills;
+    }).map(function(tank){return {screenName: tank.screenName, kills: tank.kills}});
 };
 
 
@@ -269,3 +275,6 @@ setInterval(gameObjectUpdater, 1000/60);
 
 //push out data to clients
 setInterval(clientUpdater, 1000/40);
+
+//update scoreboard
+setInterval(updateScoreboard, 500);

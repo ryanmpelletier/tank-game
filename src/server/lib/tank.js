@@ -14,6 +14,7 @@ class Tank {
         this.id = id;
         this.x = xPosition;
         this.y = yPosition;
+        this.kills = 0;
         this.screenName = screenName;
         this._hullAngle = hullAngle;
         this._gunAngle = gunAngle;
@@ -30,6 +31,7 @@ class Tank {
 
         this.locationHistory = [];
 
+
         /**
          * simple quadtree requires a basic format for object put onto the quadtree, I am trying to figure out the best
          * way to mitigate this I don't like a libary enforcing my object to have a certain structure, this is something
@@ -38,8 +40,8 @@ class Tank {
          */
         this.forQuadtree = function(){
             return {
-                x: this.x,
-                y: this.y,
+                x: this.x - config.tankWidth/2,
+                y: this.y - config.tankHeight/2,
                 w: config.tankWidth,
                 h: config.tankHeight,
                 id: this.id,

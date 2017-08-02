@@ -28,7 +28,7 @@ class QuadtreeManager {
       var visibleTanks = [];
       var visibleBullets = [];
       var visibleWalls = [];
-      
+
       this.quadtree.get(queryObject, function(quadtreeObject) {
           if(quadtreeObject.type === 'TANK') {
             var tank = quadtreeObject.object;
@@ -36,6 +36,8 @@ class QuadtreeManager {
                 id: tank.id,
                 x: tank.x,
                 y: tank.y,
+                screenName: tank.screenName,
+                kills: tank.kills,
                 hullDirection: tank.hullDirection,
                 gunAngle: tank.gunAngle,
                 rotationCorrection: tank.rotationCorrection,
@@ -54,10 +56,6 @@ class QuadtreeManager {
       });
 
       return {
-        "perspective":{
-            x: queryObject.x + queryObject.w/2,
-            y: queryObject.y + queryObject.h/2
-        },
         "tanks":visibleTanks,
         "bullets":visibleBullets,
         "walls": visibleWalls

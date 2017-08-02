@@ -33,7 +33,6 @@ class ClientData {
 
     //should probably make a setter for x and y which also changes the tank's x and y
     this.tank = new Tank(this.id, this.position.x, this.position.y);
-
     /**
      * simple quadtree requires a basic format for object put onto the quadtree, I am trying to figure out the best way to mitigate this
      * I don't like a libary enforcing my object to have a certain structure, this is something I am not used to. In Java this would just be

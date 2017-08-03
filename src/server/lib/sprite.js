@@ -2,7 +2,6 @@
  * Created by dnd on 7/21/17.
  */
 class Sprite {
-
     constructor(width = 0, height = 0, ticksPerFrame = 0,
                 rowFrameCount = 1, colFrameCount = 1,
                 rowFrameIndex = 0, colFrameIndex = 0) {
@@ -53,10 +52,10 @@ class Sprite {
             sprite.colFrameIndex * singleFrameHeight,
             sprite.width / sprite.rowFrameCount,
             sprite.height / sprite.colFrameCount,
-            destX - singleFrameWidth / scaleFactorWidth / 2,
-            destY - singleFrameHeight / scaleFactorHeight / 2,
-            singleFrameWidth / scaleFactorWidth,
-            singleFrameHeight / scaleFactorHeight
+            destX - (singleFrameWidth / 2) * scaleFactorHeight,
+            destY - (singleFrameHeight / 2) * scaleFactorHeight,
+            singleFrameWidth * scaleFactorWidth,
+            singleFrameHeight * scaleFactorHeight
         );
 
         context.restore();

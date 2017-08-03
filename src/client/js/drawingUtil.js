@@ -76,10 +76,10 @@ class DrawingUtil {
             // }
 
             // Draw tank hull
-            Sprite.render(tank.spriteTankHull, this.context2D, this.tankHullImage, tank.x, tank.y, global.drawing.tank.hullHeightScaleFactor, global.drawing.tank.hullWidthScaleFactor);
+            Sprite.render(tank.spriteTankHull, this.context2D, this.tankHullImage, tank.x, tank.y);
 
             // Draw tank gun
-            Sprite.render(tank.spriteTankGun, this.context2D, this.tankGunImage, tank.x, tank.y, global.drawing.tank.gunHeightScaleFactor, global.drawing.tank.gunWidthScaleFactor, tank.rotationCorrection);
+            Sprite.render(tank.spriteTankGun, this.context2D, this.tankGunImage, tank.x, tank.y, tank.rotationCorrection);
 
             //Draw screen names and kills
             let startX = tank.x + global.drawing.playerInfo.tankXOffset;

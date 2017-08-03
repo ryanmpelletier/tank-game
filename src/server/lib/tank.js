@@ -6,11 +6,11 @@
  * Other values as calculated by the server will be stored outside of the "player" nested object.
  */
 var config = require('../../../config.json');
-var Sprite = require('./sprite');
+var TankSprite = require('./tankSprite');
 
 class Tank {
     constructor(id, xPosition, yPosition, screenName = 'test', hullAngle = 0,
-                gunAngle = 0, isMoving = false, ammo = config.tankAmmoCapacity) {
+                gunAngle = 0, ammo = config.tankAmmoCapacity) {
         this.id = id;
         this.x = xPosition;
         this.y = yPosition;
@@ -24,8 +24,8 @@ class Tank {
         //probably will have a bullet class
         this.bullets = [];
 
-        this.spriteTankHull = new Sprite(2048, 768, 4, 8, 3);
-        this.spriteTankGun = new Sprite(2048, 256, 4, 8);
+        this.spriteTankHull = new TankSprite(1024, 768, 4, 4, 3);
+        this.spriteTankGun = new TankSprite(2048, 256, 4, 8);
 
         this.rotationCorrection = 0;
 

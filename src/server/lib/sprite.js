@@ -27,7 +27,7 @@ class Sprite {
         }
     };
 
-    static render(sprite, context, image, destX, destY, scaleFactorWidth = 1, scaleFactorHeight = 1, radians = 0) {
+    static render(sprite, context, image, destX, destY, radians = 0) {
         // Save current context to prevent rotating everything drawn after this occurs
         context.save();
 
@@ -52,10 +52,10 @@ class Sprite {
             sprite.colFrameIndex * singleFrameHeight,
             sprite.width / sprite.rowFrameCount,
             sprite.height / sprite.colFrameCount,
-            destX - (singleFrameWidth / 2) * scaleFactorHeight,
-            destY - (singleFrameHeight / 2) * scaleFactorHeight,
-            singleFrameWidth * scaleFactorWidth,
-            singleFrameHeight * scaleFactorHeight
+            destX - (singleFrameWidth / 2) * (typeof sprite.scaleFactorHeight == 'undefined' ? 1 : sprite.scaleFactorHeight),
+            destY - (singleFrameHeight / 2) * (typeof sprite.scaleFactorWidth == 'undefined' ? 1 : sprite.scaleFactorWidth),
+            singleFrameWidth * (typeof sprite.scaleFactorWidth == 'undefined' ? 1 : sprite.scaleFactorWidth),
+            singleFrameHeight * (typeof sprite.scaleFactorHeight == 'undefined' ? 1 : sprite.scaleFactorHeight)
         );
 
         context.restore();

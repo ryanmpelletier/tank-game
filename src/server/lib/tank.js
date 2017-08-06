@@ -38,7 +38,7 @@ class Tank {
          * I am not used to. In Java this would just be an interface I would implement, and I wouldn't have to change
          * the internal representation of my object, this is my compromise
          */
-        this.forQuadtree = function(){
+        this.forQuadtree = function() {
             return {
                 x: this.x - config.tankWidth/2,
                 y: this.y - config.tankHeight/2,

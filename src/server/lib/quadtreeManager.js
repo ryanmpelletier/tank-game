@@ -21,46 +21,52 @@ class QuadtreeManager {
     */
     queryGameObjects(queryObject) {
 
-      /**
-      * visible players are players that are within the screen of the current player
-      * use quadtree for efficiency
-      */
-      var visibleTanks = [];
-      var visibleBullets = [];
-      var visibleWalls = [];
+        /**
+         * Following arrays hold objects that are visible
+         * (i.e. objects that are within the screen of the current player)
+         * NOTE: QuadTree is used here for efficiency
+         */
+        var visibleTanks = [];
+        var visibleBullets = [];
+        var visibleWalls = [];
+        var visibleTracks = [];
 
-      this.quadtree.get(queryObject, function(quadtreeObject) {
-          if(quadtreeObject.type === 'TANK') {
-            var tank = quadtreeObject.object;
-            visibleTanks.push({
-                id: tank.id,
-                x: tank.x,
-                y: tank.y,
-                screenName: tank.screenName,
-                kills: tank.kills,
-                hullDirection: tank.hullDirection,
-                gunAngle: tank.gunAngle,
-                rotationCorrection: tank.rotationCorrection,
-                spriteTankHull: tank.spriteTankHull,
-                spriteTankGun: tank.spriteTankGun,
-                locationHistory: tank.locationHistory
-            });
-          }
-          else if(quadtreeObject.type === 'BULLET') {
-            visibleBullets.push(quadtreeObject.object);
-          }
-          else if(quadtreeObject.type === 'WALL') {
-            visibleWalls.push(quadtreeObject.object);
-          }
-          return true;
-      });
+        this.quadtree.get(queryObject, function(quadtreeObject) {
+            if(quadtreeObject.type === 'TANK') {
+                var tank = quadtreeObject.object;
+                visibleTanks.push({
+                    id: tank.id,
+                    x: tank.x,
+                    y: tank.y,
+                    screenName: tank.screenName,
+                    kills: tank.kills,
+                    hullDirection: tank.hullDirection,
+                    gunAngle: tank.gunAngle,
+                    rotationCorrection: tank.rotationCorrection,
+                    spriteTankHull: tank.spriteTankHull,
+                    spriteTankGun: tank.spriteTankGun,
+                    locationHistory: tank.locationHistory
+                });
+            }
+            else if(quadtreeObject.type === 'BULLET') {
+                visibleBullets.push(quadtreeObject.object);
+            }
+            else if(quadtreeObject.type === 'WALL') {
+                visibleWalls.push(quadtreeObject.object);
+            }
+            else if(quadtreeObject.type === 'TRACK') {
+                visibleTracks.push(quadtreeObject.object);
+            }
+            return true;
+        });
 
-      return {
-        "tanks":visibleTanks,
-        "bullets":visibleBullets,
-        "walls": visibleWalls
-      };
-  }
+        return {
+            "tanks": visibleTanks,
+            "bullets": visibleBullets,
+            "walls": visibleWalls,
+            "tracks": visibleTracks
+        };
+    }
 
     getQuadtree() {
         return this.quadtree;

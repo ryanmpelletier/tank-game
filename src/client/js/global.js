@@ -8,16 +8,16 @@ module.exports = {
     'drawing':{
         'drawingOrder': ["perspective", "tanks", "bullets", "walls", "ammo", "playerInfo", "scoreboard"],
         'ammo':{
-            'tankXOffset': 75,
-            'tankYOffset':60,
-            'width':7,
-            'height':12,
-            'spacing': 5,
+            'tankXOffset': 45,
+            'tankYOffset':40,
+            'width':5,
+            'height':10,
+            'spacing': 4,
             'fill': 'black'
         },
         'playerInfo':{
-            'tankXOffset': -75,
-            'tankYOffset': -68,
+            'tankXOffset': -55,
+            'tankYOffset': -48,
             'font':'18px Arial',
             'fontColor': 'black'
         },
@@ -29,6 +29,12 @@ module.exports = {
             'scoreboardLineSpacing':25,
             'font': '15px Arial',
             'fontColor':'black'
+        },
+        'tank':{
+            'hullHeightScaleFactor': .33,
+            'hullWidthScaleFactor': .33,
+            'gunHeightScaleFactor': .33,
+            'gunWidthScaleFactor': .33
         }
     }
 };

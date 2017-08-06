@@ -2,7 +2,6 @@
  * Created by dnd on 7/21/17.
  */
 class Sprite {
-
     constructor(width = 0, height = 0, ticksPerFrame = 0,
                 rowFrameCount = 1, colFrameCount = 1,
                 rowFrameIndex = 0, colFrameIndex = 0) {
@@ -28,7 +27,7 @@ class Sprite {
         }
     };
 
-    static render(sprite, context, image, destX, destY, scaleFactorWidth = 1, scaleFactorHeight = 1, radians = 0) {
+    static render(sprite, context, image, destX, destY, radians = 0) {
         // Save current context to prevent rotating everything drawn after this occurs
         context.save();
 
@@ -53,10 +52,10 @@ class Sprite {
             sprite.colFrameIndex * singleFrameHeight,
             sprite.width / sprite.rowFrameCount,
             sprite.height / sprite.colFrameCount,
-            destX - singleFrameWidth / scaleFactorWidth / 2,
-            destY - singleFrameHeight / scaleFactorHeight / 2,
-            singleFrameWidth / scaleFactorWidth,
-            singleFrameHeight / scaleFactorHeight
+            destX - (singleFrameWidth / 2) * (typeof sprite.scaleFactorHeight == 'undefined' ? 1 : sprite.scaleFactorHeight),
+            destY - (singleFrameHeight / 2) * (typeof sprite.scaleFactorWidth == 'undefined' ? 1 : sprite.scaleFactorWidth),
+            singleFrameWidth * (typeof sprite.scaleFactorWidth == 'undefined' ? 1 : sprite.scaleFactorWidth),
+            singleFrameHeight * (typeof sprite.scaleFactorHeight == 'undefined' ? 1 : sprite.scaleFactorHeight)
         );
 
         context.restore();

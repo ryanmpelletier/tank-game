@@ -56,7 +56,7 @@ var quadtreeManager = new QuadtreeManager();
 var quadtree = quadtreeManager.getQuadtree();
 
 
-var gameLogicService = new GameLogicService(quadtree);
+var gameLogicService = new GameLogicService(quadtreeManager);
 
 gameLogicService.initializeGame();
 

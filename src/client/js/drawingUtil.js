@@ -6,7 +6,8 @@ var Sprite = require('../../server/lib/sprite');
  * Here we will write all the drawing functions.
  */
 class DrawingUtil {
-    constructor(canvas, perspective = {x: global.gameWidth / 2, y: global.gameHeight / 2}, drawingOrder = global.drawing.drawingOrder) {
+    constructor(canvas, perspective = {x: global.gameWidth / 2, y: global.gameHeight / 2},
+                drawingOrder = global.drawing.drawingOrder) {
         this.canvas = canvas;
         this.context2D = canvas.getContext("2d");
 
@@ -67,14 +68,6 @@ class DrawingUtil {
         this.context2D.translate(translateX, translateY);
 
         for(var tank of tanks) {
-            // for(let location of tank.locationHistory) {
-            //     //draw circle in the center to represent track
-            //     this.context2D.beginPath();
-            //     this.context2D.strokeStyle = 'red';
-            //     this.context2D.arc(location.x, location.y, 5, 0, 2 * Math.PI);
-            //     this.context2D.stroke();
-            // }
-
             // Draw tank hull
             Sprite.render(tank.spriteTankHull, this.context2D, this.tankHullImage, tank.x, tank.y);
 
@@ -96,7 +89,7 @@ class DrawingUtil {
     /**
      * Draw the bullets
      */
-    bulletsDraw(bullets){
+    bulletsDraw(bullets) {
         var translateX = -(this.perspective.x - global.screenWidth/2);
         var translateY = -(this.perspective.y - global.screenHeight/2);
         this.context2D.translate(translateX, translateY);
@@ -114,7 +107,12 @@ class DrawingUtil {
 
     }
 
-    wallsDraw(walls){
+    tracksDraw(tracks) {
+        for(var track of tracks) {
+        }
+    }
+
+    wallsDraw(walls) {
         var translateX = -(this.perspective.x - global.screenWidth/2);
         var translateY = -(this.perspective.y - global.screenHeight/2);
         this.context2D.translate(translateX, translateY);
@@ -128,7 +126,7 @@ class DrawingUtil {
 
     }
 
-    ammoDraw(ammo){
+    ammoDraw(ammo) {
         var translateX = -(this.perspective.x - global.screenWidth/2);
         var translateY = -(this.perspective.y - global.screenHeight/2);
         this.context2D.translate(translateX, translateY);
@@ -148,7 +146,7 @@ class DrawingUtil {
         this.context2D.translate(-translateX, -translateY);
     }
 
-    scoreboardDraw(scoreboardList){
+    scoreboardDraw(scoreboardList) {
 
         this.context2D.font = global.drawing.scoreboard.scoreboardHeadingFont;
         this.context2D.fillText('Leaderboard', global.screenWidth - global.drawing.scoreboard.heading.x, global.drawing.scoreboard.heading.y);
@@ -179,9 +177,9 @@ class DrawingUtil {
         }
     }
 
-    setPerspective(x,y) {
+    setPerspective(x, y) {
         //shorthand ES6
-        this.perspective = {x,y};
+        this.perspective = {x, y};
     }
 }
 

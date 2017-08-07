@@ -29,9 +29,6 @@ class Tank {
 
         this.rotationCorrection = 0;
 
-        this.locationHistory = [];
-
-
         /**
          * simple quadtree requires a basic format for object put onto the quadtree, I am trying to figure out the best
          * way to mitigate this I don't like a libary enforcing my object to have a certain structure, this is something
@@ -81,13 +78,6 @@ class Tank {
 
     get gunAngle() {
         return this._gunAngle;
-    }
-
-    addLocation(location) {
-        if(this.locationHistory.length == 100) {
-            this.locationHistory.shift();
-        }
-        this.locationHistory.push(location);
     }
 }
 

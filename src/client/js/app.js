@@ -34,7 +34,7 @@ var drawingUtil;
 
 window.addEventListener('resize', resize);
 
-window.onload = function(){
+window.onload = function() {
     socket = socketIoClient();
 
     //set up socket to respond to server socket events
@@ -46,7 +46,7 @@ window.onload = function(){
     canvasGameBoard = new Canvas();
     drawingUtil = new DrawingUtil(canvasGameBoard.getCanvas());
 
-    setTimeout(function(){
+    setTimeout(function() {
         startGame();
     }, 1000);
 };
@@ -55,11 +55,11 @@ window.onload = function(){
  * Basically this funciton lets us set up some global properties before the animation loop begins,
  * and will likely also be where we do some last minute (millisecond) checking to make sure we are good to go
  */
-function startGame(){
+function startGame() {
     animationLoop();
 }
 
-function animationLoop(){
+function animationLoop() {
     window.requestAnimationFrame(animationLoop);
     updateClientView();
 }
@@ -68,16 +68,16 @@ function animationLoop(){
  * Here is where all the game objects are drawn,
  * it is important to start by clearing the canvas here first.
  */
-function updateClientView(){
+function updateClientView() {
     //clear canvas
     canvasGameBoard.clear();
 
     /**
      * Trying to enforce the server sending a perspective object over
      */
-    if(typeof clientGameObjects.perspective != 'undefined'){
+    if(typeof clientGameObjects.perspective != 'undefined') {
         drawingUtil.setPerspective(clientGameObjects.perspective.x, clientGameObjects.perspective.y);
-    }else{
+    }else {
         throw new Error("unable to find perspective, make sure server is sending perspective object with x and y");
     }
     drawingUtil.drawGameObjects(clientGameObjects);
@@ -89,7 +89,7 @@ function updateClientView(){
  * So basically we give the socket all the callbacks for the different events it might receive.
  * 
  */
-function setupSocket(socket){
+function setupSocket(socket) {
     /**
      * 
      * Server will send a welcome event with data the player needs to initialize itself
@@ -97,7 +97,7 @@ function setupSocket(socket){
      * Client will respond when it is ready to play the game
      * 
      */
-    socket.on('welcome',function(clientInitData, gameConfig){
+    socket.on('welcome',function(clientInitData, gameConfig) {
         /**
          * Here the client gets a chance to add any data that the server will need to
          * know in order to correctly computer game logic, such as the client's viewbox
@@ -109,19 +109,18 @@ function setupSocket(socket){
         global.gameWidth = gameConfig.gameWidth;
         global.gameHeight = gameConfig.gameHeight;
 
-
         socket.emit('welcome_received', clientInitData);
     });
 
     /**
      * Server kicked me, closing my socket
      */
-    socket.on('kick',function(data){
+    socket.on('kick',function(data) {
         socket.close();
     });
 
     //server needs to draw what gets put into gameObjects
-    socket.on('game_objects_update', function(gameObjects){
+    socket.on('game_objects_update', function(gameObjects) {
         clientGameObjects = gameObjects;
         socket.emit('client_checkin', canvasGameBoard.getUserInput());
     });
@@ -130,7 +129,7 @@ function setupSocket(socket){
      * Server wants to calculate my ping, 
      * emit back to server right away.
      */
-    socket.on('pingcheck',function(){
+    socket.on('pingcheck',function() {
         socket.emit('pongcheck');
     });
 
@@ -140,7 +139,7 @@ function setupSocket(socket){
  * Store global screen dimensions, then send them to the server.
  * This function is bound to the browser's 'resize' event.
  */
-function resize(){
+function resize() {
     global.screenWidth = window.innerWidth;
     global.screenHeight = window.innerHeight;
     canvasGameBoard.setHeight(global.screenHeight);

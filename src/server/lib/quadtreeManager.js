@@ -44,8 +44,7 @@ class QuadtreeManager {
                     gunAngle: tank.gunAngle,
                     rotationCorrection: tank.rotationCorrection,
                     spriteTankHull: tank.spriteTankHull,
-                    spriteTankGun: tank.spriteTankGun,
-                    locationHistory: tank.locationHistory
+                    spriteTankGun: tank.spriteTankGun
                 });
             }
             else if(quadtreeObject.type === 'BULLET') {
@@ -66,6 +65,39 @@ class QuadtreeManager {
             "walls": visibleWalls,
             "tracks": visibleTracks
         };
+    }
+
+    /**
+     * Queries the entire game board and returns all game objects of a specific type.
+     *
+     * @param {String} gameObjectType - The type of game object to return a list of all objects of this type.
+     * @returns {Array} The array containing all game objects of the desired type.
+     */
+    queryGameObjectsForType(gameObjectType) {
+        // Create query area of entire game board to get all objects
+        var queryArea = {
+            x: 0,
+            y: 0,
+            w: config.gameWidth,
+            h: config.gameHeight
+        };
+
+        // Get ALL game objects
+        var gameObjects = this.queryGameObjects(queryArea);
+
+        // Return only game objects of desired type
+        switch(gameObjectType) {
+            case 'TANK':
+                return gameObjects.tanks;
+            case 'BULLET':
+                return gameObjects.bullets;
+            case 'WALL':
+                return gameObjects.walls;
+            case 'TRACK':
+                return gameObjects.tracks;
+            default:
+                return [];
+        }
     }
 
     getQuadtree() {

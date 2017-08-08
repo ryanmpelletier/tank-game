@@ -109,6 +109,11 @@ class DrawingUtil {
 
     tracksDraw(tracks) {
         for(var track of tracks) {
+            this.context2D.beginPath();
+            this.context2D.strokeStyle = 'green';
+            this.context2D.fillStyle = 'black';
+            this.context2D.arc(track.x, track.y, 5, 0, 2 * Math.PI);
+            this.context2D.fill();
         }
     }
 

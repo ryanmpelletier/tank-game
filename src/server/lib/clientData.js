@@ -5,15 +5,12 @@
  * the "player" nested object. As of right now this will include user input and the screen height and width of the client.
  * Other values as calculated by the server will be stored outside of the "player" nested object.
  */
-var config = require('../../../config.json');
 var Tank = require('./tank');
-var Direction = require('./direction');
 
 class ClientData {
   constructor(id, startXPosition, startYPosition) {
     //stuff the client gives us
     this.player = {
-      screenName: undefined,
       screenWidth: undefined,
       screenHeight: undefined,
       userInput:{
@@ -28,6 +25,8 @@ class ClientData {
       x: startXPosition,
       y: startYPosition
     };
+
+    this._screenName = undefined;
     
     this.lastHeartbeat = new Date().getTime();
 
@@ -43,7 +42,7 @@ class ClientData {
     };
   }
 
-  set position (position){
+  set position(position){
     //set tank position also
     this.tank.x = position.x;
     this.tank.y = position.y;
@@ -51,8 +50,17 @@ class ClientData {
     this._position = position;
   }
 
-  get position (){
+  get position(){
     return this._position;
+  }
+
+  set screenName(screenName){
+    this._screenName = screenName;
+    this.tank.screenName = screenName;
+  }
+
+  get screenName(){
+    return this._screenName;
   }
 
 }

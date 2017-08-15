@@ -36,12 +36,17 @@ window.addEventListener('resize', resize);
 
 window.onload = function(){
     socket = socketIoClient();
-
     //set up socket to respond to server socket events
     setupSocket(socket);
+    document.getElementById("goButton").onclick = beginGame;
+};
 
+function beginGame(){
     //socket says it is ready to start playing.
-    socket.emit('init');
+    socket.emit('init', document.getElementById("screenNameInput").value);
+
+    var screenNameForm = document.getElementById("screenNameForm");
+    screenNameForm.parentNode.removeChild(screenNameForm);
 
     canvasGameBoard = new Canvas();
     drawingUtil = new DrawingUtil(canvasGameBoard.getCanvas());
@@ -49,8 +54,7 @@ window.onload = function(){
     setTimeout(function(){
         startGame();
     }, 1000);
-};
-
+}
 /**
  * Basically this funciton lets us set up some global properties before the animation loop begins,
  * and will likely also be where we do some last minute (millisecond) checking to make sure we are good to go
@@ -102,13 +106,11 @@ function setupSocket(socket){
          * Here the client gets a chance to add any data that the server will need to
          * know in order to correctly computer game logic, such as the client's viewbox
          */
-        clientInitData.player.screenName = `testScreenName`;
         clientInitData.player.screenHeight = global.screenHeight;
         clientInitData.player.screenWidth = global.screenWidth;
 
         global.gameWidth = gameConfig.gameWidth;
         global.gameHeight = gameConfig.gameHeight;
-
 
         socket.emit('welcome_received', clientInitData);
     });

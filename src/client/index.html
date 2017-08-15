@@ -1,12 +1,26 @@
   <html>
    <head>
      <title>Node Game Framework</title>
-     <link rel="stylesheet" href="css/style.css"/>
+       <link rel="stylesheet" href="css/style.css"/>
+       <link rel="stylesheet" href="css/bootstrap.min.css"/>
+       <link rel="stylesheet" href="css/bootstrap-theme.min.css"/>
      <script src="js/app.js"></script>
    </head>
    <body>
-      <!-- tabindex attribute is necessary for canvas to receive key input -->
-      <canvas id="game_canvas" tabindex="1"></canvas>
-      <img id='background_image' src="img/background-v2.png" style="display: none;"/>
+        <!-- tabindex attribute is necessary for canvas to receive key input -->
+        <canvas id="game_canvas" tabindex="1"></canvas>
+        <img id='background_image' src="img/background-v2.png" style="display: none;"/>
+
+        <div id="screenNameForm" class="screen-name-form">
+            <form>
+                <div class="form-group">
+                    <h3>Tank Game</h3>
+                    <div class="input-group">
+                        <input id="screenNameInput" type="text" class="form-control input-lg" placeholder="Enter name...">
+                        <span class="input-group-btn"> <button id="goButton" class="btn btn-lg btn-default" type="button">Go!</button> </span>
+                    </div>
+                </div>
+            </form>
+        </div>
    </body>
   </html>

@@ -98,7 +98,8 @@ socketIo.on('connection', function(socket) {
     * Client broadcasts this init event after it has set up its socket to respond to
     * events from the server socket.
     */
-    socket.on('init',function() {
+    socket.on('init',function(screenName) {
+        currentClientData.screenName = screenName;
         socket.emit('welcome', currentClientData, {gameWidth: config.gameWidth, gameHeight: config.gameHeight});
     });
 

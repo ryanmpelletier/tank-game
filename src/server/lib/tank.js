@@ -31,6 +31,8 @@ class Tank {
 
         this.locationHistory = [];
 
+        this.isAlive = true;
+
 
         /**
          * simple quadtree requires a basic format for object put onto the quadtree, I am trying to figure out the best

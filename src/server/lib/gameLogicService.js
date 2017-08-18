@@ -2,17 +2,19 @@
  *  Class for writing game logic functions and steps in a more readable way.
  * Purpose is to remove game logic from server.js, which I would like to basically just have framework code.
  */
+
 var config = require('../../../config.json');
 var Wall = require('./wall');
 var Bullet = require('./bullet');
+var Track = require('./track');
 var util = require('./util');
 var winston = require('winston');
 winston.level = 'debug';
 
-
 class GameLogicService {
-    constructor(quadtree) {
-        this.quadtree = quadtree;
+    constructor(quadtreeManager) {
+        this.quadtreeManager = quadtreeManager;
+        this.quadtree = quadtreeManager.getQuadtree();
     }
 
     initializeGame() {
@@ -36,15 +38,16 @@ class GameLogicService {
         var currentTime = new Date().getTime();
 
         this.kickPlayerIfIdle(clientData, socket, currentTime);
-        this.updatePlayerPosition(clientData, this.quadtree);
+        this.updatePlayerPosition(clientData);
         this.increaseAmmoIfNecessary(clientData,currentTime);
-        this.updatePositionsOfBullets(clientData, this.quadtree);
+        this.updatePositionsOfBullets(clientData);
         this.fireBulletsIfNecessary(clientData, currentTime);
-        this.removeBulletsThatAreOutOfBounds(clientData, currentClientDatas, this.quadtree);
-        this.handleCollisionsOnTank(clientData, socket, currentClientDatas, this.quadtree);
+        this.removeBulletsThatAreOutOfBounds(clientData, currentClientDatas);
+        this.handleCollisionsOnTank(clientData, currentClientDatas);
+        this.updateTracks(this.quadtreeManager, this.quadtree);
     }
 
-    kickPlayerIfIdle(clientData, socket, time){
+    kickPlayerIfIdle(clientData, socket, time) {
         /**
          * Kick player if idle
          */
@@ -55,7 +58,7 @@ class GameLogicService {
         }
     };
 
-    updatePlayerPosition(clientData, quadtree){
+    updatePlayerPosition(clientData) {
         /**
          * Set tank gun angle
          */
@@ -106,6 +109,8 @@ class GameLogicService {
 
             // Update tank's frame since tank is moving
             clientData.tank.spriteTankHull.update();
+
+            this.addTracks(clientData, newPosition, angleInRadians);
         }
 
         clientData.position = newPosition;
@@ -113,10 +118,86 @@ class GameLogicService {
         /**
         * Update the item on the quadtree
         */
-        quadtree.update(oldQuadreeInfo, 'id', clientData.forQuadtree());
+        this.quadtree.remove(oldQuadreeInfo, 'id');
+        this.quadtree.put(clientData.forQuadtree());
     };
 
-    increaseAmmoIfNecessary(clientData, time){
+    addTracks(clientData, newPosition, angleInRadians) {
+        // Check if delay been track creation has finished
+        if(!Track.hasFinishedDelay()) {
+            // Delay has not been reached so don't create more tracks
+            return;
+        }
+
+        let trackOneDestX = 0;
+        let trackOneDestY = 0;
+        let trackTwoDestX = 0;
+        let trackTwoDestY = 0;
+
+        let scaledHalfSingleFrame = clientData.tank.spriteTankHull.singleFrameWidth / 2 * clientData.tank.spriteTankHull.scaleFactorWidth;
+        let straightCorrection = 0.529411764705882 * scaledHalfSingleFrame;
+        let diagonalCorrection = 0.752941176470588 * scaledHalfSingleFrame;
+
+        switch(angleInRadians) {
+            case 0: // East
+                trackOneDestX = newPosition.x + straightCorrection;
+                trackOneDestY = newPosition.y - straightCorrection;
+                trackTwoDestX = newPosition.x + straightCorrection;
+                trackTwoDestY = newPosition.y + straightCorrection;
+                break;
+            case Math.PI / 4: // South East
+                trackOneDestX = newPosition.x;
+                trackOneDestY = newPosition.y + diagonalCorrection;
+                trackTwoDestX = newPosition.x + diagonalCorrection;
+                trackTwoDestY = newPosition.y;
+                break;
+            case Math.PI / 2: // South
+                trackOneDestX = newPosition.x - straightCorrection;
+                trackOneDestY = newPosition.y + straightCorrection;
+                trackTwoDestX = newPosition.x + straightCorrection;
+                trackTwoDestY = newPosition.y + straightCorrection;
+                break;
+            case 3 * Math.PI / 4: // South West
+                trackOneDestX = newPosition.x - diagonalCorrection;
+                trackOneDestY = newPosition.y;
+                trackTwoDestX = newPosition.x;
+                trackTwoDestY = newPosition.y + diagonalCorrection;
+                break;
+            case Math.PI: // West
+                trackOneDestX = newPosition.x - straightCorrection;
+                trackOneDestY = newPosition.y - straightCorrection;
+                trackTwoDestX = newPosition.x - straightCorrection;
+                trackTwoDestY = newPosition.y + straightCorrection;
+                break;
+            case -(Math.PI / 4): // North East
+                trackOneDestX = newPosition.x;
+                trackOneDestY = newPosition.y - diagonalCorrection;
+                trackTwoDestX = newPosition.x + diagonalCorrection;
+                trackTwoDestY = newPosition.y;
+                break;
+            case -(Math.PI / 2): // North
+                trackOneDestX = newPosition.x - straightCorrection;
+                trackOneDestY = newPosition.y - straightCorrection;
+                trackTwoDestX = newPosition.x + straightCorrection;
+                trackTwoDestY = newPosition.y - straightCorrection;
+                break;
+            case -(3 * Math.PI / 4): // North West
+                trackOneDestX = newPosition.x - diagonalCorrection;
+                trackOneDestY = newPosition.y;
+                trackTwoDestX = newPosition.x;
+                trackTwoDestY = newPosition.y - diagonalCorrection;
+                break;
+        }
+
+        let trackOne = new Track(trackOneDestX, trackOneDestY, angleInRadians);
+        let trackTwo = new Track(trackTwoDestX , trackTwoDestY, angleInRadians);
+
+        // Add new tank tracks since tank has changed location
+        this.quadtree.put(trackOne.forQuadtree());
+        this.quadtree.put(trackTwo.forQuadtree());
+    };
+
+    increaseAmmoIfNecessary(clientData, time) {
         /**
          * Increase ammo if necessary
          */
@@ -126,7 +207,7 @@ class GameLogicService {
         }
     };
 
-    updatePositionsOfBullets(clientData, quadtree){
+    updatePositionsOfBullets(clientData) {
         /**
         * Update positions of all the bullets
         */
@@ -136,13 +217,13 @@ class GameLogicService {
             bullet.x = bullet.x + bullet.velocityX;
             bullet.y = bullet.y - bullet.velocityY;
             let forQuadtree = bullet.forQuadtree();
-            if(!quadtree.update(oldTreeInfo, 'id', forQuadtree)){
-                throw new Error(`Unable to update bullet ${bullet.id} in quadtree, this should not happen.`);
-            }
+
+            this.quadtree.remove(oldTreeInfo, 'id');
+            this.quadtree.put(forQuadtree);
         }
     };
 
-    fireBulletsIfNecessary(clientData, time){
+    fireBulletsIfNecessary(clientData, time) {
         /**
         * Fire bullets if necessary
         */
@@ -170,37 +251,37 @@ class GameLogicService {
         }
     };
     
-    removeBulletsThatAreOutOfBounds(clientData, currentClientDatas, quadtree){
+    removeBulletsThatAreOutOfBounds(clientData, currentClientDatas) {
         /**
         * Remove any bullets that are now out of bounds.
         */
         for(var bullet of clientData.tank.bullets) {
             if(bullet.x > config.gameWidth - config.wallWidth || bullet.x < config.wallWidth || bullet.y > config.gameHeight - config.wallWidth || bullet.y < config.wallWidth){
-                var playerIndex = util.findIndex(currentClientDatas,bullet.ownerId);
+                var playerIndex = util.findIndex(currentClientDatas, bullet.ownerId);
                 if(playerIndex > -1) {
                     var bulletIndex = util.findIndex(currentClientDatas[playerIndex].tank.bullets, bullet.id);
                     if(bulletIndex > -1){
                         currentClientDatas[playerIndex].tank.bullets.splice(bulletIndex,1);
-                        quadtree.remove(bullet.forQuadtree(), 'id');
-                    }else{
+                        this.quadtree.remove(bullet.forQuadtree(), 'id');
+                    } else {
                         throw new Error(`Bullet index is ${bulletIndex}, how you gonna remove that??`);
                     }
-                }else{
+                } else {
                     throw new Error(`Player index is ${playerIndex}, how you gonna remove that??`);
                 }
             }
         }
     };
 
-    handleCollisionsOnTank(clientData, socket, currentClientDatas, quadtree){
+    handleCollisionsOnTank(clientData, currentClientDatas) {
         /**
          * Check any collisions on tank
          */
-        var objectsInTankArea = quadtree.get(clientData.tank.forQuadtree());
+        var objectsInTankArea = this.quadtree.get(clientData.tank.forQuadtree());
         for(var objectInTankArea of objectsInTankArea){
             if(objectInTankArea.type === 'BULLET'){
                 var bullet = objectInTankArea.object;
-                var playerIndex = util.findIndex(currentClientDatas,bullet.ownerId);
+                var playerIndex = util.findIndex(currentClientDatas, bullet.ownerId);
 
                 //update that player's score
                 currentClientDatas[playerIndex].tank.kills = currentClientDatas[playerIndex].tank.kills + 1;
@@ -210,8 +291,12 @@ class GameLogicService {
                     var bulletIndex = util.findIndex(currentClientDatas[playerIndex].tank.bullets, bullet.id);
                     if(bulletIndex > -1){
                         currentClientDatas[playerIndex].tank.bullets.splice(bulletIndex,1);
-                        quadtree.remove(bullet.forQuadtree(), 'id');
+                        this.quadtree.remove(bullet.forQuadtree(), 'id');
+                    } else {
+                        throw new Error(`Bullet index is ${bulletIndex}, how you gonna remove that??`);
                     }
+                } else {
+                    throw new Error(`Player index is ${playerIndex}, how you gonna remove that??`);
                 }
 
                 //destroy tank
@@ -222,6 +307,24 @@ class GameLogicService {
             }
         }
     }
+
+    updateTracks(quadtreeManager, quadtree) {
+        var visibleTracks = quadtreeManager.queryGameObjectsForType('TRACK');
+
+        visibleTracks.forEach(function(track) {
+            // Check if track should disappear
+            if(Track.hasExpired(track)) {
+                // Remove track by uniquely identifiable attribute
+                quadtree.remove(track.forQuadtree(), 'id');
+            }
+            else {
+                // Update track (remove existing and put track with updated tickCount)
+                // tickCount was updated in call to hasExpired
+                quadtree.remove(track.forQuadtree(), 'id');
+                quadtree.put(track.forQuadtree());
+            }
+        });
+    };
 
 }
 

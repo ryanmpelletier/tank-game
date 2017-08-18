@@ -8,43 +8,46 @@ var DrawingUtil = require('./drawingUtil');
 var socketIoClient = require('socket.io-client');
 var socket;
 
-/**
- * Here is the data for the objects which need to be drawn.
- * The DrawingUtil class will abstract away the drawing process,
- * so we can keep our drawing code out of this file.
- * 
- * The server will send an object which nested objects for each type of object to be drawn.
- * An example follows.
- * 
- * var clientGameObjects = {
-    "player":{},
-    "tanks": {},
-    "bullets":{},
-    "barriers":{},
-    "time":{},
-    };
- * 
- * 
- */
 var clientGameObjects = {};
 
 var canvasGameBoard;
 var drawingUtil;
 
+var requestedFrame;
+
 
 window.addEventListener('resize', resize);
 
 window.onload = function(){
-    socket = socketIoClient();
-    //set up socket to respond to server socket events
-    setupSocket(socket);
-    document.getElementById("goButton").onclick = beginGame;
+    setupStartScreen();
 };
+// I would like this to dynamically add the page with the form, and basically initialize a clean slate and new socket connection.
+// basically if this method is called the user starts fresh
+function setupStartScreen(){
+
+    //add the start screen menu to the page
+    //set up socket
+    var xhr= new XMLHttpRequest();
+    xhr.open('GET', 'html/start_screen.html', true);
+    xhr.onreadystatechange= function() {
+        if (this.readyState!==4) return;
+        if (this.status!==200) return;
+
+        var node = document.createElement('div');
+        node.innerHTML = this.responseText;
+        document.body.appendChild(node);
+        socket = socketIoClient();
+        setupSocket(socket);
+        document.getElementById("goButton").onclick = beginGame;
+    };
+    xhr.send();
+}
 
 function beginGame(){
     //socket says it is ready to start playing.
     socket.emit('init', document.getElementById("screenNameInput").value);
 
+    //remove the screenname form from the page
     var screenNameForm = document.getElementById("screenNameForm");
     screenNameForm.parentNode.removeChild(screenNameForm);
 
@@ -64,7 +67,7 @@ function startGame(){
 }
 
 function animationLoop(){
-    window.requestAnimationFrame(animationLoop);
+    requestedFrame = window.requestAnimationFrame(animationLoop);
     updateClientView();
 }
 
@@ -134,6 +137,20 @@ function setupSocket(socket){
      */
     socket.on('pingcheck',function(){
         socket.emit('pongcheck');
+    });
+
+    /**
+     * Tank has been destroyed, socket connection
+     */
+    socket.on('death',function(){
+        //stop animating
+        window.cancelAnimationFrame(requestedFrame);
+        //clear canvas
+        canvasGameBoard.clear();
+        //empty the game objects this client is drawing
+        clientGameObjects = {};
+        //setup start screen
+        setTimeout(setupStartScreen, 1000);
     });
 
 }

@@ -41,7 +41,7 @@ class GameLogicService {
         this.updatePositionsOfBullets(clientData, this.quadtree);
         this.fireBulletsIfNecessary(clientData, currentTime);
         this.removeBulletsThatAreOutOfBounds(clientData, currentClientDatas, this.quadtree);
-        this.handleCollisionsOnTank(clientData, currentClientDatas, this.quadtree);
+        this.handleCollisionsOnTank(clientData, socket, currentClientDatas, this.quadtree);
     }
 
     kickPlayerIfIdle(clientData, socket, time){
@@ -192,7 +192,7 @@ class GameLogicService {
         }
     };
 
-    handleCollisionsOnTank(clientData, currentClientDatas, quadtree){
+    handleCollisionsOnTank(clientData, socket, currentClientDatas, quadtree){
         /**
          * Check any collisions on tank
          */
@@ -205,17 +205,20 @@ class GameLogicService {
                 //update that player's score
                 currentClientDatas[playerIndex].tank.kills = currentClientDatas[playerIndex].tank.kills + 1;
 
+                //remove bullet
                 if(playerIndex > -1) {
                     var bulletIndex = util.findIndex(currentClientDatas[playerIndex].tank.bullets, bullet.id);
                     if(bulletIndex > -1){
                         currentClientDatas[playerIndex].tank.bullets.splice(bulletIndex,1);
                         quadtree.remove(bullet.forQuadtree(), 'id');
-                    }else{
-                        throw new Error(`Bullet index is ${bulletIndex}, how you gonna remove that??`);
                     }
-                }else{
-                    throw new Error(`Player index is ${playerIndex}, how you gonna remove that??`);
                 }
+
+                //destroy tank
+                clientData.tank.isAlive = false;
+
+                socket.emit('death');
+                socket.disconnect();
             }
         }
     }

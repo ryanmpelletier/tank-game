@@ -8,7 +8,7 @@
     "bulletHeight":1,
     "bulletWidth":1,
     "tankTimeToGainAmmo":1000,
-    "tankBarrelLength":60,
+    "tankBarrelLength":70,
     "tankAmmoCapacity":4,
     "tankFireTimeWait":250,
     "wallWidth": 25,

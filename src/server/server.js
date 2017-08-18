@@ -22,6 +22,7 @@ var config = require('../../config.json');
 app.use('/js',express.static(path.join(__dirname, '../client/js')));
 app.use('/css',express.static(path.join(__dirname, '../client/css')));
 app.use('/img',express.static(path.join(__dirname, '../client/img')));
+app.use('/html',express.static(path.join(__dirname, '../client/html')));
 
 /**
  * Serve index.html when the user visits the site in their browser
@@ -129,7 +130,7 @@ socketIo.on('connection', function(socket) {
 
 
     /**
-    * When client calls socket.disconnect() on their end, this event is automatically fired
+    * When client calls socket.disconnect() on their end or the server calls socket.disconnect(), this event is automatically fired
     * It is important to clean up anything that was put into the quadtree for this particular client
     */
     socket.on('disconnect',function() {

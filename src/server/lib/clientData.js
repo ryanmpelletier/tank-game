@@ -8,60 +8,61 @@
 var Tank = require('./tank');
 
 class ClientData {
-  constructor(id, startXPosition, startYPosition) {
-    //stuff the client gives us
-    this.player = {
-      screenWidth: undefined,
-      screenHeight: undefined,
-      userInput:{
-        keysPressed:{}
-      }
-    };
-    //stuff the client does NOT give us or ever set, this is read by the server for game logic/managing
-    this.id = id;
-    this.ping = undefined;
-    this.startPingTime = undefined;
-    this._position = {
-      x: startXPosition,
-      y: startYPosition
-    };
+    constructor(id, startXPosition, startYPosition) {
 
-    this._screenName = undefined;
-    
-    this.lastHeartbeat = new Date().getTime();
+        //stuff the client gives us
+        this.player = {
+          screenWidth: undefined,
+          screenHeight: undefined,
+          userInput:{
+            keysPressed:{}
+          }
+        };
 
-    //should probably make a setter for x and y which also changes the tank's x and y
-    this.tank = new Tank(this.id, this.position.x, this.position.y);
-    /**
-     * simple quadtree requires a basic format for object put onto the quadtree, I am trying to figure out the best way to mitigate this
-     * I don't like a libary enforcing my object to have a certain structure, this is something I am not used to. In Java this would just be
-     * an interface I would implement, and I wouldn't have to change the internal representation of my object, this is my compromise
-     */
-    this.forQuadtree = function(){
-        return this.tank.forQuadtree();
-    };
-  }
+        //stuff the client does NOT give us or ever set, this is read by the server for game logic/managing
+        this.id = id;
+        this.ping = undefined;
+        this.startPingTime = undefined;
+        this._position = {
+          x: startXPosition,
+          y: startYPosition
+        };
 
-  set position(position){
-    //set tank position also
-    this.tank.x = position.x;
-    this.tank.y = position.y;
-    this.tank.addLocation({x: position.x, y: position.y});
-    this._position = position;
-  }
+        this._screenName = undefined;
 
-  get position(){
-    return this._position;
-  }
+        this.lastHeartbeat = new Date().getTime();
 
-  set screenName(screenName){
-    this._screenName = screenName;
-    this.tank.screenName = screenName;
-  }
+        //should probably make a setter for x and y which also changes the tank's x and y
+        this.tank = new Tank(this.id, this.position.x, this.position.y);
+        /**
+         * simple quadtree requires a basic format for object put onto the quadtree, I am trying to figure out the best way to mitigate this
+         * I don't like a libary enforcing my object to have a certain structure, this is something I am not used to. In Java this would just be
+         * an interface I would implement, and I wouldn't have to change the internal representation of my object, this is my compromise
+         */
+        this.forQuadtree = function() {
+            return this.tank.forQuadtree();
+        };
+    }
 
-  get screenName(){
-    return this._screenName;
-  }
+    set position (position) {
+        //set tank position also
+        this.tank.x = position.x;
+        this.tank.y = position.y;
+        this._position = position;
+    }
+
+    get position() {
+        return this._position;
+    }
+
+    set screenName(screenName) {
+        this._screenName = screenName;
+        this.tank.screenName = screenName;
+    }
+
+    get screenName() {
+        return this._screenName;
+    }
 
 }
 

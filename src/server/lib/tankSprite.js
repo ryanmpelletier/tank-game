@@ -9,13 +9,9 @@ class TankSprite extends Sprite {
                 rowFrameIndex = 0, colFrameIndex = 0) {
         super(width, height, ticksPerFrame, rowFrameCount, colFrameCount, rowFrameIndex, colFrameIndex);
 
-
-        //eventually use config to set the appropriate value
-
+        this.scaleFactorWidth = config.tankWidth / (this.width / this.rowFrameCount);
         this.scaleFactorHeight = config.tankHeight / (this.height / this.colFrameCount);
-        this.scaleFactorWidth = config.tankWidth /(this.width / this.rowFrameCount);
     }
-
 }
 
 module.exports = TankSprite;

@@ -43,7 +43,7 @@ class GameLogicService {
         this.updatePositionsOfBullets(clientData);
         this.fireBulletsIfNecessary(clientData, currentTime);
         this.removeBulletsThatAreOutOfBounds(clientData, currentClientDatas);
-        this.handleCollisionsOnTank(clientData, currentClientDatas);
+        this.handleCollisionsOnTank(clientData, socket, currentClientDatas);
         this.updateTracks(this.quadtreeManager, this.quadtree);
     }
 
@@ -273,7 +273,7 @@ class GameLogicService {
         }
     };
 
-    handleCollisionsOnTank(clientData, currentClientDatas) {
+    handleCollisionsOnTank(clientData, socket, currentClientDatas) {
         /**
          * Check any collisions on tank
          */
@@ -292,13 +292,8 @@ class GameLogicService {
                     if(bulletIndex > -1){
                         currentClientDatas[playerIndex].tank.bullets.splice(bulletIndex,1);
                         this.quadtree.remove(bullet.forQuadtree(), 'id');
-                    } else {
-                        throw new Error(`Bullet index is ${bulletIndex}, how you gonna remove that??`);
                     }
-                } else {
-                    throw new Error(`Player index is ${playerIndex}, how you gonna remove that??`);
                 }
-
                 //destroy tank
                 clientData.tank.isAlive = false;
 

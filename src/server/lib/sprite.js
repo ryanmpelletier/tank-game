@@ -7,12 +7,19 @@ class Sprite {
                 rowFrameIndex = 0, colFrameIndex = 0) {
         this.width = width;
         this.height = height;
+        this.singleFrameWidth = width / rowFrameCount;
+        this.singleFrameHeight = height / colFrameCount;
         this.rowFrameCount = rowFrameCount;
         this.colFrameCount = colFrameCount;
         this.ticksPerFrame = ticksPerFrame;
         this.rowFrameIndex = rowFrameIndex;
         this.colFrameIndex = colFrameIndex;
         this.tickCount = 1;
+
+        // Setup variables here with default values that can be overridden in subclasses for specific sprite scaling
+        // (For example, these values are overridden in tankSprite to set a custom scaling factor for tanks)
+        this.scaleFactorWidth = 1;
+        this.scaleFactorHeight = 1;
     }
 
     update() {
@@ -42,20 +49,17 @@ class Sprite {
         // (necessary otherwise tank is drawn at wrong location since canvas has been rotated)
         context.translate(-destX, -destY);
 
-        var singleFrameWidth = sprite.width / sprite.rowFrameCount;
-        var singleFrameHeight = sprite.height / sprite.colFrameCount;
-
         // Draw tank sprite at destination coordinates
         context.drawImage(
-            image,
-            sprite.rowFrameIndex * singleFrameWidth,
-            sprite.colFrameIndex * singleFrameHeight,
-            sprite.width / sprite.rowFrameCount,
-            sprite.height / sprite.colFrameCount,
-            destX - (singleFrameWidth / 2) * (typeof sprite.scaleFactorHeight == 'undefined' ? 1 : sprite.scaleFactorHeight),
-            destY - (singleFrameHeight / 2) * (typeof sprite.scaleFactorWidth == 'undefined' ? 1 : sprite.scaleFactorWidth),
-            singleFrameWidth * (typeof sprite.scaleFactorWidth == 'undefined' ? 1 : sprite.scaleFactorWidth),
-            singleFrameHeight * (typeof sprite.scaleFactorHeight == 'undefined' ? 1 : sprite.scaleFactorHeight)
+            image,                                                              // Specifies the image, canvas, or video element to use
+            sprite.rowFrameIndex * sprite.singleFrameWidth,                     // The x coordinate where to start clipping
+            sprite.colFrameIndex * sprite.singleFrameHeight,                    // The y coordinate where to start clipping
+            sprite.singleFrameWidth,                                            // The width of the clipped image
+            sprite.singleFrameHeight,                                           // The height of the clipped image
+            destX - (sprite.singleFrameWidth / 2) * sprite.scaleFactorWidth,    // The x coordinate where to place the image on the canvas
+            destY - (sprite.singleFrameHeight / 2) * sprite.scaleFactorHeight,  // The y coordinate where to place the image on the canvas
+            sprite.singleFrameWidth * sprite.scaleFactorWidth,                  // The width of the image to use (stretch or reduce the image)
+            sprite.singleFrameHeight * sprite.scaleFactorHeight                 // The height of the image to use (stretch or reduce the image)
         );
 
         context.restore();

@@ -5,20 +5,23 @@ const crypto = require("crypto");
  * Class to hold data necessary for a single tank track.
  */
 class Track {
-    constructor(x, y) {
-        this.id = crypto.randomBytes(16).toString("hex");
-        // this.tickCount = 1;
-        // this.TIME_TO_LIVE = 100;
+    constructor(x, y, angle) {
+        this.x = x - config.trackWidth / 2;
+        this.y = y - config.trackHeight / 2;
+        this.angle = angle;
 
-        this.x = x;
-        this.y = y;
+        this.width = config.trackWidth;
+        this.height = config.trackHeight;
+
+        this.id = crypto.randomBytes(16).toString("hex");
+        this.tickCount = 1;
 
         this.forQuadtree = function() {
             return {
                 x: this.x,
                 y: this.y,
-                w: 1, // TODO: use config (i.e. config.trackWidth)
-                h: 1, // TODO: use config (i.e. config.trackWidth)
+                w: this.width,
+                h: this.height,
                 id: this.id,
                 type:'TRACK',
                 object: this
@@ -26,9 +29,24 @@ class Track {
         };
     }
 
-    // static hasExpired(tickCount) {
-    //     return ++tickCount === this.TIME_TO_LIVE ? true : false;
-    // }
+    static hasExpired(track) {
+        return ++track.tickCount === Track.TIME_TO_LIVE;
+    }
+
+    static hasFinishedDelay() {
+        if(++Track.globalTickCount === Track.DELAY_INTERVAL) {
+            Track.globalTickCount = 1; // reset
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
 }
+
+// Static variable creation
+Track.TIME_TO_LIVE = 500;
+Track.DELAY_INTERVAL = 4;
+Track.globalTickCount = 0;
 
 module.exports = Track;

@@ -43,7 +43,7 @@ class DrawingUtil {
         //translate canvas to where the edge of the game board is
         var translateX = -(perspective.x - global.screenWidth/2);
         var translateY = -(perspective.y - global.screenHeight/2);
-        
+
         this.context2D.translate(translateX, translateY);
         this.context2D.fillRect(0,0,global.gameWidth, global.gameHeight);
         this.context2D.translate(-translateX, -translateY);
@@ -80,7 +80,7 @@ class DrawingUtil {
 
             this.context2D.font = global.drawing.playerInfo.font;
             this.context2D.fillStyle = global.drawing.playerInfo.fontColor;
-            this.context2D.fillText(`${tank.screenName} - ${tank.kills}`,startX, startY);
+            this.context2D.fillText(`${tank.screenName} - ${tank.kills}`, startX, startY);
         }
 
         this.context2D.translate(-translateX, -translateY);
@@ -107,14 +107,39 @@ class DrawingUtil {
 
     }
 
+    /**
+     * Draw all tank tracks in user's current view.
+     *
+     * @param tracks
+     *          The list of tank tracks to draw.
+     */
     tracksDraw(tracks) {
+        var translateX = -(this.perspective.x - global.screenWidth / 2);
+        var translateY = -(this.perspective.y - global.screenHeight / 2);
+        this.context2D.translate(translateX, translateY);
+
+        this.context2D.fillStyle = "#bfa372";
+
         for(var track of tracks) {
-            this.context2D.beginPath();
-            this.context2D.strokeStyle = 'green';
-            this.context2D.fillStyle = 'black';
-            this.context2D.arc(track.x, track.y, 5, 0, 2 * Math.PI);
-            this.context2D.fill();
+            this.context2D.save();
+
+            // Move registration point to tank's position
+            this.context2D.translate(track.x + track.width / 2, track.y + track.height / 2);
+
+            // Rotate entire canvas desired amount for tank's hull to rotate
+            // (rotates around axis at tank's current location)
+            this.context2D.rotate(track.angle);
+
+            // Move registration point back to the top left corner of canvas
+            // (necessary otherwise tank is drawn at wrong location since canvas has been rotated)
+            this.context2D.translate(-(track.x + track.width / 2), -(track.y + track.height / 2));
+
+            this.context2D.fillRect(track.x, track.y, track.width, track.height);
+
+            this.context2D.restore();
         }
+
+        this.context2D.translate(-translateX, -translateY);
     }
 
     wallsDraw(walls) {

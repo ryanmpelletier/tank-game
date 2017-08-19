@@ -22,8 +22,7 @@ window.onload = function() {
     setupStartScreen();
 };
 
-// I would like this to dynamically add the page with the form, and basically initialize a clean slate and new socket connection.
-// basically if this method is called the user starts fresh
+//set up the form where the user can enter their name
 function setupStartScreen() {
 
     //add the start screen menu to the page
@@ -37,27 +36,25 @@ function setupStartScreen() {
         var node = document.createElement('div');
         node.innerHTML = this.responseText;
         document.body.appendChild(node);
-        socket = socketIoClient();
-        setupSocket(socket);
         document.getElementById("goButton").onclick = beginGame;
     };
     xhr.send();
 }
 
+//set up the socket and begin talking with the server
 function beginGame(){
+    socket = socketIoClient();
+    setupSocket(socket);
     //socket says it is ready to start playing.
     socket.emit('init', document.getElementById("screenNameInput").value);
 
-    //remove the screenname form from the page
+    //remove the start up form from the page
     var screenNameForm = document.getElementById("screenNameForm");
     screenNameForm.parentNode.removeChild(screenNameForm);
 
     canvasGameBoard = new Canvas();
     drawingUtil = new DrawingUtil(canvasGameBoard.getCanvas());
-
-    setTimeout(function() {
-        startGame();
-    }, 1000);
+    startGame();
 }
 /**
  * Basically this funciton lets us set up some global properties before the animation loop begins,
@@ -68,7 +65,7 @@ function startGame() {
 }
 
 function animationLoop() {
-    window.requestAnimationFrame(animationLoop);
+    requestedFrame = window.requestAnimationFrame(animationLoop);
     updateClientView();
 }
 
@@ -83,12 +80,12 @@ function updateClientView() {
     /**
      * Trying to enforce the server sending a perspective object over
      */
-    if(typeof clientGameObjects.perspective != 'undefined') {
+    if(typeof clientGameObjects.perspective !== 'undefined') {
         drawingUtil.setPerspective(clientGameObjects.perspective.x, clientGameObjects.perspective.y);
+        drawingUtil.drawGameObjects(clientGameObjects);
     }else {
-        throw new Error("unable to find perspective, make sure server is sending perspective object with x and y");
+        console.log("unable to find perspective, make sure server is sending perspective object with x and y");
     }
-    drawingUtil.drawGameObjects(clientGameObjects);
 }
 
 
@@ -151,7 +148,7 @@ function setupSocket(socket) {
         //empty the game objects this client is drawing
         clientGameObjects = {};
         //setup start screen
-        setTimeout(setupStartScreen, 1000);
+        setupStartScreen();
     });
 
 }

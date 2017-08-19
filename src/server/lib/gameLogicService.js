@@ -110,13 +110,16 @@ class GameLogicService {
             // Update tank's frame since tank is moving
             clientData.tank.spriteTankHull.update();
 
-            this.addTracks(clientData, newPosition, angleInRadians);
+            // this.addTracks(clientData, newPosition, angleInRadians);
         }
 
         clientData.position = newPosition;
 
-        // Update tank on QuadTree
-        this.quadtree.update(oldQuadreeInfo, 'id', clientData.forQuadtree());
+        /**
+        * Update the item on the quadtree
+        */
+        this.quadtree.remove(oldQuadreeInfo, 'id');
+        this.quadtree.put(clientData.forQuadtree());
     };
 
     addTracks(clientData, newPosition, angleInRadians) {
@@ -310,16 +313,16 @@ class GameLogicService {
         var visibleTracks = quadtreeManager.queryGameObjectsForType('TRACK');
 
         visibleTracks.forEach(function(track) {
-            let originalTrack = track;
-
             // Check if track should disappear
             if(Track.hasExpired(track)) {
                 // Remove track by uniquely identifiable attribute
                 quadtree.remove(track.forQuadtree(), 'id');
             }
             else {
-                // Update track...tickCount was updated in call to hasExpired
-                quadtree.update(originalTrack, 'id', track.forQuadtree());
+                // Update track (remove existing and put track with updated tickCount)
+                // tickCount was updated in call to hasExpired
+                quadtree.remove(track.forQuadtree(), 'id');
+                quadtree.put(track.forQuadtree());
             }
         });
     };

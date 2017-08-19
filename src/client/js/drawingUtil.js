@@ -1,5 +1,6 @@
 var global = require('./global');
 var Sprite = require('../../server/lib/sprite');
+var Util = require('../../server/lib/util');
 
 /**
  * This is the class that holds a reference to the canvas.
@@ -87,7 +88,10 @@ class DrawingUtil {
     }
 
     /**
-     * Draw the bullets
+     * Draws all bullets in user's current view.
+     *
+     * @param bullets
+     *          The list of bullets to draw.
      */
     bulletsDraw(bullets) {
         var translateX = -(this.perspective.x - global.screenWidth/2);
@@ -95,11 +99,12 @@ class DrawingUtil {
         this.context2D.translate(translateX, translateY);
 
         for(var i = 0; i < bullets.length; i++){
+            var bullet = bullets[i];
+
             //draw circle in the center to represent bullet
             this.context2D.beginPath();
-            this.context2D.strokeStyle = 'green';
             this.context2D.fillStyle = 'black';
-            this.context2D.arc(bullets[i].x, bullets[i].y, 5, 0, 2*Math.PI);
+            this.context2D.arc(bullet.x, bullet.y, 4, 0, 2 * Math.PI);
             this.context2D.fill();
         }
 
@@ -108,7 +113,7 @@ class DrawingUtil {
     }
 
     /**
-     * Draw all tank tracks in user's current view.
+     * Draws all tank tracks in user's current view.
      *
      * @param tracks
      *          The list of tank tracks to draw.
@@ -121,22 +126,7 @@ class DrawingUtil {
         this.context2D.fillStyle = "#bfa372";
 
         for(var track of tracks) {
-            this.context2D.save();
-
-            // Move registration point to tank's position
-            this.context2D.translate(track.x + track.width / 2, track.y + track.height / 2);
-
-            // Rotate entire canvas desired amount for tank's hull to rotate
-            // (rotates around axis at tank's current location)
-            this.context2D.rotate(track.angle);
-
-            // Move registration point back to the top left corner of canvas
-            // (necessary otherwise tank is drawn at wrong location since canvas has been rotated)
-            this.context2D.translate(-(track.x + track.width / 2), -(track.y + track.height / 2));
-
-            this.context2D.fillRect(track.x, track.y, track.width, track.height);
-
-            this.context2D.restore();
+            Util.drawRotatedRect(this.context2D, track.x, track.y, track.width, track.height, track.angle);
         }
 
         this.context2D.translate(-translateX, -translateY);

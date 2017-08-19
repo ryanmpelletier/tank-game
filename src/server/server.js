@@ -100,7 +100,8 @@ socketIo.on('connection', function(socket) {
     * events from the server socket.
     */
     socket.on('init',function(screenName) {
-        currentClientData.screenName = screenName;
+        //only allow 10 characters for screen name
+        currentClientData.screenName = screenName.substring(0,10);
         socket.emit('welcome', currentClientData, {gameWidth: config.gameWidth, gameHeight: config.gameHeight});
     });
 

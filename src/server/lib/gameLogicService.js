@@ -110,7 +110,7 @@ class GameLogicService {
             // Update tank's frame since tank is moving
             clientData.tank.spriteTankHull.update();
 
-            this.addTracks(clientData, newPosition, angleInRadians);
+            // this.addTracks(clientData, newPosition, angleInRadians);
         }
 
         clientData.position = newPosition;
@@ -294,6 +294,12 @@ class GameLogicService {
                         this.quadtree.remove(bullet.forQuadtree(), 'id');
                     }
                 }
+                //destroy tank
+                clientData.tank.isAlive = false;
+
+                socket.emit('death');
+                socket.disconnect();
+            }else if(objectInTankArea.type === 'WALL'){
                 //destroy tank
                 clientData.tank.isAlive = false;
 

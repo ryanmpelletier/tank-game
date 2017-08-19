@@ -45,7 +45,7 @@ class Track {
 }
 
 // Static variable creation
-Track.TIME_TO_LIVE = 500;
+Track.TIME_TO_LIVE = 50;
 Track.DELAY_INTERVAL = 4;
 Track.globalTickCount = 0;
 

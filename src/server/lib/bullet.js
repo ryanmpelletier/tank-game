@@ -6,7 +6,7 @@ const crypto = require("crypto");
 
 
 class Bullet {
-    constructor(ownerId, x, y,  velocityX = 0, velocityY = 0){
+    constructor(ownerId, x, y, velocityX = 0, velocityY = 0){
         this.id = crypto.randomBytes(16).toString("hex");
         this.ownerId = ownerId;
         this.x = x;

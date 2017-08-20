@@ -15,7 +15,6 @@ var drawingUtil;
 
 var requestedFrame;
 
-
 window.addEventListener('resize', resize);
 
 window.onload = function() {
@@ -24,38 +23,39 @@ window.onload = function() {
 
 //set up the form where the user can enter their name
 function setupStartScreen() {
-
     //add the start screen menu to the page
     //set up socket
     var xhr= new XMLHttpRequest();
     xhr.open('GET', 'html/start_screen.html', true);
-    xhr.onreadystatechange= function() {
-        if (this.readyState!==4) return;
-        if (this.status!==200) return;
+    xhr.onreadystatechange = function() {
+        if (this.readyState !== 4) return;
+        if (this.status !== 200) return;
 
         var node = document.createElement('div');
         node.innerHTML = this.responseText;
         document.body.appendChild(node);
-        document.getElementById("goButton").onclick = beginGame;
+        document.getElementById("button-play").onclick = beginGame;
     };
     xhr.send();
 }
 
 //set up the socket and begin talking with the server
-function beginGame(){
+function beginGame() {
     socket = socketIoClient();
     setupSocket(socket);
     //socket says it is ready to start playing.
-    socket.emit('init', document.getElementById("screenNameInput").value);
+    socket.emit('init', document.getElementById("input-username").value);
 
     //remove the start up form from the page
-    var screenNameForm = document.getElementById("screenNameForm");
+    var screenNameForm = document.getElementById("start-screen-center-container");
+    console.log(screenNameForm);
     screenNameForm.parentNode.removeChild(screenNameForm);
 
     canvasGameBoard = new Canvas();
     drawingUtil = new DrawingUtil(canvasGameBoard.getCanvas());
     startGame();
 }
+
 /**
  * Basically this funciton lets us set up some global properties before the animation loop begins,
  * and will likely also be where we do some last minute (millisecond) checking to make sure we are good to go

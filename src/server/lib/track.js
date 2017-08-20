@@ -29,8 +29,8 @@ class Track {
         };
     }
 
-    static hasExpired(track) {
-        return ++track.tickCount === Track.TIME_TO_LIVE;
+    hasExpired() {
+        return ++this.tickCount === Track.TIME_TO_LIVE;
     }
 
     static hasFinishedDelay() {

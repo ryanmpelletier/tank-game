@@ -38,26 +38,20 @@ class GameLogicService {
     gameTick(clientData, socket, currentClientDatas) {
         var currentTime = new Date().getTime();
 
-        this.kickPlayerIfIdle(clientData, socket, currentTime);
-        this.updatePlayerPosition(clientData);
-        this.increaseAmmoIfNecessary(clientData,currentTime);
-        this.updatePositionsOfBullets(clientData);
-        this.fireBulletsIfNecessary(clientData, currentTime);
-        this.removeBulletsThatAreOutOfBounds(clientData, currentClientDatas);
-        this.handleCollisionsOnTank(clientData, socket, currentClientDatas);
-        this.updateTracks(this.quadtreeManager, this.quadtree);
+        if(clientData.lastHeartbeat < currentTime - config.maxLastHeartBeat){
+            winston.log('debug',`Kicking player ${clientData.tank.screenName}`);
+            this.kill(clientData, socket);
+        }else{
+            this.updatePlayerPosition(clientData);
+            this.increaseAmmoIfNecessary(clientData,currentTime);
+            this.updatePositionsOfBullets(clientData);
+            this.fireBulletsIfNecessary(clientData, currentTime);
+            this.removeBulletsThatAreOutOfBounds(clientData, currentClientDatas);
+            this.handleCollisionsOnTank(clientData, socket, currentClientDatas);
+            this.updateTracks(this.quadtreeManager, this.quadtree);
+        }
     }
 
-    kickPlayerIfIdle(clientData, socket, time) {
-        /**
-         * Kick player if idle
-         */
-        if(clientData.lastHeartbeat < time - config.maxLastHeartBeat) {
-            winston.log('debug',`Kicking player ${clientData.player.screenName}`);
-            socket.emit('kick');
-            socket.disconnect();
-        }
-    };
 
     updatePlayerPosition(clientData) {
         let player = clientData.player;
@@ -327,15 +321,9 @@ class GameLogicService {
                     }
                 }
                 //destroy tank
-                clientData.tank.isAlive = false;
-
-                socket.emit('death');
-                socket.disconnect();
+                this.kill(clientData, socket);
             }else if(objectInTankArea.type === 'WALL'){
-                //destroy tank
-                clientData.tank.isAlive = false;
-                socket.emit('death');
-                socket.disconnect();
+                this.kill(clientData, socket);
             }
         }
     }
@@ -356,6 +344,12 @@ class GameLogicService {
             }
         });
     };
+
+    kill(clientData, socket){
+        clientData.tank.isAlive = false;
+        socket.emit('death');
+        socket.disconnect();
+    }
 
     /*
      * This code is dangerous, will try to place user over and over again indefinitely,

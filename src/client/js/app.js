@@ -116,13 +116,6 @@ function setupSocket(socket) {
         socket.emit('welcome_received', clientInitData);
     });
 
-    /**
-     * Server kicked me, closing my socket
-     */
-    socket.on('kick',function(data) {
-        socket.close();
-    });
-
     //server needs to draw what gets put into gameObjects
     socket.on('game_objects_update', function(gameObjects) {
         clientGameObjects = gameObjects;

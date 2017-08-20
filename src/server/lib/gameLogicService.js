@@ -44,9 +44,8 @@ class GameLogicService {
         }else{
             this.updatePlayerPosition(clientData);
             this.increaseAmmoIfNecessary(clientData,currentTime);
-            this.updatePositionsOfBullets(clientData);
+            this.updatePositionsOfBullets(clientData, this.quadtreeManager);
             this.fireBulletsIfNecessary(clientData, currentTime);
-            this.removeBulletsThatAreOutOfBounds(clientData, currentClientDatas);
             this.handleCollisionsOnTank(clientData, socket, currentClientDatas);
             this.updateTracks(this.quadtreeManager, this.quadtree);
         }
@@ -226,19 +225,27 @@ class GameLogicService {
         }
     };
 
-    updatePositionsOfBullets(clientData) {
+    updatePositionsOfBullets(clientData, quadtreeManager) {
         /**
         * Update positions of all the bullets
         */
         for(var bullet of clientData.tank.bullets) {
-
             let oldTreeInfo = bullet.forQuadtree();
-            bullet.x = bullet.x + bullet.velocityX;
-            bullet.y = bullet.y - bullet.velocityY;
-            let forQuadtree = bullet.forQuadtree();
+            //if bullet is in wall, remove the bullet, else update the position
+            if(quadtreeManager.queryGameObjectsForType(['WALL'], oldTreeInfo)['WALL'].length){
+                let bulletIndex = util.findIndex(clientData.tank.bullets, bullet.id);
+                if(bulletIndex > -1){
+                    clientData.tank.bullets.splice(bulletIndex,1);
+                    this.quadtree.remove(bullet.forQuadtree(), 'id');
+                }
+            }else{
+                bullet.x = bullet.x + bullet.velocityX;
+                bullet.y = bullet.y - bullet.velocityY;
+                let forQuadtree = bullet.forQuadtree();
 
-            this.quadtree.remove(oldTreeInfo, 'id');
-            this.quadtree.put(forQuadtree);
+                this.quadtree.remove(oldTreeInfo, 'id');
+                this.quadtree.put(forQuadtree);
+            }
         }
     };
 
@@ -266,28 +273,6 @@ class GameLogicService {
 
                 this.quadtree.put(bullet.forQuadtree());
                 clientData.tank.bullets.push(bullet);
-            }
-        }
-    };
-    
-    removeBulletsThatAreOutOfBounds(clientData, currentClientDatas) {
-        /**
-        * Remove any bullets that are now out of bounds.
-        */
-        for(var bullet of clientData.tank.bullets) {
-            if(bullet.x > config.gameWidth - config.wallWidth || bullet.x < config.wallWidth || bullet.y > config.gameHeight - config.wallWidth || bullet.y < config.wallWidth){
-                var playerIndex = util.findIndex(currentClientDatas, bullet.ownerId);
-                if(playerIndex > -1) {
-                    var bulletIndex = util.findIndex(currentClientDatas[playerIndex].tank.bullets, bullet.id);
-                    if(bulletIndex > -1){
-                        currentClientDatas[playerIndex].tank.bullets.splice(bulletIndex,1);
-                        this.quadtree.remove(bullet.forQuadtree(), 'id');
-                    } else {
-                        throw new Error(`Bullet index is ${bulletIndex}, how you gonna remove that??`);
-                    }
-                } else {
-                    throw new Error(`Player index is ${playerIndex}, how you gonna remove that??`);
-                }
             }
         }
     };

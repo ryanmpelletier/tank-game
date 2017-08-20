@@ -7,6 +7,7 @@ var config = require('../../../config.json');
 var Wall = require('./wall');
 var Bullet = require('./bullet');
 var Track = require('./track');
+var Direction = require('./direction');
 var util = require('./util');
 var winston = require('winston');
 winston.level = 'debug';
@@ -59,11 +60,14 @@ class GameLogicService {
     };
 
     updatePlayerPosition(clientData) {
+        let player = clientData.player;
+        let tank = clientData.tank;
+
         /**
          * Set tank gun angle
          */
-        if(typeof clientData.player.userInput.mouseAngle !== 'undefined'){
-            clientData.tank.gunAngle = clientData.player.userInput.mouseAngle;
+        if(typeof player.userInput.mouseAngle !== 'undefined'){
+            tank.gunAngle = player.userInput.mouseAngle;
         }
 
         var oldQuadreeInfo = clientData.forQuadtree();
@@ -78,24 +82,24 @@ class GameLogicService {
          */
 
         // Check if user's position should move UP
-        if(clientData.player.userInput.keysPressed['KEY_UP'] &&
-            !clientData.player.userInput.keysPressed['KEY_DOWN']) {
+        if(player.userInput.keysPressed['KEY_UP'] &&
+            !player.userInput.keysPressed['KEY_DOWN']) {
             newPosition.y = oldPosition.y - config.player.speedFactor;
         }
         // Check if user's position should move DOWN
-        else if(clientData.player.userInput.keysPressed['KEY_DOWN'] &&
-            !clientData.player.userInput.keysPressed['KEY_UP']) {
+        else if(player.userInput.keysPressed['KEY_DOWN'] &&
+            !player.userInput.keysPressed['KEY_UP']) {
             newPosition.y = oldPosition.y + config.player.speedFactor;
         }
 
         // Check if user's position should move RIGHT
-        if(clientData.player.userInput.keysPressed['KEY_RIGHT'] &&
-            !clientData.player.userInput.keysPressed['KEY_LEFT']) {
+        if(player.userInput.keysPressed['KEY_RIGHT'] &&
+            !player.userInput.keysPressed['KEY_LEFT']) {
             newPosition.x = oldPosition.x + config.player.speedFactor;
         }
         // Check if user's position should move LEFT
-        else if(clientData.player.userInput.keysPressed['KEY_LEFT'] &&
-            !clientData.player.userInput.keysPressed['KEY_RIGHT']) {
+        else if(player.userInput.keysPressed['KEY_LEFT'] &&
+            !player.userInput.keysPressed['KEY_RIGHT']) {
             newPosition.x = oldPosition.x - config.player.speedFactor;
         }
 
@@ -105,12 +109,12 @@ class GameLogicService {
         if(!util.areCoordinatesEqual(oldPosition, newPosition)) {
             // Tank has moved so update its direction
             let angleInRadians = Math.atan2(newPosition.y - oldPosition.y, newPosition.x - oldPosition.x);
-            clientData.tank.hullAngle = angleInRadians;
+            tank.hullAngle = angleInRadians;
 
             // Update tank's frame since tank is moving
-            clientData.tank.spriteTankHull.update();
+            tank.spriteTankHull.update();
 
-            this.addTracks(clientData, newPosition, angleInRadians);
+            this.addTracks(tank, newPosition, angleInRadians);
         }
 
         clientData.position = newPosition;
@@ -122,9 +126,16 @@ class GameLogicService {
         this.quadtree.put(clientData.forQuadtree());
     };
 
-    addTracks(clientData, newPosition, angleInRadians) {
+    /**
+     * Adds tracks for the current tank to the QuadTree and associates the tracks with a certain tank path.
+     *
+     * @param tank
+     * @param newPosition
+     * @param angleInRadians
+     */
+    addTracks(tank, newPosition, angleInRadians) {
         // Check if delay been track creation has finished
-        if(!Track.hasFinishedDelay()) {
+        if(!tank.path.hasFinishedDelay()) {
             // Delay has not been reached so don't create more tracks
             return;
         }
@@ -134,7 +145,7 @@ class GameLogicService {
         let trackTwoDestX = 0;
         let trackTwoDestY = 0;
 
-        let scaledHalfSingleFrame = clientData.tank.spriteTankHull.singleFrameWidth / 2 * clientData.tank.spriteTankHull.scaleFactorWidth;
+        let scaledHalfSingleFrame = tank.spriteTankHull.singleFrameWidth / 2 * tank.spriteTankHull.scaleFactorWidth;
 
         // Correction is the value from the center of the tank (newPosition.x, newPosition.y) to where the the track
         // actually needs to be rendered (i.e. in line with the left/right tank wheel).
@@ -153,58 +164,58 @@ class GameLogicService {
         let diagonalCorrection = 0.752941176470588 * scaledHalfSingleFrame;
 
         switch(angleInRadians) {
-            case 0: // East
+            case Direction.E: // East
                 trackOneDestX = newPosition.x + straightCorrection;
                 trackOneDestY = newPosition.y - straightCorrection;
                 trackTwoDestX = newPosition.x + straightCorrection;
                 trackTwoDestY = newPosition.y + straightCorrection;
                 break;
-            case Math.PI / 4: // South East
+            case Direction.SE: // South East
                 trackOneDestX = newPosition.x;
                 trackOneDestY = newPosition.y + diagonalCorrection;
                 trackTwoDestX = newPosition.x + diagonalCorrection;
                 trackTwoDestY = newPosition.y;
                 break;
-            case Math.PI / 2: // South
+            case Direction.S: // South
                 trackOneDestX = newPosition.x - straightCorrection;
                 trackOneDestY = newPosition.y + straightCorrection;
                 trackTwoDestX = newPosition.x + straightCorrection;
                 trackTwoDestY = newPosition.y + straightCorrection;
                 break;
-            case 3 * Math.PI / 4: // South West
+            case Direction.SW: // South West
                 trackOneDestX = newPosition.x - diagonalCorrection;
                 trackOneDestY = newPosition.y;
                 trackTwoDestX = newPosition.x;
                 trackTwoDestY = newPosition.y + diagonalCorrection;
                 break;
-            case Math.PI: // West
+            case Direction.W: // West
                 trackOneDestX = newPosition.x - straightCorrection;
                 trackOneDestY = newPosition.y - straightCorrection;
                 trackTwoDestX = newPosition.x - straightCorrection;
                 trackTwoDestY = newPosition.y + straightCorrection;
                 break;
-            case -(Math.PI / 4): // North East
-                trackOneDestX = newPosition.x;
-                trackOneDestY = newPosition.y - diagonalCorrection;
-                trackTwoDestX = newPosition.x + diagonalCorrection;
-                trackTwoDestY = newPosition.y;
-                break;
-            case -(Math.PI / 2): // North
-                trackOneDestX = newPosition.x - straightCorrection;
-                trackOneDestY = newPosition.y - straightCorrection;
-                trackTwoDestX = newPosition.x + straightCorrection;
-                trackTwoDestY = newPosition.y - straightCorrection;
-                break;
-            case -(3 * Math.PI / 4): // North West
+            case Direction.NW: // North West
                 trackOneDestX = newPosition.x - diagonalCorrection;
                 trackOneDestY = newPosition.y;
                 trackTwoDestX = newPosition.x;
                 trackTwoDestY = newPosition.y - diagonalCorrection;
                 break;
+            case Direction.N: // North
+                trackOneDestX = newPosition.x - straightCorrection;
+                trackOneDestY = newPosition.y - straightCorrection;
+                trackTwoDestX = newPosition.x + straightCorrection;
+                trackTwoDestY = newPosition.y - straightCorrection;
+                break;
+            case Direction.NE: // North East
+                trackOneDestX = newPosition.x;
+                trackOneDestY = newPosition.y - diagonalCorrection;
+                trackTwoDestX = newPosition.x + diagonalCorrection;
+                trackTwoDestY = newPosition.y;
+                break;
         }
 
-        let trackOne = new Track(trackOneDestX, trackOneDestY, angleInRadians);
-        let trackTwo = new Track(trackTwoDestX , trackTwoDestY, angleInRadians);
+        let trackOne = new Track(trackOneDestX, trackOneDestY, angleInRadians, tank.path.id);
+        let trackTwo = new Track(trackTwoDestX , trackTwoDestY, angleInRadians, tank.path.id);
 
         // Add new tank tracks since tank has changed location
         this.quadtree.put(trackOne.forQuadtree());

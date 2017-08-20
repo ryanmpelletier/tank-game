@@ -317,9 +317,9 @@ class GameLogicService {
     }
 
     updateTracks(quadtreeManager, quadtree) {
-        var visibleTracks = quadtreeManager.queryGameObjectsForType('TRACK');
+        var objects = quadtreeManager.queryGameObjectsForType(['TRACK']);
 
-        visibleTracks.forEach(function(track) {
+        objects['TRACK'].forEach(function(track) {
             // Check if track should disappear
             if(Track.hasExpired(track)) {
                 // Remove track by uniquely identifiable attribute

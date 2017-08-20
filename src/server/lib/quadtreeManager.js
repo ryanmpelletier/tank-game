@@ -19,7 +19,7 @@ class QuadtreeManager {
     * Use queryObject to query the internal quadtree
     * return exactly what the client needs to draw based on the results
     */
-    queryGameObjects(queryObject) {
+    queryGameObjects(queryArea) {
 
         /**
          * Following arrays hold objects that are visible
@@ -31,7 +31,7 @@ class QuadtreeManager {
         var visibleWalls = [];
         var visibleTracks = [];
 
-        this.quadtree.get(queryObject, function(quadtreeObject) {
+        this.quadtree.get(queryArea, function(quadtreeObject) {
             if(quadtreeObject.type === 'TANK') {
                 var tank = quadtreeObject.object;
                 visibleTanks.push({
@@ -73,31 +73,24 @@ class QuadtreeManager {
      * @param {String} gameObjectType - The type of game object to return a list of all objects of this type.
      * @returns {Array} The array containing all game objects of the desired type.
      */
-    queryGameObjectsForType(gameObjectType) {
-        // Create query area of entire game board to get all objects
-        var queryArea = {
-            x: 0,
-            y: 0,
-            w: config.gameWidth,
-            h: config.gameHeight
-        };
+    queryGameObjectsForType(gameObjectTypes, queryArea = {x: 0, y: 0, w: config.gameWidth, h: config.gameHeight}) {
 
         // Get ALL game objects
-        var gameObjects = this.queryGameObjects(queryArea);
+        var gameObjects = {};
 
-        // Return only game objects of desired type
-        switch(gameObjectType) {
-            case 'TANK':
-                return gameObjects.tanks;
-            case 'BULLET':
-                return gameObjects.bullets;
-            case 'WALL':
-                return gameObjects.walls;
-            case 'TRACK':
-                return gameObjects.tracks;
-            default:
-                return [];
+        for(var i = 0; i < gameObjectTypes.length; i++){
+            gameObjects[gameObjectTypes[i]] = [];
         }
+
+        this.quadtree.get(queryArea, function(quadtreeObject){
+            // Return only game objects of desired type
+            if(gameObjectTypes.indexOf(quadtreeObject.type) > -1){
+                gameObjects[quadtreeObject.type].push(quadtreeObject.object);
+            }
+            return true;
+        });
+
+        return gameObjects;
     }
 
     getQuadtree() {

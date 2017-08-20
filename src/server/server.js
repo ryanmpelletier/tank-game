@@ -88,7 +88,7 @@ socketIo.on('connection', function(socket) {
     * Here is where I need to perform any server-side logic to set up state for the newly connecting player.
     * For example: calculate players starting position, get their ID, etc.
     */
-    var currentClientData = new ClientData(socket.id, config.gameWidth/2, config.gameHeight/2);
+    var currentClientData = new ClientData(socket.id, GameLogicService.getSpawnLocation(quadtreeManager));
 
 
     /**

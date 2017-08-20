@@ -333,7 +333,7 @@ class GameLogicService {
         var objects = quadtreeManager.queryGameObjectsForType(['TRACK']);
         objects['TRACK'].forEach(function(track) {
             // Check if track should disappear
-            if(Track.hasExpired(track)) {
+            if(track.hasExpired()) {
                 // Remove track by uniquely identifiable attribute
                 quadtree.remove(track.forQuadtree(), 'id');
             }

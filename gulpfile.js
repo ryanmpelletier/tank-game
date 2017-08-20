@@ -79,6 +79,7 @@ gulp.task('build-server', ['build-client'], function () {
 gulp.task('run', ['build-server'], function () {
     nodemon({
         delay: 1000,
+        nodeArgs: ['--inspect'],
         script: './bin/server/server.js',
     })
     .on('restart',function(){

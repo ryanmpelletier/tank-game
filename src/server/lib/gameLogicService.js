@@ -309,7 +309,6 @@ class GameLogicService {
             }else if(objectInTankArea.type === 'WALL'){
                 //destroy tank
                 clientData.tank.isAlive = false;
-
                 socket.emit('death');
                 socket.disconnect();
             }
@@ -318,7 +317,6 @@ class GameLogicService {
 
     updateTracks(quadtreeManager, quadtree) {
         var objects = quadtreeManager.queryGameObjectsForType(['TRACK']);
-
         objects['TRACK'].forEach(function(track) {
             // Check if track should disappear
             if(Track.hasExpired(track)) {
@@ -333,6 +331,37 @@ class GameLogicService {
             }
         });
     };
+
+    /*
+     * This code is dangerous, will try to place user over and over again indefinitely,
+     * need to eventually have a max amount of tries. We can't just stall the entire game because someone can't be placed.
+     * I hope to make the game board dynamically grow.
+     */
+    static getSpawnLocation(quadtreeManager){
+        outerLoop: while(true){
+            //generate random x and y within the board
+            var x = Math.floor((Math.random() * config.gameWidth));
+            var y = Math.floor((Math.random() * config.gameHeight));
+
+            //query quadtree for objects of certain type within a certain area of that location
+            //TODO optimize by directly using the quadtree, which can stop a query once a certain object is found
+            var objects = quadtreeManager.queryGameObjectsForType(['BULLET', 'WALL', 'TANK'], {x:(x - config.spawnAreaWidth / 2), y:(y - config.spawnAreaHeight / 2), w: config.spawnAreaWidth , h: config.spawnAreaHeight });
+
+            //if any of the objects came back which can kill a tank, get different random coordinates
+            for(var key of Object.keys(objects)){
+                if (objects.hasOwnProperty(key) && objects[key].length > 0) {
+                    continue outerLoop;
+                }
+            }
+
+            return {
+                x: x,
+                y: y
+            }
+
+        }
+
+    }
 
 }
 

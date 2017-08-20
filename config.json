@@ -18,6 +18,8 @@
     "defaultWallWidth": 25,
     "defaultWallHeight": 25,
     "scoreBoardLength": 10,
+    "spawnAreaWidth": 500,
+    "spawnAreaHeight": 500,
     "player": {
         "speedFactor": 3
     }

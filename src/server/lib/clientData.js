@@ -8,7 +8,7 @@
 var Tank = require('./tank');
 
 class ClientData {
-    constructor(id, startXPosition, startYPosition) {
+    constructor(id, startPosition) {
 
         //stuff the client gives us
         this.player = {
@@ -23,10 +23,7 @@ class ClientData {
         this.id = id;
         this.ping = undefined;
         this.startPingTime = undefined;
-        this._position = {
-          x: startXPosition,
-          y: startYPosition
-        };
+        this._position = startPosition;
 
         this._screenName = undefined;
 

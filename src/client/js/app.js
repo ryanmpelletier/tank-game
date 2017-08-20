@@ -32,6 +32,7 @@ function setupStartScreen() {
         if (this.status !== 200) return;
 
         var node = document.createElement('div');
+        node.setAttribute("id", "start-screen-content");
         node.innerHTML = this.responseText;
         document.body.appendChild(node);
         document.getElementById("button-play").onclick = beginGame;
@@ -47,8 +48,7 @@ function beginGame() {
     socket.emit('init', document.getElementById("input-username").value);
 
     //remove the start up form from the page
-    var screenNameForm = document.getElementById("start-screen-center-container");
-    console.log(screenNameForm);
+    var screenNameForm = document.getElementById("start-screen-content");
     screenNameForm.parentNode.removeChild(screenNameForm);
 
     canvasGameBoard = new Canvas();

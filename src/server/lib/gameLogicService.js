@@ -135,6 +135,20 @@ class GameLogicService {
         let trackTwoDestY = 0;
 
         let scaledHalfSingleFrame = clientData.tank.spriteTankHull.singleFrameWidth / 2 * clientData.tank.spriteTankHull.scaleFactorWidth;
+
+        // Correction is the value from the center of the tank (newPosition.x, newPosition.y) to where the the track
+        // actually needs to be rendered (i.e. in line with the left/right tank wheel).
+        //
+        // Came up with the magic fractions below by first seeing what number of units needed to move for this specific
+        // tank sprite width and height (config values were 85 px for width/height). In this case, correction value
+        // turned out to be 22.5 for horizontal/vertical and 32 for vertical) and then divided these values
+        // by scaledHalfSingleFrame:
+        //     22.5 / 42.5 = 0.529411764705882
+        //     32.0 / 42.5 = 0.752941176470588
+        //
+        // These magical fractions allow the tracks to be rendered at the correct location behind a tank's wheels for
+        // any size tank (i.e. tank width/height can be changed without having to manually fix where the tracks are
+        // rendered).
         let straightCorrection = 0.529411764705882 * scaledHalfSingleFrame;
         let diagonalCorrection = 0.752941176470588 * scaledHalfSingleFrame;
 

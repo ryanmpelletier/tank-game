@@ -5,10 +5,11 @@ const crypto = require("crypto");
  * Class to hold data necessary for a single tank track.
  */
 class Track {
-    constructor(x, y, angle) {
+    constructor(x, y, angle, pathId) {
         this.x = x - config.trackWidth / 2;
         this.y = y - config.trackHeight / 2;
         this.angle = angle;
+        this.pathId = pathId; // Not using this yet, but seems good to know what path this track is a part of
 
         this.width = config.trackWidth;
         this.height = config.trackHeight;
@@ -32,21 +33,9 @@ class Track {
     hasExpired() {
         return ++this.tickCount === Track.TIME_TO_LIVE;
     }
-
-    static hasFinishedDelay() {
-        if(++Track.globalTickCount === Track.DELAY_INTERVAL) {
-            Track.globalTickCount = 1; // reset
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
 }
 
 // Static variable creation
-Track.TIME_TO_LIVE = 50;
-Track.DELAY_INTERVAL = 4;
-Track.globalTickCount = 0;
+Track.TIME_TO_LIVE = 100;
 
 module.exports = Track;

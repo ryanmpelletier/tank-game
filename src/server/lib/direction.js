@@ -1,18 +1,16 @@
 /**
- * Class for representing a direction in degrees.
- *
- * @author dderuiter
- * @date 07/15/2017
+ * Class for representing a direction in radians.
+ * Range: (-Math.PI, Math.PI).
  */
 
-const DIRECTION_NORTH = 0;
-const DIRECTION_NORTH_EAST = 45;
-const DIRECTION_EAST = 90;
-const DIRECTION_SOUTH_EAST = 135;
-const DIRECTION_SOUTH = 180;
-const DIRECTION_SOUTH_WEST = 225;
-const DIRECTION_WEST = 270;
-const DIRECTION_NORTH_WEST = 315;
+const DIRECTION_EAST = 0;
+const DIRECTION_SOUTH_EAST = Math.PI / 4;
+const DIRECTION_SOUTH = Math.PI / 2;
+const DIRECTION_SOUTH_WEST = 3 * Math.PI / 4;
+const DIRECTION_WEST = Math.PI;
+const DIRECTION_NORTH_WEST = -(3 * Math.PI / 4);
+const DIRECTION_NORTH = -(Math.PI / 2);
+const DIRECTION_NORTH_EAST = -(Math.PI / 4);
 
 class Direction {
 

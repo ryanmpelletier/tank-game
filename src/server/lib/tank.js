@@ -7,6 +7,7 @@
  */
 var config = require('../../../config.json');
 var TankSprite = require('./tankSprite');
+var Path = require('./path');
 
 class Tank {
     constructor(id, xPosition, yPosition, screenName = 'test', hullAngle = 0,
@@ -20,6 +21,8 @@ class Tank {
         this._gunAngle = gunAngle;
         this.ammo = ammo;
         this.lastFireTime = undefined;
+        this.rotationCorrection = 0;
+        this.isAlive = true;
 
         //probably will have a bullet class
         this.bullets = [];
@@ -27,9 +30,7 @@ class Tank {
         this.spriteTankHull = new TankSprite(1024, 768, 4, 4, 3);
         this.spriteTankGun = new TankSprite(2048, 256, 4, 8);
 
-        this.rotationCorrection = 0;
-
-        this.isAlive = true;
+        this.path = new Path(id);
 
         /**
          * simple quadtree requires a basic format for object put onto the quadtree, I am trying to figure out the best

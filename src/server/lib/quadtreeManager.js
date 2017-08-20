@@ -73,15 +73,7 @@ class QuadtreeManager {
      * @param {String} gameObjectType - The type of game object to return a list of all objects of this type.
      * @returns {Array} The array containing all game objects of the desired type.
      */
-    queryGameObjectsForType(gameObjectType) {
-        // Create query area of entire game board to get all objects
-        var queryArea = {
-            x: 0,
-            y: 0,
-            w: config.gameWidth,
-            h: config.gameHeight
-        };
-
+    queryGameObjectsForType(gameObjectType, queryArea = {x: 0, y: 0, w: config.gameWidth, h: config.gameHeight}) {
         // Get ALL game objects
         var gameObjects = this.queryGameObjects(queryArea);
 

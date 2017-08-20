@@ -48,15 +48,6 @@ class DrawingUtil {
         this.context2D.translate(translateX, translateY);
         this.context2D.fillRect(0,0,global.gameWidth, global.gameHeight);
         this.context2D.translate(-translateX, -translateY);
-
-        /**
-         * For debugging purposes, draw helpful data about screenSize, gameWidth, and user position
-         */
-        this.context2D.font = "20px Arial";
-        this.context2D.fillStyle = "red";
-        this.context2D.fillText(`X: ${perspective.x}, Y: ${perspective.y}`, 10, 50);
-        this.context2D.fillText(`Screen Width: ${global.screenWidth}, Screen Height: ${global.screenHeight}`,10,75);
-        this.context2D.fillText(`Game Width: ${global.gameWidth}, Game Height: ${global.gameHeight}`, 10, 100);
     }
 
     /**

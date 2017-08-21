@@ -42,8 +42,8 @@ class GameLogicService {
             winston.log('debug',`Kicking player ${clientData.tank.screenName}`);
             this.kill(clientData, socket);
         }else{
-            this.updatePlayerPosition(clientData);
-            this.increaseAmmoIfNecessary(clientData,currentTime);
+            this.updateTank(clientData);
+            this.increaseAmmoIfNecessary(clientData, currentTime);
             this.updatePositionsOfBullets(clientData);
             this.fireBulletsIfNecessary(clientData, currentTime);
             this.removeBulletsThatAreOutOfBounds(clientData, currentClientDatas);
@@ -52,50 +52,46 @@ class GameLogicService {
         }
     }
 
-
-    updatePlayerPosition(clientData) {
+    updateTank(clientData) {
         let player = clientData.player;
         let tank = clientData.tank;
 
-        /**
-         * Set tank gun angle
-         */
-        if(typeof player.userInput.mouseAngle !== 'undefined'){
+        if(typeof player.userInput.mouseAngle !== 'undefined') {
+            // Set tank gun angle
             tank.gunAngle = player.userInput.mouseAngle;
         }
 
-        var oldQuadreeInfo = clientData.forQuadtree();
+        var oldTank = tank.forQuadtree();
         var oldPosition = clientData.position;
-        var newPosition = {
-            x: clientData.position.x,
-            y: clientData.position.y
-        };
+        var newPosition = { x: clientData.position.x, y: clientData.position.y };
 
-        /**
-         *  Update player position based on input
-         */
+        let xChange = 0;
+        let yChange = 0;
 
-        // Check if user's position should move UP
-        if(player.userInput.keysPressed['KEY_UP'] &&
-            !player.userInput.keysPressed['KEY_DOWN']) {
-            newPosition.y = oldPosition.y - config.player.speedFactor;
+        if(player.userInput.keysPressed['KEY_RIGHT']) {
+            xChange += config.player.speedFactor;
         }
-        // Check if user's position should move DOWN
-        else if(player.userInput.keysPressed['KEY_DOWN'] &&
-            !player.userInput.keysPressed['KEY_UP']) {
-            newPosition.y = oldPosition.y + config.player.speedFactor;
+        if(player.userInput.keysPressed['KEY_LEFT']) {
+            xChange -= config.player.speedFactor;
+        }
+        if(player.userInput.keysPressed['KEY_DOWN']) {
+            yChange += config.player.speedFactor;
+        }
+        if(player.userInput.keysPressed['KEY_UP']) {
+            yChange -= config.player.speedFactor;
         }
 
-        // Check if user's position should move RIGHT
-        if(player.userInput.keysPressed['KEY_RIGHT'] &&
-            !player.userInput.keysPressed['KEY_LEFT']) {
-            newPosition.x = oldPosition.x + config.player.speedFactor;
+        // Check that user is moving diagonally
+        if(xChange !== 0 && yChange !== 0) {
+            // Calculate equivalent x & y coord. changes for moving diagonally at same speed as horizontally/vertically
+            // The change for x & y will be smaller for moving diagonally
+            let diagSpeedFactor = Math.sqrt(Math.pow(config.player.speedFactor, 2) / 2);
+            xChange = Math.sign(xChange) * diagSpeedFactor;
+            yChange = Math.sign(yChange) * diagSpeedFactor;
         }
-        // Check if user's position should move LEFT
-        else if(player.userInput.keysPressed['KEY_LEFT'] &&
-            !player.userInput.keysPressed['KEY_RIGHT']) {
-            newPosition.x = oldPosition.x - config.player.speedFactor;
-        }
+
+        newPosition.x = oldPosition.x + xChange;
+        newPosition.y = oldPosition.y + yChange;
 
         // Check if tank has moved since last update
         // (Necessary to check because otherwise tank's direction will keep going
@@ -113,11 +109,9 @@ class GameLogicService {
 
         clientData.position = newPosition;
 
-        /**
-        * Update the item on the quadtree
-        */
-        this.quadtree.remove(oldQuadreeInfo, 'id');
-        this.quadtree.put(clientData.forQuadtree());
+        // Update Tank object on QuadTree
+        this.quadtree.remove(oldTank, 'id');
+        this.quadtree.put(tank.forQuadtree());
     };
 
     /**

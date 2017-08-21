@@ -20,6 +20,9 @@
     "scoreBoardLength": 10,
     "spawnAreaWidth": 500,
     "spawnAreaHeight": 500,
+    "wallCount": 10,
+    "maxWallDimension": 400,
+    "minWallDimension": 35,
     "player": {
         "speedFactor": 3
     }

@@ -18,6 +18,7 @@ class GameLogicService {
         this.quadtree = quadtreeManager.getQuadtree();
     }
 
+    //this initializeGame() code can pretty much take as long as it wants, no players will be waiting for this code to finish
     initializeGame() {
         /**
          * Initialize border walls, put them in the quadtree
@@ -33,6 +34,31 @@ class GameLogicService {
         this.quadtree.put(topBorderWall.forQuadtree());
         this.quadtree.put(rightBorderWall.forQuadtree());
         this.quadtree.put(bottomBorderWall.forQuadtree());
+
+        for(var i = 0; i < config.wallCount; i++){
+            //random x,y to start barrier
+            var x = Math.floor((Math.random() * config.gameWidth));
+            var y = Math.floor((Math.random() * config.gameHeight));
+
+
+            var w;
+            var h;
+
+            /*
+                Half the rows tend to be wider than long, the other half tend to be longer than wide.
+                I did this because I want more rectangular shapes than square shapes.
+             */
+            if(i % 2 === 0){
+                w = Math.max(config.minWallDimension, Math.floor((Math.random() * (config.maxWallDimension / 3))));
+                h = Math.max(config.minWallDimension,Math.floor((Math.random() * config.maxWallDimension)));
+            }else{
+                w = Math.max(config.minWallDimension, Math.floor((Math.random() * config.maxWallDimension)));
+                h = Math.max(config.minWallDimension,Math.floor((Math.random() * (config.maxWallDimension / 3))));
+            }
+
+            var wall = new Wall(x,y,Math.min(config.gameWidth - x,w),Math.min(config.gameHeight - y,h));
+            this.quadtree.put(wall.forQuadtree());
+        }
     }
 
     gameTick(clientData, socket, currentClientDatas) {
@@ -335,6 +361,7 @@ class GameLogicService {
         socket.emit('death');
         socket.disconnect();
     }
+
 
     /*
      * This code is dangerous, will try to place user over and over again indefinitely,

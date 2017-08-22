@@ -211,7 +211,7 @@ var gameTick = function(clientData) {
  */
 var gameObjectUpdater = function() {
     //Iterate backwards, players may be removed from the array as the iteration occurs
-    for (let i = currentClientDatas.length - 1; i >= 0; --i) {
+    for (var i = currentClientDatas.length - 1; i >= 0; --i) {
         gameTick(currentClientDatas[i]);
     }
 };

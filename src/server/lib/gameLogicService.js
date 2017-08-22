@@ -18,6 +18,7 @@ class GameLogicService {
         this.quadtree = quadtreeManager.getQuadtree();
     }
 
+    //this initializeGame() code can pretty much take as long as it wants, no players will be waiting for this code to finish
     initializeGame() {
         /**
          * Initialize border walls, put them in the quadtree
@@ -33,6 +34,31 @@ class GameLogicService {
         this.quadtree.put(topBorderWall.forQuadtree());
         this.quadtree.put(rightBorderWall.forQuadtree());
         this.quadtree.put(bottomBorderWall.forQuadtree());
+
+        for(var i = 0; i < config.wallCount; i++){
+            //random x,y to start barrier
+            var x = Math.floor((Math.random() * config.gameWidth));
+            var y = Math.floor((Math.random() * config.gameHeight));
+
+
+            var w;
+            var h;
+
+            /*
+                Half the rows tend to be wider than long, the other half tend to be longer than wide.
+                I did this because I want more rectangular shapes than square shapes.
+             */
+            if(i % 2 === 0){
+                w = Math.max(config.minWallDimension, Math.floor((Math.random() * (config.maxWallDimension / 3))));
+                h = Math.max(config.minWallDimension,Math.floor((Math.random() * config.maxWallDimension)));
+            }else{
+                w = Math.max(config.minWallDimension, Math.floor((Math.random() * config.maxWallDimension)));
+                h = Math.max(config.minWallDimension,Math.floor((Math.random() * (config.maxWallDimension / 3))));
+            }
+
+            var wall = new Wall(x,y,Math.min(config.gameWidth - x,w),Math.min(config.gameHeight - y,h));
+            this.quadtree.put(wall.forQuadtree());
+        }
     }
 
     gameTick(clientData, socket, currentClientDatas) {
@@ -42,18 +68,17 @@ class GameLogicService {
             winston.log('debug',`Kicking player ${clientData.tank.screenName}`);
             this.kill(clientData, socket);
         }else{
-            this.updatePlayerPosition(clientData);
+            this.updatePlayerPosition(clientData, this.quadtreeManager);
             this.increaseAmmoIfNecessary(clientData,currentTime);
-            this.updatePositionsOfBullets(clientData);
+            this.updatePositionsOfBullets(clientData, this.quadtreeManager, currentTime);
             this.fireBulletsIfNecessary(clientData, currentTime);
-            this.removeBulletsThatAreOutOfBounds(clientData, currentClientDatas);
             this.handleCollisionsOnTank(clientData, socket, currentClientDatas);
             this.updateTracks(this.quadtreeManager, this.quadtree);
         }
     }
 
 
-    updatePlayerPosition(clientData) {
+    updatePlayerPosition(clientData, quadtreeManager) {
         let player = clientData.player;
         let tank = clientData.tank;
 
@@ -111,13 +136,17 @@ class GameLogicService {
             this.addTracks(tank, newPosition, angleInRadians);
         }
 
-        clientData.position = newPosition;
+        var walls = quadtreeManager.queryGameObjectsForType(['WALL'], {x: newPosition.x - config.tankWidth / 2, y: newPosition.y - config.tankHeight / 2, w: config.tankWidth, h: config.tankHeight})['WALL'];
+        if(!walls.length) {
+            clientData.position = newPosition;
 
-        /**
-        * Update the item on the quadtree
-        */
-        this.quadtree.remove(oldQuadreeInfo, 'id');
-        this.quadtree.put(clientData.forQuadtree());
+            /**
+             * Update the item on the quadtree
+             */
+            this.quadtree.remove(oldQuadreeInfo, 'id');
+            this.quadtree.put(clientData.forQuadtree());
+        }
+
     };
 
     /**
@@ -226,19 +255,53 @@ class GameLogicService {
         }
     };
 
-    updatePositionsOfBullets(clientData) {
+    updatePositionsOfBullets(clientData, quadtreeManager, time) {
         /**
         * Update positions of all the bullets
         */
         for(var bullet of clientData.tank.bullets) {
+            let currentBulletLocation = bullet.forQuadtree();
 
-            let oldTreeInfo = bullet.forQuadtree();
+            //if bullet is in wall, update the position to reflect a bounce off the wall
+            var walls = quadtreeManager.queryGameObjectsForType(['WALL'], currentBulletLocation)['WALL'];
+            if(walls.length && !bullet.isInWall){
+                bullet.isInWall = true;
+                var wall = walls[0];
+                //I need to find out which side of the wall the bullet is hitting, this is a PITA
+                if((bullet.oldX + config.bulletWidth) < wall.x){
+                    //old bullet x was less than wall x, bullet was coming from left side
+                    bullet.velocityX = -bullet.velocityX;
+                }else if(bullet.oldX > (wall.x + wall.w)){
+                    //old bullet x was greater than wall x, bullet was coming from right side
+                    bullet.velocityX = -bullet.velocityX;
+                }else if((bullet.oldY + config.bulletHeight) < wall.y){
+                    //old bullet y was less than wall y, came from above
+                    bullet.velocityY = -bullet.velocityY;
+                }else if(bullet.oldY >  (wall.y + wall.h)){
+                    //old bullet y is greater than wall y, came from below
+                    bullet.velocityY = -bullet.velocityY;
+                }
+            }else{
+                bullet.isInWall = false;
+            }
+            bullet.oldX = bullet.x;
+            bullet.oldY = bullet.y;
             bullet.x = bullet.x + bullet.velocityX;
             bullet.y = bullet.y - bullet.velocityY;
+
             let forQuadtree = bullet.forQuadtree();
 
-            this.quadtree.remove(oldTreeInfo, 'id');
+            this.quadtree.remove(currentBulletLocation, 'id');
             this.quadtree.put(forQuadtree);
+
+            //if it is time for bullet to die, let it die
+            if(time - bullet.timeCreated > config.bulletTimeToLive){
+                let bulletIndex = util.findIndex(clientData.tank.bullets, bullet.id);
+                if(bulletIndex > -1){
+                    clientData.tank.bullets.splice(bulletIndex,1);
+                    this.quadtree.remove(bullet.forQuadtree(), 'id');
+                }
+            }
         }
     };
 
@@ -266,28 +329,6 @@ class GameLogicService {
 
                 this.quadtree.put(bullet.forQuadtree());
                 clientData.tank.bullets.push(bullet);
-            }
-        }
-    };
-    
-    removeBulletsThatAreOutOfBounds(clientData, currentClientDatas) {
-        /**
-        * Remove any bullets that are now out of bounds.
-        */
-        for(var bullet of clientData.tank.bullets) {
-            if(bullet.x > config.gameWidth - config.wallWidth || bullet.x < config.wallWidth || bullet.y > config.gameHeight - config.wallWidth || bullet.y < config.wallWidth){
-                var playerIndex = util.findIndex(currentClientDatas, bullet.ownerId);
-                if(playerIndex > -1) {
-                    var bulletIndex = util.findIndex(currentClientDatas[playerIndex].tank.bullets, bullet.id);
-                    if(bulletIndex > -1){
-                        currentClientDatas[playerIndex].tank.bullets.splice(bulletIndex,1);
-                        this.quadtree.remove(bullet.forQuadtree(), 'id');
-                    } else {
-                        throw new Error(`Bullet index is ${bulletIndex}, how you gonna remove that??`);
-                    }
-                } else {
-                    throw new Error(`Player index is ${playerIndex}, how you gonna remove that??`);
-                }
             }
         }
     };
@@ -322,8 +363,6 @@ class GameLogicService {
                 }
                 //destroy tank
                 this.kill(clientData, socket);
-            }else if(objectInTankArea.type === 'WALL'){
-                this.kill(clientData, socket);
             }
         }
     }
@@ -350,6 +389,7 @@ class GameLogicService {
         socket.emit('death');
         socket.disconnect();
     }
+
 
     /*
      * This code is dangerous, will try to place user over and over again indefinitely,

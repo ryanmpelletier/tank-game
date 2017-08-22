@@ -13,6 +13,7 @@ class Bullet {
         this.y = y;
         this.velocityX = velocityX;
         this.velocityY = velocityY;
+        this.timeCreated = new Date().getTime();
 
         this.forQuadtree = function(){
             return {

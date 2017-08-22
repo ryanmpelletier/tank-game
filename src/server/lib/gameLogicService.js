@@ -68,7 +68,7 @@ class GameLogicService {
             winston.log('debug',`Kicking player ${clientData.tank.screenName}`);
             this.kill(clientData, socket);
         }else{
-            this.updatePlayerPosition(clientData);
+            this.updatePlayerPosition(clientData, this.quadtreeManager);
             this.increaseAmmoIfNecessary(clientData,currentTime);
             this.updatePositionsOfBullets(clientData, this.quadtreeManager, currentTime);
             this.fireBulletsIfNecessary(clientData, currentTime);
@@ -78,7 +78,7 @@ class GameLogicService {
     }
 
 
-    updatePlayerPosition(clientData) {
+    updatePlayerPosition(clientData, quadtreeManager) {
         let player = clientData.player;
         let tank = clientData.tank;
 
@@ -136,13 +136,17 @@ class GameLogicService {
             this.addTracks(tank, newPosition, angleInRadians);
         }
 
-        clientData.position = newPosition;
+        var walls = quadtreeManager.queryGameObjectsForType(['WALL'], {x: newPosition.x - config.tankWidth / 2, y: newPosition.y - config.tankHeight / 2, w: config.tankWidth, h: config.tankHeight})['WALL'];
+        if(!walls.length) {
+            clientData.position = newPosition;
 
-        /**
-        * Update the item on the quadtree
-        */
-        this.quadtree.remove(oldQuadreeInfo, 'id');
-        this.quadtree.put(clientData.forQuadtree());
+            /**
+             * Update the item on the quadtree
+             */
+            this.quadtree.remove(oldQuadreeInfo, 'id');
+            this.quadtree.put(clientData.forQuadtree());
+        }
+
     };
 
     /**
@@ -358,8 +362,6 @@ class GameLogicService {
                     }
                 }
                 //destroy tank
-                this.kill(clientData, socket);
-            }else if(objectInTankArea.type === 'WALL'){
                 this.kill(clientData, socket);
             }
         }

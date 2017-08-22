@@ -70,7 +70,7 @@ class GameLogicService {
         }else{
             this.updatePlayerPosition(clientData);
             this.increaseAmmoIfNecessary(clientData,currentTime);
-            this.updatePositionsOfBullets(clientData, this.quadtreeManager);
+            this.updatePositionsOfBullets(clientData, this.quadtreeManager, currentTime);
             this.fireBulletsIfNecessary(clientData, currentTime);
             this.handleCollisionsOnTank(clientData, socket, currentClientDatas);
             this.updateTracks(this.quadtreeManager, this.quadtree);
@@ -251,26 +251,52 @@ class GameLogicService {
         }
     };
 
-    updatePositionsOfBullets(clientData, quadtreeManager) {
+    updatePositionsOfBullets(clientData, quadtreeManager, time) {
         /**
         * Update positions of all the bullets
         */
         for(var bullet of clientData.tank.bullets) {
-            let oldTreeInfo = bullet.forQuadtree();
-            //if bullet is in wall, remove the bullet, else update the position
-            if(quadtreeManager.queryGameObjectsForType(['WALL'], oldTreeInfo)['WALL'].length){
+            let currentBulletLocation = bullet.forQuadtree();
+
+            //if bullet is in wall, update the position to reflect a bounce off the wall
+            var walls = quadtreeManager.queryGameObjectsForType(['WALL'], currentBulletLocation)['WALL'];
+            if(walls.length && !bullet.isInWall){
+                bullet.isInWall = true;
+                var wall = walls[0];
+                //I need to find out which side of the wall the bullet is hitting, this is a PITA
+                if((bullet.oldX + config.bulletWidth) < wall.x){
+                    //old bullet x was less than wall x, bullet was coming from left side
+                    bullet.velocityX = -bullet.velocityX;
+                }else if(bullet.oldX > (wall.x + wall.w)){
+                    //old bullet x was greater than wall x, bullet was coming from right side
+                    bullet.velocityX = -bullet.velocityX;
+                }else if((bullet.oldY + config.bulletHeight) < wall.y){
+                    //old bullet y was less than wall y, came from above
+                    bullet.velocityY = -bullet.velocityY;
+                }else if(bullet.oldY >  (wall.y + wall.h)){
+                    //old bullet y is greater than wall y, came from below
+                    bullet.velocityY = -bullet.velocityY;
+                }
+            }else{
+                bullet.isInWall = false;
+            }
+            bullet.oldX = bullet.x;
+            bullet.oldY = bullet.y;
+            bullet.x = bullet.x + bullet.velocityX;
+            bullet.y = bullet.y - bullet.velocityY;
+
+            let forQuadtree = bullet.forQuadtree();
+
+            this.quadtree.remove(currentBulletLocation, 'id');
+            this.quadtree.put(forQuadtree);
+
+            //if it is time for bullet to die, let it die
+            if(time - bullet.timeCreated > config.bulletTimeToLive){
                 let bulletIndex = util.findIndex(clientData.tank.bullets, bullet.id);
                 if(bulletIndex > -1){
                     clientData.tank.bullets.splice(bulletIndex,1);
                     this.quadtree.remove(bullet.forQuadtree(), 'id');
                 }
-            }else{
-                bullet.x = bullet.x + bullet.velocityX;
-                bullet.y = bullet.y - bullet.velocityY;
-                let forQuadtree = bullet.forQuadtree();
-
-                this.quadtree.remove(oldTreeInfo, 'id');
-                this.quadtree.put(forQuadtree);
             }
         }
     };

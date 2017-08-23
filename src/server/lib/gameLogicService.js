@@ -68,8 +68,8 @@ class GameLogicService {
             winston.log('debug',`Kicking player ${clientData.tank.screenName}`);
             this.kill(clientData, socket);
         }else{
-            this.updatePlayerPosition(clientData, this.quadtreeManager);
-            this.increaseAmmoIfNecessary(clientData,currentTime);
+            this.updateTank(clientData);
+            this.increaseAmmoIfNecessary(clientData, currentTime);
             this.updatePositionsOfBullets(clientData, this.quadtreeManager, currentTime);
             this.fireBulletsIfNecessary(clientData, currentTime);
             this.handleCollisionsOnTank(clientData, socket, currentClientDatas);
@@ -77,50 +77,46 @@ class GameLogicService {
         }
     }
 
-
-    updatePlayerPosition(clientData, quadtreeManager) {
+    updateTank(clientData) {
         let player = clientData.player;
         let tank = clientData.tank;
 
-        /**
-         * Set tank gun angle
-         */
-        if(typeof player.userInput.mouseAngle !== 'undefined'){
+        if(typeof player.userInput.mouseAngle !== 'undefined') {
+            // Set tank gun angle
             tank.gunAngle = player.userInput.mouseAngle;
         }
 
-        var oldQuadreeInfo = clientData.forQuadtree();
+        var oldTank = tank.forQuadtree();
         var oldPosition = clientData.position;
-        var newPosition = {
-            x: clientData.position.x,
-            y: clientData.position.y
-        };
+        var newPosition = { x: clientData.position.x, y: clientData.position.y };
 
-        /**
-         *  Update player position based on input
-         */
+        let xChange = 0;
+        let yChange = 0;
 
-        // Check if user's position should move UP
-        if(player.userInput.keysPressed['KEY_UP'] &&
-            !player.userInput.keysPressed['KEY_DOWN']) {
-            newPosition.y = oldPosition.y - config.player.speedFactor;
+        if(player.userInput.keysPressed['KEY_RIGHT']) {
+            xChange += config.player.speedFactor;
         }
-        // Check if user's position should move DOWN
-        else if(player.userInput.keysPressed['KEY_DOWN'] &&
-            !player.userInput.keysPressed['KEY_UP']) {
-            newPosition.y = oldPosition.y + config.player.speedFactor;
+        if(player.userInput.keysPressed['KEY_LEFT']) {
+            xChange -= config.player.speedFactor;
+        }
+        if(player.userInput.keysPressed['KEY_DOWN']) {
+            yChange += config.player.speedFactor;
+        }
+        if(player.userInput.keysPressed['KEY_UP']) {
+            yChange -= config.player.speedFactor;
         }
 
-        // Check if user's position should move RIGHT
-        if(player.userInput.keysPressed['KEY_RIGHT'] &&
-            !player.userInput.keysPressed['KEY_LEFT']) {
-            newPosition.x = oldPosition.x + config.player.speedFactor;
+        // Check that user is moving diagonally
+        if(xChange !== 0 && yChange !== 0) {
+            // Calculate equivalent x & y coord. changes for moving diagonally at same speed as horizontally/vertically
+            // The change for x & y will be smaller for moving diagonally
+            let diagSpeedFactor = Math.sqrt(Math.pow(config.player.speedFactor, 2) / 2);
+            xChange = Math.sign(xChange) * diagSpeedFactor;
+            yChange = Math.sign(yChange) * diagSpeedFactor;
         }
-        // Check if user's position should move LEFT
-        else if(player.userInput.keysPressed['KEY_LEFT'] &&
-            !player.userInput.keysPressed['KEY_RIGHT']) {
-            newPosition.x = oldPosition.x - config.player.speedFactor;
-        }
+
+        newPosition.x = oldPosition.x + xChange;
+        newPosition.y = oldPosition.y + yChange;
 
         // Check if tank has moved since last update
         // (Necessary to check because otherwise tank's direction will keep going
@@ -128,6 +124,10 @@ class GameLogicService {
         if(!util.areCoordinatesEqual(oldPosition, newPosition)) {
             // Tank has moved so update its direction
             let angleInRadians = Math.atan2(newPosition.y - oldPosition.y, newPosition.x - oldPosition.x);
+
+            // Convert radians to positive if negative: Math.atan2() has range of (-PI, PI)
+            angleInRadians = Number((angleInRadians + 2 * Math.PI) % (2 * Math.PI)).toFixed(5);
+
             tank.hullAngle = angleInRadians;
 
             // Update tank's frame since tank is moving
@@ -136,17 +136,14 @@ class GameLogicService {
             this.addTracks(tank, newPosition, angleInRadians);
         }
 
-        var walls = quadtreeManager.queryGameObjectsForType(['WALL'], {x: newPosition.x - config.tankWidth / 2, y: newPosition.y - config.tankHeight / 2, w: config.tankWidth, h: config.tankHeight})['WALL'];
+        var walls = this.quadtreeManager.queryGameObjectsForType(['WALL'], {x: newPosition.x - config.tankWidth / 2, y: newPosition.y - config.tankHeight / 2, w: config.tankWidth, h: config.tankHeight})['WALL'];
         if(!walls.length) {
             clientData.position = newPosition;
 
-            /**
-             * Update the item on the quadtree
-             */
-            this.quadtree.remove(oldQuadreeInfo, 'id');
-            this.quadtree.put(clientData.forQuadtree());
+            // Update Tank object on QuadTree
+            this.quadtree.remove(oldTank, 'id');
+            this.quadtree.put(tank.forQuadtree());
         }
-
     };
 
     /**
@@ -183,8 +180,8 @@ class GameLogicService {
         // These magical fractions allow the tracks to be rendered at the correct location behind a tank's wheels for
         // any size tank (i.e. tank width/height can be changed without having to manually fix where the tracks are
         // rendered).
-        let straightCorrection = 0.529411764705882 * scaledHalfSingleFrame;
-        let diagonalCorrection = 0.752941176470588 * scaledHalfSingleFrame;
+        let straightCorrection = 0.52941 * scaledHalfSingleFrame;
+        let diagonalCorrection = 0.75294 * scaledHalfSingleFrame;
 
         switch(angleInRadians) {
             case Direction.E: // East

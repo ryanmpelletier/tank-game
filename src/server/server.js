@@ -118,7 +118,7 @@ socketIo.on('connection', function(socket) {
         sockets[clientUpdatedData.id] = socket;
 
         //put client onto quadtree
-        quadtree.put(currentClientData.forQuadtree());
+        quadtree.put(currentClientData.tank.forQuadtree());
     });
 
     /**
@@ -148,7 +148,7 @@ socketIo.on('connection', function(socket) {
          /**
           * Remove player from quadtree
           */
-        quadtree.remove(currentClientData.forQuadtree(), 'id');
+        quadtree.remove(currentClientData.tank.forQuadtree(), 'id');
 
 
         var playerIndex = util.findIndex(currentClientDatas,currentClientData.id);

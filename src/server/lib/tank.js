@@ -54,11 +54,8 @@ class Tank {
     set hullAngle(hullAngle) {
         this._hullAngle = hullAngle;
 
-        // Convert radians to positive if negative
-        hullAngle = (hullAngle + 2 * Math.PI) % (2 * Math.PI);
-
         // Determine correct sprite frame from angle
-        this.spriteTankHull.rowFrameIndex = Math.ceil(hullAngle / (Math.PI / 4)) % 4;
+        this.spriteTankHull.rowFrameIndex = Number(hullAngle / (Math.PI / 4)).toFixed(0) % 4;
     }
 
     set gunAngle(gunAngle) {

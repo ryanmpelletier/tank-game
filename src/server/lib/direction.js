@@ -1,16 +1,16 @@
 /**
  * Class for representing a direction in radians.
- * Range: (-Math.PI, Math.PI).
+ * Range: (0, 2 * Math.PI).
  */
 
-const DIRECTION_EAST = 0;
-const DIRECTION_SOUTH_EAST = Math.PI / 4;
-const DIRECTION_SOUTH = Math.PI / 2;
-const DIRECTION_SOUTH_WEST = 3 * Math.PI / 4;
-const DIRECTION_WEST = Math.PI;
-const DIRECTION_NORTH_WEST = -(3 * Math.PI / 4);
-const DIRECTION_NORTH = -(Math.PI / 2);
-const DIRECTION_NORTH_EAST = -(Math.PI / 4);
+const DIRECTION_EAST        = Number(0).toFixed(5);
+const DIRECTION_SOUTH_EAST  = Number(Math.PI / 4).toFixed(5);
+const DIRECTION_SOUTH       = Number(Math.PI / 2).toFixed(5);
+const DIRECTION_SOUTH_WEST  = Number(3 * Math.PI / 4).toFixed(5);
+const DIRECTION_WEST        = Number(Math.PI).toFixed(5);
+const DIRECTION_NORTH_WEST  = Number(5 * Math.PI / 4).toFixed(5);
+const DIRECTION_NORTH       = Number(3 * Math.PI / 2).toFixed(5);
+const DIRECTION_NORTH_EAST  = Number(7 * Math.PI / 4).toFixed(5);
 
 class Direction {
 

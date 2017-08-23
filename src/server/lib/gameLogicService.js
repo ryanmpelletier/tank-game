@@ -99,6 +99,10 @@ class GameLogicService {
         if(!util.areCoordinatesEqual(oldPosition, newPosition)) {
             // Tank has moved so update its direction
             let angleInRadians = Math.atan2(newPosition.y - oldPosition.y, newPosition.x - oldPosition.x);
+
+            // Convert radians to positive if negative: Math.atan2() has range of (-PI, PI)
+            angleInRadians = Number((angleInRadians + 2 * Math.PI) % (2 * Math.PI)).toFixed(5);
+
             tank.hullAngle = angleInRadians;
 
             // Update tank's frame since tank is moving
@@ -148,8 +152,8 @@ class GameLogicService {
         // These magical fractions allow the tracks to be rendered at the correct location behind a tank's wheels for
         // any size tank (i.e. tank width/height can be changed without having to manually fix where the tracks are
         // rendered).
-        let straightCorrection = 0.529411764705882 * scaledHalfSingleFrame;
-        let diagonalCorrection = 0.752941176470588 * scaledHalfSingleFrame;
+        let straightCorrection = 0.52941 * scaledHalfSingleFrame;
+        let diagonalCorrection = 0.75294 * scaledHalfSingleFrame;
 
         switch(angleInRadians) {
             case Direction.E: // East

@@ -36,6 +36,6 @@ class Track {
 }
 
 // Static variable creation
-Track.TIME_TO_LIVE = 100;
+Track.TIME_TO_LIVE = 64;
 
 module.exports = Track;

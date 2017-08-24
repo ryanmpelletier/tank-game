@@ -136,8 +136,8 @@ class GameLogicService {
             this.addTracks(tank, newPosition, angleInRadians);
         }
 
-        var walls = this.quadtreeManager.queryGameObjectsForType(['WALL'], {x: newPosition.x - config.tankWidth / 2, y: newPosition.y - config.tankHeight / 2, w: config.tankWidth, h: config.tankHeight})['WALL'];
-        if(!walls.length) {
+        var objects = this.quadtreeManager.queryGameObjectsForType(['WALL', 'TANK'], {x: newPosition.x - config.tankWidth / 2, y: newPosition.y - config.tankHeight / 2, w: config.tankWidth, h: config.tankHeight});
+        if(!objects['WALL'].length && (objects['TANK'].length === 1)) {
             clientData.position = newPosition;
 
             // Update Tank object on QuadTree

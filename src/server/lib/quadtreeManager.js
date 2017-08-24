@@ -12,7 +12,7 @@ class QuadtreeManager {
          * Internally hold one quadtree, I can see someone wanting to write one that had multiple but
          * I'm not going to be concerned with that for now
          */
-        this.quadtree = new SimpleQuadtree(0, 0, config.gameWidth, config.gameHeight);
+        this.quadtree = new SimpleQuadtree(0, 0, config.gameWidth, config.gameHeight, {maxChildren: 25});
     }
 
     /**

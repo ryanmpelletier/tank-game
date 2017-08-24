@@ -15,7 +15,7 @@
     "tankFireTimeWait": 250,
     "wallWidth": 25,
     "bulletVelocity": 5,
-    "bulletTimeToLive": 3000,
+    "bulletTimeToLive": 2750,
     "defaultWallWidth": 25,
     "defaultWallHeight": 25,
     "scoreBoardLength": 10,

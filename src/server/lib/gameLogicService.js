@@ -115,6 +115,10 @@ class GameLogicService {
             yChange = Math.sign(yChange) * diagSpeedFactor;
         }
 
+
+        tank.xChange = xChange;
+        tank.yChange = yChange;
+
         newPosition.x = oldPosition.x + xChange;
         newPosition.y = oldPosition.y + yChange;
 
@@ -284,7 +288,7 @@ class GameLogicService {
             bullet.oldX = bullet.x;
             bullet.oldY = bullet.y;
             bullet.x = bullet.x + bullet.velocityX;
-            bullet.y = bullet.y - bullet.velocityY;
+            bullet.y = bullet.y + bullet.velocityY;
 
             let forQuadtree = bullet.forQuadtree();
 
@@ -316,13 +320,17 @@ class GameLogicService {
                 clientData.tank.ammo = clientData.tank.ammo - 1;
 
                 var xComponent = Math.cos(clientData.tank.gunAngle);
-                var yComponent = Math.sin(clientData.tank.gunAngle);
+                var yComponent = -Math.sin(clientData.tank.gunAngle);
+
+
+                console.log(`x change ${clientData.tank.xChange}`);
+                console.log(`y change ${clientData.tank.yChange}`);
 
                 var bullet = new Bullet(clientData.id,
                     clientData.tank.x + (xComponent * config.tankBarrelLength),
-                    clientData.tank.y - (yComponent * config.tankBarrelLength),
-                    xComponent * config.bulletVelocity,
-                    yComponent * config.bulletVelocity);
+                    clientData.tank.y + (yComponent * config.tankBarrelLength),
+                    (xComponent * config.bulletVelocity) + clientData.tank.xChange,
+                    (yComponent * config.bulletVelocity) + clientData.tank.yChange);
 
                 this.quadtree.put(bullet.forQuadtree());
                 clientData.tank.bullets.push(bullet);
@@ -340,7 +348,7 @@ class GameLogicService {
                 var bullet = objectInTankArea.object;
 
                 // Check if bullet belongs to tank who shot the bullet
-                if(bullet.ownerId == clientData.tank.id) {
+                if(bullet.ownerId === clientData.tank.id) {
                     // Stop tanks from killing themselves
                     continue;
                 }
@@ -382,7 +390,6 @@ class GameLogicService {
     };
 
     kill(clientData, socket){
-        clientData.tank.isAlive = false;
         socket.emit('death');
         socket.disconnect();
     }

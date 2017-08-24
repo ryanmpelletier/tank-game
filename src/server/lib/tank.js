@@ -22,7 +22,8 @@ class Tank {
         this.ammo = ammo;
         this.lastFireTime = undefined;
         this.rotationCorrection = 0;
-        this.isAlive = true;
+        this.xChange = 0;
+        this.yChange = 0;
 
         //probably will have a bullet class
         this.bullets = [];

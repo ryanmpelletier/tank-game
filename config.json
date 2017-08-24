@@ -3,28 +3,35 @@
     "maxLastHeartBeat": 5000,
     "gameWidth": 2000,
     "gameHeight": 2000,
-    "tankWidth": 85,
-    "tankHeight": 85,
-    "trackWidth": 4,
-    "trackHeight": 10,
-    "bulletWidth": 1,
-    "bulletHeight": 1,
-    "tankTimeToGainAmmo": 1000,
-    "tankBarrelLength": 45,
-    "tankAmmoCapacity": 4,
-    "tankFireTimeWait": 250,
-    "wallWidth": 25,
-    "bulletVelocity": 5,
-    "bulletTimeToLive": 2750,
-    "defaultWallWidth": 25,
-    "defaultWallHeight": 25,
     "scoreBoardLength": 10,
     "spawnAreaWidth": 500,
     "spawnAreaHeight": 500,
-    "wallCount": 10,
-    "maxWallDimension": 400,
-    "minWallDimension": 35,
-    "player": {
-        "speedFactor": 4
+    "wall": {
+        "width": 25,
+        "height": 25,
+        "count": 10,
+        "minDimension": 35,
+        "maxDimension": 400
+    },
+    "track": {
+        "timeToLive": 64,
+        "width": 4,
+        "height": 10
+    },
+    "bullet": {
+        "width": 1,
+        "height": 1,
+        "velocity": 5,
+        "timeToLive": 2750
+    },
+    "tank": {
+        "width": 85,
+        "height": 85,
+        "normalSpeed": 4,
+        "boostFactor": 1.5,
+        "barrelLength": 45,
+        "ammoCapacity": 4,
+        "fireTimeWait": 250,
+        "timeToGainAmmo": 1000
     }
 }

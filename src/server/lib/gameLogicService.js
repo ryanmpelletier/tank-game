@@ -115,6 +115,12 @@ class GameLogicService {
             yChange = Math.sign(yChange) * diagSpeedFactor;
         }
 
+        // Check if player is pressing key to BOOST
+        if(player.userInput.keysPressed['KEY_SPACE']) {
+            xChange *= config.tank.boostFactor;
+            yChange *= config.tank.boostFactor;
+        }
+
         tank.xChange = xChange;
         tank.yChange = yChange;
 

@@ -241,7 +241,7 @@ var clientUpdater = function() {
 
         var ammo = {
             "ammo":{
-                capacity: config.tankAmmoCapacity,
+                capacity: config.tank.ammoCapacity,
                 count: clientData.tank.ammo
             }
         };

@@ -11,7 +11,7 @@ var Path = require('./path');
 
 class Tank {
     constructor(id, xPosition, yPosition, screenName = 'test', hullAngle = 0,
-                gunAngle = 0, ammo = config.tankAmmoCapacity) {
+                gunAngle = 0, ammo = config.tank.ammoCapacity) {
         this.id = id;
         this.x = xPosition;
         this.y = yPosition;
@@ -41,10 +41,10 @@ class Tank {
          */
         this.forQuadtree = function() {
             return {
-                x: this.x - config.tankWidth / 2,
-                y: this.y - config.tankHeight / 2,
-                w: config.tankWidth,
-                h: config.tankHeight,
+                x: this.x - config.tank.width / 2,
+                y: this.y - config.tank.height / 2,
+                w: config.tank.width,
+                h: config.tank.height,
                 id: this.id,
                 type:'TANK',
                 object: this

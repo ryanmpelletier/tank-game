@@ -19,8 +19,8 @@ class Bullet {
             return {
                 x: this.x,
                 y: this.y,
-                w: config.bulletWidth,
-                h: config.bulletHeight,
+                w: config.bullet.width,
+                h: config.bullet.height,
                 id: this.id,
                 type:'BULLET',
                 object: this

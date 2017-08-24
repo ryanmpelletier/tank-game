@@ -25,17 +25,17 @@ class GameLogicService {
          * I'm still not sure I want to use the quadtree to store data for the borders.
          * I don't know how much it will help us, it might even not help. 
          */
-        var leftBorderWall = new Wall(0, 0, config.wallWidth, config.gameHeight);
-        var topBorderWall = new Wall(config.wallWidth, 0, config.gameWidth - 2 * config.wallWidth, config.wallWidth);
-        var rightBorderWall = new Wall(config.gameWidth - config.wallWidth, 0, config.wallWidth, config.gameHeight);
-        var bottomBorderWall = new Wall(config.wallWidth, config.gameHeight - config.wallWidth, config.gameWidth - 2 * config.wallWidth, config.wallWidth);
+        var leftBorderWall = new Wall(0, 0, config.wall.width, config.gameHeight);
+        var topBorderWall = new Wall(config.wall.width, 0, config.gameWidth - 2 * config.wall.width, config.wall.width);
+        var rightBorderWall = new Wall(config.gameWidth - config.wall.width, 0, config.wall.width, config.gameHeight);
+        var bottomBorderWall = new Wall(config.wall.width, config.gameHeight - config.wall.width, config.gameWidth - 2 * config.wall.width, config.wall.width);
 
         this.quadtree.put(leftBorderWall.forQuadtree());
         this.quadtree.put(topBorderWall.forQuadtree());
         this.quadtree.put(rightBorderWall.forQuadtree());
         this.quadtree.put(bottomBorderWall.forQuadtree());
 
-        for(var i = 0; i < config.wallCount; i++){
+        for(var i = 0; i < config.wall.count; i++){
             //random x,y to start barrier
             var x = Math.floor((Math.random() * config.gameWidth));
             var y = Math.floor((Math.random() * config.gameHeight));
@@ -49,11 +49,11 @@ class GameLogicService {
                 I did this because I want more rectangular shapes than square shapes.
              */
             if(i % 2 === 0){
-                w = Math.max(config.minWallDimension, Math.floor((Math.random() * (config.maxWallDimension / 3))));
-                h = Math.max(config.minWallDimension,Math.floor((Math.random() * config.maxWallDimension)));
+                w = Math.max(config.wall.minDimension, Math.floor((Math.random() * (config.wall.maxDimension / 3))));
+                h = Math.max(config.wall.minDimension,Math.floor((Math.random() * config.wall.maxDimension)));
             }else{
-                w = Math.max(config.minWallDimension, Math.floor((Math.random() * config.maxWallDimension)));
-                h = Math.max(config.minWallDimension,Math.floor((Math.random() * (config.maxWallDimension / 3))));
+                w = Math.max(config.wall.minDimension, Math.floor((Math.random() * config.wall.maxDimension)));
+                h = Math.max(config.wall.minDimension,Math.floor((Math.random() * (config.wall.maxDimension / 3))));
             }
 
             var wall = new Wall(x,y,Math.min(config.gameWidth - x,w),Math.min(config.gameHeight - y,h));
@@ -94,27 +94,26 @@ class GameLogicService {
         let yChange = 0;
 
         if(player.userInput.keysPressed['KEY_RIGHT']) {
-            xChange += config.player.speedFactor;
+            xChange += config.tank.normalSpeed;
         }
         if(player.userInput.keysPressed['KEY_LEFT']) {
-            xChange -= config.player.speedFactor;
+            xChange -= config.tank.normalSpeed;
         }
         if(player.userInput.keysPressed['KEY_DOWN']) {
-            yChange += config.player.speedFactor;
+            yChange += config.tank.normalSpeed;
         }
         if(player.userInput.keysPressed['KEY_UP']) {
-            yChange -= config.player.speedFactor;
+            yChange -= config.tank.normalSpeed;
         }
 
         // Check that user is moving diagonally
         if(xChange !== 0 && yChange !== 0) {
             // Calculate equivalent x & y coord. changes for moving diagonally at same speed as horizontally/vertically
             // The change for x & y will be smaller for moving diagonally
-            let diagSpeedFactor = Math.sqrt(Math.pow(config.player.speedFactor, 2) / 2);
+            let diagSpeedFactor = Math.sqrt(Math.pow(config.tank.normalSpeed, 2) / 2);
             xChange = Math.sign(xChange) * diagSpeedFactor;
             yChange = Math.sign(yChange) * diagSpeedFactor;
         }
-
 
         tank.xChange = xChange;
         tank.yChange = yChange;
@@ -140,7 +139,7 @@ class GameLogicService {
             this.addTracks(tank, newPosition, angleInRadians);
         }
 
-        var objects = this.quadtreeManager.queryGameObjectsForType(['WALL', 'TANK'], {x: newPosition.x - config.tankWidth / 2, y: newPosition.y - config.tankHeight / 2, w: config.tankWidth, h: config.tankHeight});
+        var objects = this.quadtreeManager.queryGameObjectsForType(['WALL', 'TANK'], {x: newPosition.x - config.tank.width / 2, y: newPosition.y - config.tank.height / 2, w: config.tank.width, h: config.tank.height});
         if(!objects['WALL'].length && (objects['TANK'].length === 1)) {
             clientData.position = newPosition;
 
@@ -250,7 +249,7 @@ class GameLogicService {
         /**
          * Increase ammo if necessary
          */
-        if(clientData.tank.ammo < config.tankAmmoCapacity && ((time - clientData.tank.lastAmmoEarned > config.tankTimeToGainAmmo) || typeof clientData.tank.lastAmmoEarned === 'undefined')){
+        if(clientData.tank.ammo < config.tank.ammoCapacity && ((time - clientData.tank.lastAmmoEarned > config.tank.timeToGainAmmo) || typeof clientData.tank.lastAmmoEarned === 'undefined')){
             clientData.tank.ammo = clientData.tank.ammo + 1;
             clientData.tank.lastAmmoEarned = time;
         }
@@ -269,13 +268,13 @@ class GameLogicService {
                 bullet.isInWall = true;
                 var wall = walls[0];
                 //I need to find out which side of the wall the bullet is hitting, this is a PITA
-                if((bullet.oldX + config.bulletWidth) < wall.x){
+                if((bullet.oldX + config.bullet.width) < wall.x){
                     //old bullet x was less than wall x, bullet was coming from left side
                     bullet.velocityX = -bullet.velocityX;
                 }else if(bullet.oldX > (wall.x + wall.w)){
                     //old bullet x was greater than wall x, bullet was coming from right side
                     bullet.velocityX = -bullet.velocityX;
-                }else if((bullet.oldY + config.bulletHeight) < wall.y){
+                }else if((bullet.oldY + config.bullet.height) < wall.y){
                     //old bullet y was less than wall y, came from above
                     bullet.velocityY = -bullet.velocityY;
                 }else if(bullet.oldY >  (wall.y + wall.h)){
@@ -296,7 +295,7 @@ class GameLogicService {
             this.quadtree.put(forQuadtree);
 
             //if it is time for bullet to die, let it die
-            if(time - bullet.timeCreated > config.bulletTimeToLive){
+            if(time - bullet.timeCreated > config.bullet.timeToLive){
                 let bulletIndex = util.findIndex(clientData.tank.bullets, bullet.id);
                 if(bulletIndex > -1){
                     clientData.tank.bullets.splice(bulletIndex,1);
@@ -314,7 +313,7 @@ class GameLogicService {
             if(clientData.player.userInput.mouseClicked &&
                 clientData.tank.ammo > 0 &&
                 (typeof clientData.tank.lastFireTime === 'undefined' ||
-                (time - clientData.tank.lastFireTime > config.tankFireTimeWait))) {
+                (time - clientData.tank.lastFireTime > config.tank.fireTimeWait))) {
 
                 clientData.tank.lastFireTime = time;
                 clientData.tank.ammo = clientData.tank.ammo - 1;
@@ -322,15 +321,11 @@ class GameLogicService {
                 var xComponent = Math.cos(clientData.tank.gunAngle);
                 var yComponent = -Math.sin(clientData.tank.gunAngle);
 
-
-                console.log(`x change ${clientData.tank.xChange}`);
-                console.log(`y change ${clientData.tank.yChange}`);
-
                 var bullet = new Bullet(clientData.id,
-                    clientData.tank.x + (xComponent * config.tankBarrelLength),
-                    clientData.tank.y + (yComponent * config.tankBarrelLength),
-                    (xComponent * config.bulletVelocity) + clientData.tank.xChange,
-                    (yComponent * config.bulletVelocity) + clientData.tank.yChange);
+                    clientData.tank.x + (xComponent * config.tank.barrelLength),
+                    clientData.tank.y + (yComponent * config.tank.barrelLength),
+                    (xComponent * config.bullet.velocity) + clientData.tank.xChange,
+                    (yComponent * config.bullet.velocity) + clientData.tank.yChange);
 
                 this.quadtree.put(bullet.forQuadtree());
                 clientData.tank.bullets.push(bullet);

@@ -6,13 +6,13 @@ const crypto = require("crypto");
  */
 class Track {
     constructor(x, y, angle, pathId) {
-        this.x = x - config.trackWidth / 2;
-        this.y = y - config.trackHeight / 2;
+        this.x = x - config.track.width / 2;
+        this.y = y - config.track.height / 2;
         this.angle = angle;
         this.pathId = pathId; // Not using this yet, but seems good to know what path this track is a part of
 
-        this.width = config.trackWidth;
-        this.height = config.trackHeight;
+        this.width = config.track.width;
+        this.height = config.track.height;
 
         this.id = crypto.randomBytes(16).toString("hex");
         this.tickCount = 1;
@@ -36,6 +36,6 @@ class Track {
 }
 
 // Static variable creation
-Track.TIME_TO_LIVE = 64;
+Track.TIME_TO_LIVE = config.track.timeToLive;
 
 module.exports = Track;

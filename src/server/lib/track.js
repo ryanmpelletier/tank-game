@@ -17,25 +17,19 @@ class Track {
         this.id = crypto.randomBytes(16).toString("hex");
         this.tickCount = 1;
 
-        this.forQuadtree = function() {
+        this.forSpacialHash = function() {
             return {
-                x: this.x,
-                y: this.y,
-                w: this.width,
-                h: this.height,
-                id: this.id,
+                range: {
+                    x: this.x,
+                    y: this.y,
+                    width: this.width,
+                    height: this.height
+                },
                 type:'TRACK',
                 object: this
             }
         };
     }
-
-    hasExpired() {
-        return ++this.tickCount === Track.TIME_TO_LIVE;
-    }
 }
-
-// Static variable creation
-Track.TIME_TO_LIVE = config.track.timeToLive;
 
 module.exports = Track;

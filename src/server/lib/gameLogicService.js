@@ -13,9 +13,10 @@ var winston = require('winston');
 winston.level = 'debug';
 
 class GameLogicService {
-    constructor(quadtreeManager) {
+    constructor(quadtreeManager, spatialHashManager) {
         this.quadtreeManager = quadtreeManager;
         this.quadtree = quadtreeManager.getQuadtree();
+        this.spatialHashManager = spatialHashManager;
     }
 
     //this initializeGame() code can pretty much take as long as it wants, no players will be waiting for this code to finish
@@ -73,7 +74,6 @@ class GameLogicService {
             this.updatePositionsOfBullets(clientData, this.quadtreeManager, currentTime);
             this.fireBulletsIfNecessary(clientData, currentTime);
             this.handleCollisionsOnTank(clientData, socket, currentClientDatas);
-            this.updateTracks(this.quadtreeManager, this.quadtree);
         }
     }
 
@@ -168,11 +168,10 @@ class GameLogicService {
             // Delay has not been reached so don't create more tracks
             return;
         }
-
-        let trackOneDestX = 0;
-        let trackOneDestY = 0;
-        let trackTwoDestX = 0;
-        let trackTwoDestY = 0;
+        let track1DestX = 0;
+        let track1DestY = 0;
+        let track2DestX = 0;
+        let track2DestY = 0;
 
         let scaledHalfSingleFrame = tank.spriteTankHull.singleFrameWidth / 2 * tank.spriteTankHull.scaleFactorWidth;
 
@@ -194,61 +193,62 @@ class GameLogicService {
 
         switch(angleInRadians) {
             case Direction.E: // East
-                trackOneDestX = newPosition.x + straightCorrection;
-                trackOneDestY = newPosition.y - straightCorrection;
-                trackTwoDestX = newPosition.x + straightCorrection;
-                trackTwoDestY = newPosition.y + straightCorrection;
+                track1DestX = newPosition.x + straightCorrection;
+                track1DestY = newPosition.y - straightCorrection;
+                track2DestX = newPosition.x + straightCorrection;
+                track2DestY = newPosition.y + straightCorrection;
                 break;
             case Direction.SE: // South East
-                trackOneDestX = newPosition.x;
-                trackOneDestY = newPosition.y + diagonalCorrection;
-                trackTwoDestX = newPosition.x + diagonalCorrection;
-                trackTwoDestY = newPosition.y;
+                track1DestX = newPosition.x;
+                track1DestY = newPosition.y + diagonalCorrection;
+                track2DestX = newPosition.x + diagonalCorrection;
+                track2DestY = newPosition.y;
                 break;
             case Direction.S: // South
-                trackOneDestX = newPosition.x - straightCorrection;
-                trackOneDestY = newPosition.y + straightCorrection;
-                trackTwoDestX = newPosition.x + straightCorrection;
-                trackTwoDestY = newPosition.y + straightCorrection;
+                track1DestX = newPosition.x - straightCorrection;
+                track1DestY = newPosition.y + straightCorrection;
+                track2DestX = newPosition.x + straightCorrection;
+                track2DestY = newPosition.y + straightCorrection;
                 break;
             case Direction.SW: // South West
-                trackOneDestX = newPosition.x - diagonalCorrection;
-                trackOneDestY = newPosition.y;
-                trackTwoDestX = newPosition.x;
-                trackTwoDestY = newPosition.y + diagonalCorrection;
+                track1DestX = newPosition.x - diagonalCorrection;
+                track1DestY = newPosition.y;
+                track2DestX = newPosition.x;
+                track2DestY = newPosition.y + diagonalCorrection;
                 break;
             case Direction.W: // West
-                trackOneDestX = newPosition.x - straightCorrection;
-                trackOneDestY = newPosition.y - straightCorrection;
-                trackTwoDestX = newPosition.x - straightCorrection;
-                trackTwoDestY = newPosition.y + straightCorrection;
+                track1DestX = newPosition.x - straightCorrection;
+                track1DestY = newPosition.y - straightCorrection;
+                track2DestX = newPosition.x - straightCorrection;
+                track2DestY = newPosition.y + straightCorrection;
                 break;
             case Direction.NW: // North West
-                trackOneDestX = newPosition.x - diagonalCorrection;
-                trackOneDestY = newPosition.y;
-                trackTwoDestX = newPosition.x;
-                trackTwoDestY = newPosition.y - diagonalCorrection;
+                track1DestX = newPosition.x - diagonalCorrection;
+                track1DestY = newPosition.y;
+                track2DestX = newPosition.x;
+                track2DestY = newPosition.y - diagonalCorrection;
                 break;
             case Direction.N: // North
-                trackOneDestX = newPosition.x - straightCorrection;
-                trackOneDestY = newPosition.y - straightCorrection;
-                trackTwoDestX = newPosition.x + straightCorrection;
-                trackTwoDestY = newPosition.y - straightCorrection;
+                track1DestX = newPosition.x - straightCorrection;
+                track1DestY = newPosition.y - straightCorrection;
+                track2DestX = newPosition.x + straightCorrection;
+                track2DestY = newPosition.y - straightCorrection;
                 break;
             case Direction.NE: // North East
-                trackOneDestX = newPosition.x;
-                trackOneDestY = newPosition.y - diagonalCorrection;
-                trackTwoDestX = newPosition.x + diagonalCorrection;
-                trackTwoDestY = newPosition.y;
+                track1DestX = newPosition.x;
+                track1DestY = newPosition.y - diagonalCorrection;
+                track2DestX = newPosition.x + diagonalCorrection;
+                track2DestY = newPosition.y;
                 break;
         }
 
-        let trackOne = new Track(trackOneDestX, trackOneDestY, angleInRadians, tank.path.id);
-        let trackTwo = new Track(trackTwoDestX , trackTwoDestY, angleInRadians, tank.path.id);
+        let track1 = new Track(track1DestX, track1DestY, angleInRadians, tank.path.id);
+        let track2 = new Track(track2DestX , track2DestY, angleInRadians, tank.path.id);
 
         // Add new tank tracks since tank has changed location
-        this.quadtree.put(trackOne.forQuadtree());
-        this.quadtree.put(trackTwo.forQuadtree());
+        // NOTE: Tracks aren't added if there are already tracks in same location on game board
+        this.spatialHashManager.insertTrack(track1);
+        this.spatialHashManager.insertTrack(track2);
     };
 
     increaseAmmoIfNecessary(clientData, time) {
@@ -373,28 +373,10 @@ class GameLogicService {
         }
     }
 
-    updateTracks(quadtreeManager, quadtree) {
-        var objects = quadtreeManager.queryGameObjectsForType(['TRACK']);
-        objects['TRACK'].forEach(function(track) {
-            // Check if track should disappear
-            if(track.hasExpired()) {
-                // Remove track by uniquely identifiable attribute
-                quadtree.remove(track.forQuadtree(), 'id');
-            }
-            else {
-                // Update track (remove existing and put track with updated tickCount)
-                // tickCount was updated in call to hasExpired
-                quadtree.remove(track.forQuadtree(), 'id');
-                quadtree.put(track.forQuadtree());
-            }
-        });
-    };
-
     kill(clientData, socket){
         socket.emit('death');
         socket.disconnect();
     }
-
 
     /*
      * This code is dangerous, will try to place user over and over again indefinitely,

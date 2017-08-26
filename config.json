@@ -14,9 +14,9 @@
         "maxDimension": 400
     },
     "track": {
-        "timeToLive": 64,
         "width": 4,
-        "height": 10
+        "height": 10,
+        "maxSpatialHashSize": 1000
     },
     "bullet": {
         "width": 1,

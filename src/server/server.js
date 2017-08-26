@@ -47,6 +47,7 @@ http.listen(config.port, function(){
 var ClientData = require('./lib/clientData');
 var util = require('./lib/util');
 var QuadtreeManager = require('./lib/quadtreeManager');
+var SpatialHashManager = require('./lib/spacialHashManager');
 var GameLogicService = require('./lib/gameLogicService');
 var Heap = require('heap');
 
@@ -56,8 +57,9 @@ var Heap = require('heap');
 var quadtreeManager = new QuadtreeManager();
 var quadtree = quadtreeManager.getQuadtree();
 
+const spatialHashManager = new SpatialHashManager();
 
-var gameLogicService = new GameLogicService(quadtreeManager);
+var gameLogicService = new GameLogicService(quadtreeManager, spatialHashManager);
 
 gameLogicService.initializeGame();
 
@@ -246,6 +248,13 @@ var clientUpdater = function() {
             }
         };
 
+        var range = {
+            x: clientData.position.x - clientData.player.screenWidth/2,
+            y: clientData.position.y - clientData.player.screenHeight/2,
+            width: clientData.player.screenWidth,
+            height: clientData.player.screenHeight
+        };
+
         /**
          * Note there is some dumbness going on here. The JSON spec says that
          * JSON objects have unordered properties. However, we are counting on these properties
@@ -261,6 +270,7 @@ var clientUpdater = function() {
                 {},
                 perspective,
                 quadtreeManager.queryGameObjects(queryArea),
+                spatialHashManager.queryTracks(range),
                 ammo,
                 {scoreboard: scoreboardList}
             )

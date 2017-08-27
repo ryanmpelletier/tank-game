@@ -327,14 +327,21 @@ class GameLogicService {
                 var xComponent = Math.cos(clientData.tank.gunAngle);
                 var yComponent = -Math.sin(clientData.tank.gunAngle);
 
-                var bullet = new Bullet(clientData.id,
-                    clientData.tank.x + (xComponent * config.tank.barrelLength),
-                    clientData.tank.y + (yComponent * config.tank.barrelLength),
-                    (xComponent * config.bullet.velocity) + clientData.tank.xChange,
-                    (yComponent * config.bullet.velocity) + clientData.tank.yChange);
+                var bulletStartX = clientData.tank.x + (xComponent * config.tank.barrelLength);
+                var bulletStartY = clientData.tank.y + (yComponent * config.tank.barrelLength);
 
-                this.quadtree.put(bullet.forQuadtree());
-                clientData.tank.bullets.push(bullet);
+                var walls = this.quadtreeManager.queryGameObjectsForType(['WALL'], {x: bulletStartX, y: bulletStartY, w: config.bullet.width, h: config.bullet.height})['WALL'];
+
+                if(!walls.length){
+                    var bullet = new Bullet(clientData.id,
+                        bulletStartX,
+                        bulletStartY,
+                        (xComponent * config.bullet.velocity) + clientData.tank.xChange,
+                        (yComponent * config.bullet.velocity) + clientData.tank.yChange);
+
+                    this.quadtree.put(bullet.forQuadtree());
+                    clientData.tank.bullets.push(bullet);
+                }
             }
         }
     };

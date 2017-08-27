@@ -4,7 +4,8 @@
   "description": "Game framework for writing Node.js games using WebSockets and Express",
   "main": "app.js",
   "scripts": {
-    "test": "gulp test"
+    "test": "gulp test",
+    "run": "gulp"
   },
   "repository": {
     "type": "git",

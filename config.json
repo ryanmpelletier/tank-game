@@ -21,8 +21,8 @@
     "bullet": {
         "width": 1,
         "height": 1,
-        "velocity": 5,
-        "timeToLive": 2750
+        "velocity": 9,
+        "timeToLive": 2500
     },
     "tank": {
         "width": 85,

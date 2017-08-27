@@ -121,9 +121,6 @@ class GameLogicService {
             yChange *= config.tank.boostFactor;
         }
 
-        tank.xChange = xChange;
-        tank.yChange = yChange;
-
         newPosition.x = oldPosition.x + xChange;
         newPosition.y = oldPosition.y + yChange;
 
@@ -336,8 +333,8 @@ class GameLogicService {
                     var bullet = new Bullet(clientData.id,
                         bulletStartX,
                         bulletStartY,
-                        (xComponent * config.bullet.velocity) + clientData.tank.xChange,
-                        (yComponent * config.bullet.velocity) + clientData.tank.yChange);
+                        (xComponent * config.bullet.velocity),
+                        (yComponent * config.bullet.velocity));
 
                     this.quadtree.put(bullet.forQuadtree());
                     clientData.tank.bullets.push(bullet);

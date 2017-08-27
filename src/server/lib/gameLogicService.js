@@ -121,9 +121,6 @@ class GameLogicService {
             yChange *= config.tank.boostFactor;
         }
 
-        tank.xChange = xChange;
-        tank.yChange = yChange;
-
         newPosition.x = oldPosition.x + xChange;
         newPosition.y = oldPosition.y + yChange;
 
@@ -327,14 +324,22 @@ class GameLogicService {
                 var xComponent = Math.cos(clientData.tank.gunAngle);
                 var yComponent = -Math.sin(clientData.tank.gunAngle);
 
-                var bullet = new Bullet(clientData.id,
-                    clientData.tank.x + (xComponent * config.tank.barrelLength),
-                    clientData.tank.y + (yComponent * config.tank.barrelLength),
-                    (xComponent * config.bullet.velocity) + clientData.tank.xChange,
-                    (yComponent * config.bullet.velocity) + clientData.tank.yChange);
+                var bulletStartX = clientData.tank.x + (xComponent * config.tank.barrelLength);
+                var bulletStartY = clientData.tank.y + (yComponent * config.tank.barrelLength);
 
-                this.quadtree.put(bullet.forQuadtree());
-                clientData.tank.bullets.push(bullet);
+                var walls = this.quadtreeManager.queryGameObjectsForType(['WALL'], {x: bulletStartX, y: bulletStartY, w: config.bullet.width, h: config.bullet.height})['WALL'];
+
+                if(!walls.length){
+                    var bullet = new Bullet(clientData.id,
+                        bulletStartX,
+                        bulletStartY,
+                        (xComponent * config.bullet.velocity),
+                        (yComponent * config.bullet.velocity));
+
+                    this.quadtree.put(bullet.forQuadtree());
+                    clientData.tank.bullets.push(bullet);
+                }
+
             }
         }
     };
@@ -347,12 +352,6 @@ class GameLogicService {
         for(var objectInTankArea of objectsInTankArea){
             if(objectInTankArea.type === 'BULLET'){
                 var bullet = objectInTankArea.object;
-
-                // Check if bullet belongs to tank who shot the bullet
-                if(bullet.ownerId === clientData.tank.id) {
-                    // Stop tanks from killing themselves
-                    continue;
-                }
 
                 var playerIndex = util.findIndex(currentClientDatas, bullet.ownerId);
 

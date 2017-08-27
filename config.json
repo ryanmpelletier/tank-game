@@ -33,5 +33,30 @@
         "ammoCapacity": 4,
         "fireTimeWait": 250,
         "timeToGainAmmo": 1000
+    },
+    "screenName":{
+        "maxLength": 10,
+        "blacklist": [
+            "ass",
+            "bitch",
+            "bastard",
+            "boob",
+            "boobs",
+            "cock",
+            "cunt",
+            "damn",
+            "dick",
+            "fuck",
+            "nigga",
+            "nigger",
+            "penis",
+            "pussy",
+            "shit",
+            "titties",
+            "tits",
+            "tit",
+            "titty",
+            "whore"
+        ]
     }
 }

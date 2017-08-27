@@ -102,8 +102,15 @@ socketIo.on('connection', function(socket) {
     * events from the server socket.
     */
     socket.on('init',function(screenName) {
+        screenName = screenName.substring(0,config.screenName.maxLength);
         //only allow 10 characters for screen name
-        currentClientData.screenName = screenName.substring(0,10);
+        for(var i = 0; i < config.screenName.blacklist.length; i++){
+            if(screenName.toUpperCase().indexOf(config.screenName.blacklist[i].toUpperCase()) > -1){
+                var splitName = screenName.toUpperCase().split(config.screenName.blacklist[i].toUpperCase());
+                screenName = splitName.join("*");
+            }
+        }
+        currentClientData.screenName = screenName.toLowerCase();
         socket.emit('welcome', currentClientData, {gameWidth: config.gameWidth, gameHeight: config.gameHeight});
     });
 

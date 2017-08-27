@@ -342,6 +342,7 @@ class GameLogicService {
                     this.quadtree.put(bullet.forQuadtree());
                     clientData.tank.bullets.push(bullet);
                 }
+
             }
         }
     };
@@ -354,12 +355,6 @@ class GameLogicService {
         for(var objectInTankArea of objectsInTankArea){
             if(objectInTankArea.type === 'BULLET'){
                 var bullet = objectInTankArea.object;
-
-                // Check if bullet belongs to tank who shot the bullet
-                if(bullet.ownerId === clientData.tank.id) {
-                    // Stop tanks from killing themselves
-                    continue;
-                }
 
                 var playerIndex = util.findIndex(currentClientDatas, bullet.ownerId);
 

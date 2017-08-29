@@ -157,22 +157,35 @@ class DrawingUtil {
         this.context2D.translate(-translateX, -translateY);
     }
 
+    /**
+     * Updates the leaderboard with the current leaders (i.e. "tank aces") in the game.
+     *
+     * @param scoreboardList
+     *          The list of leaders to add to the scoreboard.
+     */
     scoreboardDraw(scoreboardList) {
+        let leaderboardRowsDiv = document.getElementById("leaderboard-rows");
+        const MAX_ROW_COUNT = 10;
+        let rowNum = 0;
 
-        this.context2D.font = global.drawing.scoreboard.scoreboardHeadingFont;
-        this.context2D.fillText('Leaderboard', global.screenWidth - global.drawing.scoreboard.heading.x, global.drawing.scoreboard.heading.y);
+        // Update leaderboard
+        for(var score of scoreboardList) {
+            if(rowNum === MAX_ROW_COUNT) {
+                break;
+            }
 
+            leaderboardRowsDiv.children[rowNum].children[0].innerHTML = (rowNum + 1) + ")";
+            leaderboardRowsDiv.children[rowNum].children[1].innerHTML = score.screenName;
+            leaderboardRowsDiv.children[rowNum].children[2].innerHTML = score.kills;
 
-        //Draw screen names and kills
-        let startX = global.screenWidth - global.drawing.scoreboard.scoreboardXOffset;
-        let startY = global.drawing.scoreboard.scoreboardYOffset;
+            rowNum++;
+        }
 
-        this.context2D.font = global.drawing.scoreboard.font;
-        this.context2D.fillStyle = global.drawing.scoreboard.fontColor;
-
-        for(var score of scoreboardList){
-            this.context2D.fillText(`${score.screenName} - ${score.kills}`,startX, startY);
-            startY += global.drawing.scoreboard.scoreboardLineSpacing;
+        // Clear old leaderboard rows
+        for(; rowNum < MAX_ROW_COUNT; rowNum++) {
+            leaderboardRowsDiv.children[rowNum].children[0].innerHTML = "";
+            leaderboardRowsDiv.children[rowNum].children[1].innerHTML = "";
+            leaderboardRowsDiv.children[rowNum].children[2].innerHTML = "";
         }
     }
 

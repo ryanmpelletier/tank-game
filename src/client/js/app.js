@@ -21,14 +21,30 @@ window.addEventListener('resize', resize);
 
 window.onload = function() {
     setupStartScreen();
+    loadLeaderboard();
 };
+
+/**
+ * Loads the leaderboard.html file into the leaderboard <div>.
+ * NOTE: Dynamically loading in leaderboard.html to keep the main index.html file easy to read.
+ */
+function loadLeaderboard() {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'html/leaderboard.html', true);
+    xhr.send();
+    xhr.onreadystatechange = function() {
+        if (this.readyState !== 4) return;
+        if (this.status !== 200) return;
+        document.getElementById("leaderboard").innerHTML = this.responseText;
+    };
+}
 
 //set up the form where the user can enter their name
 function setupStartScreen() {
 
     //see if we need to get the screenNameForm for the first time
-    if(typeof screenNameForm === 'undefined'){
-        var xhr= new XMLHttpRequest();
+    if(typeof screenNameForm === 'undefined') {
+        var xhr = new XMLHttpRequest();
         xhr.open('GET', 'html/start_screen.html', true);
         xhr.onreadystatechange = function() {
             if (this.readyState !== 4) return;
@@ -38,22 +54,23 @@ function setupStartScreen() {
             node.setAttribute("id", "start-screen-content");
             node.innerHTML = this.responseText;
             document.body.appendChild(node);
-            document.getElementById("button-play").onclick = beginGame;
+            document.getElementById("start-screen-form").onsubmit = beginGame;
         };
         xhr.send();
-    }else{
+    } else {
         document.body.appendChild(screenNameForm);
-        document.getElementById("button-play").onclick = beginGame;
+        document.getElementById("leaderboard").style.display = "none";
+        document.getElementById("start-screen-form").onsubmit = beginGame;
     }
-
 }
 
 //set up the socket and begin talking with the server
 function beginGame() {
     socket = socketIoClient();
     setupSocket(socket);
+
     //socket says it is ready to start playing.
-    socket.emit('init', document.getElementById("input-username").value);
+    socket.emit('init', document.getElementById("input-username").value.trim().slice(0, 10));
 
     //remove the start up form from the page
     screenNameForm = document.getElementById("start-screen-content");
@@ -61,6 +78,9 @@ function beginGame() {
 
     canvasGameBoard = new Canvas();
     drawingUtil = new DrawingUtil(canvasGameBoard.getCanvas());
+
+    document.getElementById("leaderboard").style.display = "block";
+
     startGame();
 }
 

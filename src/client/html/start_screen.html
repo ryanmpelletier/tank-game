@@ -1,15 +1,15 @@
 <div id="start-screen-center-container">
     <h1 id="game-name">Tank Ace</h1>
     <h2 id="game-slogan">Can you become an ace?</h2>
-    <form>
+    <form id="start-screen-form">
         <div class="form-group">
             <div class="input-group">
-                <input id="input-username" type="text" class="form-control input-lg" placeholder="Username" maxlength="10" autocomplete="off"/>
+                <input id="input-username" class="form-control input-lg" placeholder="Username" autocomplete="off" pattern=".{4,12}" title="4 to 12 characters" required/>
                 <span class="input-group-btn">
                     <button id="button-play" class="btn btn-lg btn-default" type="submit">Play!</button>
                 </span>
             </div>
         </div>
     </form>
-</div>d
+</div>
 

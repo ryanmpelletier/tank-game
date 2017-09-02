@@ -29,6 +29,7 @@
         "height": 85,
         "normalSpeed": 4,
         "boostFactor": 1.5,
+        "boostMaxCapacity": 100,
         "barrelLength": 65,
         "ammoCapacity": 4,
         "fireTimeWait": 250,

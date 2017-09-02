@@ -24,6 +24,7 @@ class Tank {
         this.rotationCorrection = 0;
         this.xChange = 0;
         this.yChange = 0;
+        this._boostRemaining = Tank.MAX_BOOST_CAPACITY;
 
         //probably will have a bullet class
         this.bullets = [];
@@ -80,6 +81,24 @@ class Tank {
     get gunAngle() {
         return this._gunAngle;
     }
+
+    set boostRemaining(boostRemaining) {
+        if(boostRemaining < 0) {
+            this._boostRemaining = 0;
+        }
+        else if(boostRemaining > Tank.MAX_BOOST_CAPACITY) {
+            this._boostRemaining = Tank.MAX_BOOST_CAPACITY;
+        }
+        else {
+            this._boostRemaining = boostRemaining;
+        }
+    }
+
+    get boostRemaining() {
+        return this._boostRemaining;
+    }
 }
+
+Tank.MAX_BOOST_CAPACITY = config.tank.boostMaxCapacity;
 
 module.exports = Tank;

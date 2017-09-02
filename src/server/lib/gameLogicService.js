@@ -117,8 +117,17 @@ class GameLogicService {
 
         // Check if player is pressing key to BOOST
         if(player.userInput.keysPressed['KEY_SPACE']) {
-            xChange *= config.tank.boostFactor;
-            yChange *= config.tank.boostFactor;
+            if(tank.boostRemaining !== 0) {
+                xChange *= config.tank.boostFactor;
+                yChange *= config.tank.boostFactor;
+
+                // Drain boost meter
+                tank.boostRemaining = tank.boostRemaining - 2;
+            }
+        }
+        else { // Not boosting
+            // Re-fill boost meter
+            tank.boostRemaining = tank.boostRemaining + 1;
         }
 
         newPosition.x = oldPosition.x + xChange;

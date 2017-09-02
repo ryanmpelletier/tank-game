@@ -73,6 +73,10 @@ class DrawingUtil {
             this.context2D.font = global.drawing.playerInfo.font;
             this.context2D.fillStyle = global.drawing.playerInfo.fontColor;
             this.context2D.fillText(`${tank.screenName} - ${tank.kills}`, startX, startY);
+
+            // Update boost bar
+            let newBoostPercent = (tank._boostRemaining / 100) * 100;
+            document.getElementById("boost-bar").style.width = newBoostPercent + "%";
         }
 
         this.context2D.translate(-translateX, -translateY);

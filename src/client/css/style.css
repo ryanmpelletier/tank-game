@@ -132,3 +132,22 @@ canvas {
     -ms-user-select: none;          /* Internet Explorer/Edge */
     user-select: none;              /* Non-prefixed version, currently supported by Chrome and Opera */
 }
+
+#boost {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 200px;
+}
+
+#boost > .progress {
+    height: 30px;
+    margin: 0;
+    background: #4a4a4a;
+    animation: 0.2s linear 0s normal none infinite;
+    border: 2px solid #3e3e3e
+}
+
+#boost > .progress > .progress-bar {
+    transition: width .01s linear;
+}

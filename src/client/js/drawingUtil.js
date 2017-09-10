@@ -194,6 +194,56 @@ class DrawingUtil {
     }
 
     /**
+     * Updates the radar with the objects on the game board
+     *
+     * @param radarObjects
+     *      The objects to draw on the radar, which includes tanks and walls
+     */
+    radarDraw(radarObjects){
+
+        //this is the ratio of radar size to actual game size, it will be used to draw scaled objects
+        var horizontalScale = global.drawing.radar.width / global.gameWidth;
+        var verticalScale = global.drawing.radar.height / global.gameHeight;
+
+        var radarX = global.screenWidth - global.drawing.radar.width - global.drawing.radar.rightPadding;
+        var radarY = global.screenHeight - global.drawing.radar.height - global.drawing.radar.bottomPadding;
+
+        var walls = radarObjects['WALL'];
+        this.context2D.fillStyle = global.drawing.radar.wallFill;
+        for(var i = 0; i < walls.length; i++){
+            this.context2D.fillRect(
+                radarX + (walls[i].x * horizontalScale),
+                radarY + (walls[i].y * verticalScale),
+                (walls[i].w * horizontalScale),
+                (walls[i].h * verticalScale)
+            );
+        }
+
+        var tanks = radarObjects['TANK'];
+        this.context2D.fillStyle = global.drawing.radar.tankFill;
+        for(var j = 0; j < tanks.length; j++){
+            this.context2D.fillRect(
+                radarX + (tanks[j].x * horizontalScale),
+                radarY + (tanks[j].y * verticalScale),
+                (global.drawing.radar.tankWidth * horizontalScale),
+                (global.drawing.radar.tankHeight * verticalScale)
+            );
+        }
+
+
+        //draw radar
+        this.context2D.fillStyle = global.drawing.radar.backgroundFill;
+
+        this.context2D.fillRect(
+            radarX,
+            radarY,
+            global.drawing.radar.width,
+            global.drawing.radar.height
+        );
+
+    }
+
+    /**
      * Given gameObjects, call the appropriate method on the drawingUtil
      * to draw that object.
      */

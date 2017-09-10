@@ -7,7 +7,7 @@ module.exports = {
     '68': 'KEY_RIGHT',
     '83': 'KEY_DOWN',
     'drawing':{
-        'drawingOrder': ["perspective", "tracks", "tanks", "bullets", "walls", "ammo", "playerInfo", "scoreboard"],
+        'drawingOrder': ["perspective", "tracks", "tanks", "bullets", "walls", "ammo", "playerInfo", "scoreboard", "radar"],
         'ammo':{
             'tankXOffset': 45,
             'tankYOffset':40,
@@ -36,6 +36,17 @@ module.exports = {
             'hullWidthScaleFactor': .33,
             'gunHeightScaleFactor': .33,
             'gunWidthScaleFactor': .33
+        },
+        'radar':{
+            'height': 200,
+            'width': 200,
+            'bottomPadding': 40,
+            'rightPadding': 6,
+            'backgroundFill': 'rgba(128,128,128,0.5)',
+            'wallFill': 'rgba(0,0,0,0.5)',
+            'tankWidth': 85,
+            'tankHeight': 85,
+            'tankFill': 'rgba(255,0,0,0.5)'
         }
     }
 };

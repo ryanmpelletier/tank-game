@@ -70,6 +70,7 @@ gameLogicService.initializeGame();
 var currentClientDatas = [];
 var sockets = {};
 var scoreboardList = [];
+var radarObjects = {};
 
 /**
  * 2. SOCKET CONNECTION CALLBACKS
@@ -279,7 +280,8 @@ var clientUpdater = function() {
                 quadtreeManager.queryGameObjects(queryArea),
                 spatialHashManager.queryTracks(range),
                 ammo,
-                {scoreboard: scoreboardList}
+                {scoreboard: scoreboardList},
+                {radar: radarObjects}
             )
         );
     });
@@ -291,6 +293,10 @@ var updateScoreboard = function(){
     }), Math.min(currentClientDatas.length,config.scoreBoardLength), function(tank1, tank2){
         return tank1.kills - tank2.kills;
     }).map(function(tank){return {screenName: tank.screenName, kills: tank.kills}});
+};
+
+var updateRadar = function(){
+    radarObjects = quadtreeManager.queryGameObjectsForType(['TANK','WALL']);
 };
 
 
@@ -306,3 +312,6 @@ setInterval(clientUpdater, 1000/40);
 
 //update scoreboard
 setInterval(updateScoreboard, 500);
+
+//update radar
+setInterval(updateRadar, 2500);

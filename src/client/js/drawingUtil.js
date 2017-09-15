@@ -220,8 +220,12 @@ class DrawingUtil {
         }
 
         var tanks = radarObjects['TANK'];
-        this.context2D.fillStyle = global.drawing.radar.tankFill;
         for(var j = 0; j < tanks.length; j++){
+            if(global.screenName == tanks[j].screenName){
+                this.context2D.fillStyle = global.drawing.radar.selfTankFill;
+            }else{
+                this.context2D.fillStyle = global.drawing.radar.tankFill;
+            }
             this.context2D.fillRect(
                 radarX + (tanks[j].x * horizontalScale),
                 radarY + (tanks[j].y * verticalScale),

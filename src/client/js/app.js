@@ -140,6 +140,7 @@ function setupSocket(socket) {
 
         global.gameWidth = gameConfig.gameWidth;
         global.gameHeight = gameConfig.gameHeight;
+        global.screenName = clientInitData.tank.screenName;
 
         socket.emit('welcome_received', clientInitData);
     });

@@ -46,7 +46,8 @@ module.exports = {
             'wallFill': 'rgba(0,0,0,0.5)',
             'tankWidth': 85,
             'tankHeight': 85,
-            'tankFill': 'rgba(255,0,0,0.5)'
+            'tankFill': 'rgba(255,0,0,0.5)',
+            'selfTankFill':'rgba(255,255,255,0.5)'
         }
     }
 };

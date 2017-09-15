@@ -80,7 +80,7 @@ function beginGame() {
 
     document.getElementById("leaderboard").style.display = "block";
     document.getElementById("boost").style.display = "block";
-    
+
     startGame();
 }
 

@@ -59,7 +59,6 @@ function setupStartScreen() {
         xhr.send();
     } else {
         document.body.appendChild(screenNameForm);
-        document.getElementById("leaderboard").style.display = "none";
         document.getElementById("start-screen-form").onsubmit = beginGame;
     }
 }
@@ -80,6 +79,7 @@ function beginGame() {
     drawingUtil = new DrawingUtil(canvasGameBoard.getCanvas());
 
     document.getElementById("leaderboard").style.display = "block";
+    document.getElementById("boost").style.display = "block";
 
     startGame();
 }
@@ -140,6 +140,7 @@ function setupSocket(socket) {
 
         global.gameWidth = gameConfig.gameWidth;
         global.gameHeight = gameConfig.gameHeight;
+        global.screenName = clientInitData.tank.screenName;
 
         socket.emit('welcome_received', clientInitData);
     });
@@ -168,6 +169,9 @@ function setupSocket(socket) {
         canvasGameBoard.clear();
         //empty the game objects this client is drawing
         clientGameObjects = {};
+        //remove leaderboard and boost bar
+        document.getElementById("leaderboard").style.display = "none";
+        document.getElementById("boost").style.display = "none";
         //setup start screen
         setupStartScreen();
     });

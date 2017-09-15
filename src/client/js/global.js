@@ -22,15 +22,6 @@ module.exports = {
             'font':'18px Arial',
             'fontColor': 'black'
         },
-        'scoreboard':{
-            'scoreboardHeadingFont': 'bold 18px Arial',
-            'heading':{x:115, y:25},
-            'scoreboardXOffset': 115,
-            'scoreboardYOffset': 50,
-            'scoreboardLineSpacing':25,
-            'font': '15px Arial',
-            'fontColor':'black'
-        },
         'tank':{
             'hullHeightScaleFactor': .33,
             'hullWidthScaleFactor': .33,

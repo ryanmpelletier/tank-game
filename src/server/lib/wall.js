@@ -8,10 +8,12 @@ const crypto = require("crypto");
 
 class Wall {
     constructor(x, y, w = 25, h = 25){
+
         this.x = x;
         this.y = y;
         this.w = w;
         this.h = h;
+        this.id = crypto.randomBytes(16).toString("hex");
 
         this.forQuadtree = function(){
             return {
@@ -19,6 +21,7 @@ class Wall {
                 y: this.y,
                 w: this.w,
                 h: this.h,
+                id:this.id,
                 type:'WALL',
                 object: this
             }

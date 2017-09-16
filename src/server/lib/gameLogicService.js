@@ -27,9 +27,9 @@ class GameLogicService {
          * I don't know how much it will help us, it might even not help. 
          */
         var leftBorderWall = new Wall(0, 0, config.wall.width, config.gameHeight);
-        var topBorderWall = new Wall(config.wall.width, 0, config.gameWidth - 2 * config.wall.width, config.wall.width);
+        var topBorderWall = new Wall(0, 0, config.gameWidth, config.wall.width);
         var rightBorderWall = new Wall(config.gameWidth - config.wall.width, 0, config.wall.width, config.gameHeight);
-        var bottomBorderWall = new Wall(config.wall.width, config.gameHeight - config.wall.width, config.gameWidth - 2 * config.wall.width, config.wall.width);
+        var bottomBorderWall = new Wall(0, config.gameHeight - config.wall.width, config.gameWidth, config.wall.width);
 
         this.quadtree.put(leftBorderWall.forQuadtree());
         this.quadtree.put(topBorderWall.forQuadtree());
@@ -272,47 +272,61 @@ class GameLogicService {
         * Update positions of all the bullets
         */
         for(var bullet of clientData.tank.bullets) {
-            let currentBulletLocation = bullet.forQuadtree();
-
-            //if bullet is in wall, update the position to reflect a bounce off the wall
-            var walls = quadtreeManager.queryGameObjectsForType(['WALL'], currentBulletLocation)['WALL'];
-            if(walls.length && !bullet.isInWall){
-                bullet.isInWall = true;
-                var wall = walls[0];
-                //I need to find out which side of the wall the bullet is hitting, this is a PITA
-                if((bullet.oldX + config.bullet.width) < wall.x){
-                    //old bullet x was less than wall x, bullet was coming from left side
-                    bullet.velocityX = -bullet.velocityX;
-                }else if(bullet.oldX > (wall.x + wall.w)){
-                    //old bullet x was greater than wall x, bullet was coming from right side
-                    bullet.velocityX = -bullet.velocityX;
-                }else if((bullet.oldY + config.bullet.height) < wall.y){
-                    //old bullet y was less than wall y, came from above
-                    bullet.velocityY = -bullet.velocityY;
-                }else if(bullet.oldY >  (wall.y + wall.h)){
-                    //old bullet y is greater than wall y, came from below
-                    bullet.velocityY = -bullet.velocityY;
-                }
-            }else{
-                bullet.isInWall = false;
-            }
-            bullet.oldX = bullet.x;
-            bullet.oldY = bullet.y;
-            bullet.x = bullet.x + bullet.velocityX;
-            bullet.y = bullet.y + bullet.velocityY;
-
-            let forQuadtree = bullet.forQuadtree();
-
-            this.quadtree.remove(currentBulletLocation, 'id');
-            this.quadtree.put(forQuadtree);
 
             //if it is time for bullet to die, let it die
+            //otherwise do bullet logic
             if(time - bullet.timeCreated > config.bullet.timeToLive){
                 let bulletIndex = util.findIndex(clientData.tank.bullets, bullet.id);
                 if(bulletIndex > -1){
                     clientData.tank.bullets.splice(bulletIndex,1);
                     this.quadtree.remove(bullet.forQuadtree(), 'id');
                 }
+            }else{
+                let currentBulletLocation = bullet.forQuadtree();
+
+                //if bullet is in wall, update the position to reflect a bounce off the wall
+                //need to keep track of the walls that the bullet is in/out of
+                var walls = quadtreeManager.queryGameObjectsForType(['WALL'], currentBulletLocation)['WALL'];
+
+                for(var wallId of bullet.wallsInsideOf){
+                    //if no longer in a particular wall, remove it from the array of walls the bullet thinks it is in
+                    if(walls.indexOf(wallId) === -1){
+                        bullet.wallsInsideOf.splice(bullet.wallsInsideOf.indexOf(wallId),1);
+                    }
+                }
+
+                //for each wall the bullet is in contact with, we need to calculate how the velocity based on contact with that wall
+                for(var j = 0; j < walls.length; j++){
+                    var wall = walls[j];
+
+                    if(bullet.wallsInsideOf.indexOf(wall.id) === -1) {
+                        bullet.wallsInsideOf.push(wall.id);
+                        //I need to find out which side of the wall the bullet is hitting, this is a PITA
+                        if ((bullet.oldX + config.bullet.width) < wall.x) {
+                            //old bullet x was less than wall x, bullet was coming from left side
+                            bullet.velocityX = -bullet.velocityX;
+                        } else if (bullet.oldX > (wall.x + wall.w)) {
+                            //old bullet x was greater than wall x, bullet was coming from right side
+                            bullet.velocityX = -bullet.velocityX;
+                        } else if ((bullet.oldY + config.bullet.height) < wall.y) {
+                            //old bullet y was less than wall y, came from above
+                            bullet.velocityY = -bullet.velocityY;
+                        } else if (bullet.oldY > (wall.y + wall.h)) {
+                            //old bullet y is greater than wall y, came from below
+                            bullet.velocityY = -bullet.velocityY;
+                        }
+                    }
+                }
+
+                bullet.oldX = bullet.x;
+                bullet.oldY = bullet.y;
+                bullet.x = bullet.x + bullet.velocityX;
+                bullet.y = bullet.y + bullet.velocityY;
+
+                let forQuadtree = bullet.forQuadtree();
+
+                this.quadtree.remove(currentBulletLocation, 'id');
+                this.quadtree.put(forQuadtree);
             }
         }
     };

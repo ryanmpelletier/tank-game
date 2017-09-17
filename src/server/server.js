@@ -181,12 +181,20 @@ socketIo.on('connection', function(socket) {
     * This is called at least once each time the client redraws the frame
     */
     socket.on('client_checkin',function(clientCheckinData) {
+        if(clientCheckinData){
+            currentClientData.player.userInput = {
+                "keysPressed":clientCheckinData.keysPressed || config.defaultKeysPressed,
+                "mouseClicked": clientCheckinData.mouseClicked || config.defaultMouseClicked,
+                "mouseAngle": clientCheckinData.mouseAngle || config.defaultMouseAngle
+            };
+        }else{
+            currentClientData.player.userInput = {
+                "keysPressed": config.defaultKeysPressed,
+                "mouseClicked": config.defaultMouseClicked,
+                "mouseAngle": config.defaultMouseAngle
+            };
+        }
 
-        currentClientData.player.userInput = {
-            "keysPressed":clientCheckinData.keysPressed || config.defaultKeysPressed,
-            "mouseClicked": clientCheckinData.mouseClicked || config.defaultMouseClicked,
-            "mouseAngle": clientCheckinData.mouseAngle || config.defaultMouseAngle
-        };
         currentClientData.lastHeartbeat = new Date().getTime();
     });
 

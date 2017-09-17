@@ -6,6 +6,15 @@
     "scoreBoardLength": 10,
     "spawnAreaWidth": 500,
     "spawnAreaHeight": 500,
+    "defaultKeysPressed": {
+        "KEY_UP": false,
+        "KEY_LEFT": false,
+        "KEY_DOWN": false,
+        "KEY_RIGHT": false,
+        "KEY_SPACE": false
+    },
+    "defaultMouseAngle": 0,
+    "defaultMouseClicked":false,
     "wall": {
         "width": 25,
         "height": 25,

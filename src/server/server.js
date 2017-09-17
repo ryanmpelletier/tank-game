@@ -181,7 +181,12 @@ socketIo.on('connection', function(socket) {
     * This is called at least once each time the client redraws the frame
     */
     socket.on('client_checkin',function(clientCheckinData) {
-        currentClientData.player.userInput = clientCheckinData;
+
+        currentClientData.player.userInput = {
+            "keysPressed":clientCheckinData.keysPressed || config.defaultKeysPressed,
+            "mouseClicked": clientCheckinData.mouseClicked || config.defaultMouseClicked,
+            "mouseAngle": clientCheckinData.mouseAngle || config.defaultMouseAngle
+        };
         currentClientData.lastHeartbeat = new Date().getTime();
     });
 

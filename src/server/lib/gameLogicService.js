@@ -81,10 +81,8 @@ class GameLogicService {
         let player = clientData.player;
         let tank = clientData.tank;
 
-        if(typeof player.userInput.mouseAngle !== 'undefined') {
-            // Set tank gun angle
-            tank.gunAngle = player.userInput.mouseAngle;
-        }
+
+        tank.gunAngle = player.userInput.mouseAngle;
 
         var oldTank = tank.forQuadtree();
         var oldPosition = clientData.position;
@@ -335,35 +333,33 @@ class GameLogicService {
         /**
         * Fire bullets if necessary
         */
-        if(typeof clientData.player.userInput.mouseClicked !== 'undefined') {
-            if(clientData.player.userInput.mouseClicked &&
-                clientData.tank.ammo > 0 &&
-                (typeof clientData.tank.lastFireTime === 'undefined' ||
-                (time - clientData.tank.lastFireTime > config.tank.fireTimeWait))) {
+        if(clientData.player.userInput.mouseClicked &&
+            clientData.tank.ammo > 0 &&
+            (typeof clientData.tank.lastFireTime === 'undefined' ||
+            (time - clientData.tank.lastFireTime > config.tank.fireTimeWait))) {
 
-                clientData.tank.lastFireTime = time;
-                clientData.tank.ammo = clientData.tank.ammo - 1;
+            clientData.tank.lastFireTime = time;
+            clientData.tank.ammo = clientData.tank.ammo - 1;
 
-                var xComponent = Math.cos(clientData.tank.gunAngle);
-                var yComponent = -Math.sin(clientData.tank.gunAngle);
+            var xComponent = Math.cos(clientData.tank.gunAngle);
+            var yComponent = -Math.sin(clientData.tank.gunAngle);
 
-                var bulletStartX = clientData.tank.x + (xComponent * config.tank.barrelLength);
-                var bulletStartY = clientData.tank.y + (yComponent * config.tank.barrelLength);
+            var bulletStartX = clientData.tank.x + (xComponent * config.tank.barrelLength);
+            var bulletStartY = clientData.tank.y + (yComponent * config.tank.barrelLength);
 
-                var walls = this.quadtreeManager.queryGameObjectsForType(['WALL'], {x: bulletStartX, y: bulletStartY, w: config.bullet.width, h: config.bullet.height})['WALL'];
+            var walls = this.quadtreeManager.queryGameObjectsForType(['WALL'], {x: bulletStartX, y: bulletStartY, w: config.bullet.width, h: config.bullet.height})['WALL'];
 
-                if(!walls.length){
-                    var bullet = new Bullet(clientData.id,
-                        bulletStartX,
-                        bulletStartY,
-                        (xComponent * config.bullet.velocity),
-                        (yComponent * config.bullet.velocity));
+            if(!walls.length){
+                var bullet = new Bullet(clientData.id,
+                    bulletStartX,
+                    bulletStartY,
+                    (xComponent * config.bullet.velocity),
+                    (yComponent * config.bullet.velocity));
 
-                    this.quadtree.put(bullet.forQuadtree());
-                    clientData.tank.bullets.push(bullet);
-                }
-
+                this.quadtree.put(bullet.forQuadtree());
+                clientData.tank.bullets.push(bullet);
             }
+
         }
     };
 

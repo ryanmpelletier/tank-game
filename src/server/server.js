@@ -34,8 +34,9 @@ app.get('/', function(req, res){
 /**
  * Start listening, I'm not sure how the details of this are working
  */
-http.listen(config.port, function(){
-    winston.log('debug','listening on port:' + config.port);
+var port = process.env.PORT || config.port;
+http.listen(port, function(){
+    winston.log('debug','listening on port:' + port);
 });
 
 

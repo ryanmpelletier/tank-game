@@ -8,6 +8,9 @@ var DrawingUtil = require('./drawingUtil');
 var socketIoClient = require('socket.io-client');
 var socket;
 
+//doesn't need to be for a variable, this import adds a polyfill Microsoft browsers need
+require('babel-polyfill');
+
 var screenNameForm = undefined;
 
 var clientGameObjects = {};

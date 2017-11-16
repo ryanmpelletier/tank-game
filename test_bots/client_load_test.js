@@ -1,5 +1,5 @@
 
-const numberOfBots = 3;
+const numberOfBots = process.argv[2];
 
 
 var io = require('socket.io-client');

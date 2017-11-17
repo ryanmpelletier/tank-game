@@ -16,8 +16,6 @@ The build files used are pretty simple, and are also documented well. In order t
 1.  **git clone** https://github.com/ryanp102694/tank-game.git
 1.  **cd** tank-game
 1.  **npm install**
-1.  **npm install --global gulp**
-1.  **npm link gulp**
-1.  **gulp**
+1.  **npm start**
 1.  *Browse to localhost:8080*
 

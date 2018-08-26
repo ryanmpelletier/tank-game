@@ -1,7 +1,7 @@
 {
-  "name": "node-game-framework",
+  "name": "tank-game",
   "version": "1.0.0",
-  "description": "Game framework for writing Node.js games using WebSockets and Express",
+  "description": "A game written in JavaScript, uses WebSockets and HTML5 canvas. Runs in Node!",
   "main": "app.js",
   "scripts": {
     "test": "node_modules/gulp/bin/gulp.js test",

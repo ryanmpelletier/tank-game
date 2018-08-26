@@ -13,7 +13,7 @@ RUN npm install
 # RUN npm install --only=production
 
 # Bundle app source
-COPY . .60
+COPY . .
 
 EXPOSE 8080
 

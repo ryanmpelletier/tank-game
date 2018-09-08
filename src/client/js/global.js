@@ -1,6 +1,7 @@
 module.exports = {
     'screenWidth': window.innerWidth,
     'screenHeight': window.innerHeight,
+    "clientCheckinInterval": 15,
     '32': 'KEY_SPACE',
     '65': 'KEY_LEFT',
     '87': 'KEY_UP',

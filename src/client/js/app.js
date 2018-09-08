@@ -20,6 +20,8 @@ var drawingUtil;
 
 var requestedFrame;
 
+var lastClientCheckin = new Date().getTime();
+
 window.addEventListener('resize', resize);
 
 window.onload = function() {
@@ -58,18 +60,20 @@ function setupStartScreen() {
             node.innerHTML = this.responseText;
             document.body.appendChild(node);
             document.getElementById("start-screen-form").onsubmit = beginGame;
+            document.getElementById("button-spectate").onclick = spectate;
         };
         xhr.send();
     } else {
         document.body.appendChild(screenNameForm);
         document.getElementById("start-screen-form").onsubmit = beginGame;
+        document.getElementById("button-spectate").onclick = spectate;
     }
 }
 
 //set up the socket and begin talking with the server
 function beginGame() {
     socket = socketIoClient();
-    setupSocket(socket);
+    setupPlaySocket(socket);
 
     //socket says it is ready to start playing.
     socket.emit('init', document.getElementById("input-username").value.trim().slice(0, 10));
@@ -85,6 +89,11 @@ function beginGame() {
     document.getElementById("boost").style.display = "block";
 
     startGame();
+}
+
+function spectate(){
+    socket = socketIoClient();
+    setupSpectateSocket(socket);
 }
 
 /**
@@ -125,7 +134,7 @@ function updateClientView() {
  * So basically we give the socket all the callbacks for the different events it might receive.
  * 
  */
-function setupSocket(socket) {
+function setupPlaySocket(socket) {
     /**
      * 
      * Server will send a welcome event with data the player needs to initialize itself
@@ -151,7 +160,10 @@ function setupSocket(socket) {
     //server needs to draw what gets put into gameObjects
     socket.on('game_objects_update', function(gameObjects) {
         clientGameObjects = gameObjects;
-        socket.emit('client_checkin', canvasGameBoard.getUserInput());
+        if((new Date().getTime() - lastClientCheckin) > global.clientCheckinInterval){
+            socket.emit('client_checkin', canvasGameBoard.getUserInput());
+            lastClientCheckin = new Date().getTime();
+        }
     });
 
     /**
@@ -179,6 +191,31 @@ function setupSocket(socket) {
         setupStartScreen();
     });
 
+}
+
+function setupSpectateSocket(socket){
+    /**
+     *
+     * Server will send a welcome event with data the player needs to initialize itself
+     * The purpose of the event is to acknowledge that a user has joined
+     * Client will respond when it is ready to play the game
+     *
+     */
+    socket.on('welcome',function(clientInitData, gameConfig) {
+        /**
+         * Here the client gets a chance to add any data that the server will need to
+         * know in order to correctly computer game logic, such as the client's viewbox
+         */
+        clientInitData.player.screenHeight = global.screenHeight;
+        clientInitData.player.screenWidth = global.screenWidth;
+
+        global.gameWidth = gameConfig.gameWidth;
+        global.gameHeight = gameConfig.gameHeight;
+        global.screenName = clientInitData.tank.screenName;
+
+        //TODO, add data here which indicates whether the client will be a player or a spectator
+        socket.emit('welcome_received', clientInitData);
+    });
 }
 
 /**

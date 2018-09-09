@@ -12,6 +12,7 @@ class ClientData {
 
         //stuff the client gives us
         this.player = {
+          type: undefined,
           screenWidth: undefined,
           screenHeight: undefined,
           userInput:{

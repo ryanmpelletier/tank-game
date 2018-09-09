@@ -142,23 +142,25 @@ class DrawingUtil {
     }
 
     ammoDraw(ammo) {
-        var translateX = -(this.perspective.x - global.screenWidth/2);
-        var translateY = -(this.perspective.y - global.screenHeight/2);
-        this.context2D.translate(translateX, translateY);
+        if(global.playerType === 'PLAYER') {
+            var translateX = -(this.perspective.x - global.screenWidth / 2);
+            var translateY = -(this.perspective.y - global.screenHeight / 2);
+            this.context2D.translate(translateX, translateY);
 
-        this.context2D.fillStyle = global.drawing.ammo.fill;
+            this.context2D.fillStyle = global.drawing.ammo.fill;
 
-        let startX = this.perspective.x + global.drawing.ammo.tankXOffset;
-        let startY = this.perspective.y + global.drawing.ammo.tankYOffset;
+            let startX = this.perspective.x + global.drawing.ammo.tankXOffset;
+            let startY = this.perspective.y + global.drawing.ammo.tankYOffset;
 
-        for(let i = 0; i < ammo.capacity; i++){
-            if(i < ammo.count){
-                this.context2D.fillRect((startX + (i *(global.drawing.ammo.width + global.drawing.ammo.spacing))), startY, global.drawing.ammo.width, global.drawing.ammo.height);
-            }else{
-                this.context2D.rect((startX + (i *(global.drawing.ammo.width + global.drawing.ammo.spacing))), startY, global.drawing.ammo.width, global.drawing.ammo.height);
+            for (let i = 0; i < ammo.capacity; i++) {
+                if (i < ammo.count) {
+                    this.context2D.fillRect((startX + (i * (global.drawing.ammo.width + global.drawing.ammo.spacing))), startY, global.drawing.ammo.width, global.drawing.ammo.height);
+                } else {
+                    this.context2D.rect((startX + (i * (global.drawing.ammo.width + global.drawing.ammo.spacing))), startY, global.drawing.ammo.width, global.drawing.ammo.height);
+                }
             }
+            this.context2D.translate(-translateX, -translateY);
         }
-        this.context2D.translate(-translateX, -translateY);
     }
 
     /**

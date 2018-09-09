@@ -77,6 +77,64 @@ class GameLogicService {
         }
     }
 
+    //basically, we let the spectator move about the board freely
+    gameTickSpectator(clientData, socket) {
+        var currentTime = new Date().getTime();
+
+        if(clientData.lastHeartbeat < currentTime - config.maxLastHeartBeat){
+            winston.log('debug',`Kicking spectator ${clientData.tank.screenName}`);
+            this.kill(clientData, socket);
+        }else{
+            //do things specific to spectators
+            this.updateSpectatorPosition(clientData)
+        }
+    }
+
+
+    updateSpectatorPosition(clientData){
+        let player = clientData.player;
+
+        var oldPosition = clientData.position;
+        var newPosition = { x: clientData.position.x, y: clientData.position.y };
+
+        let xChange = 0;
+        let yChange = 0;
+
+        if(player.userInput.keysPressed['KEY_RIGHT']) {
+            xChange += config.tank.normalSpeed;
+        }
+        if(player.userInput.keysPressed['KEY_LEFT']) {
+            xChange -= config.tank.normalSpeed;
+        }
+        if(player.userInput.keysPressed['KEY_DOWN']) {
+            yChange += config.tank.normalSpeed;
+        }
+        if(player.userInput.keysPressed['KEY_UP']) {
+            yChange -= config.tank.normalSpeed;
+        }
+
+        // Check that user is moving diagonally
+        if(xChange !== 0 && yChange !== 0) {
+            // Calculate equivalent x & y coord. changes for moving diagonally at same speed as horizontally/vertically
+            // The change for x & y will be smaller for moving diagonally
+            let diagSpeedFactor = Math.sqrt(Math.pow(config.tank.normalSpeed, 2) / 2);
+            xChange = Math.sign(xChange) * diagSpeedFactor;
+            yChange = Math.sign(yChange) * diagSpeedFactor;
+        }
+
+        newPosition.x = oldPosition.x + xChange;
+        newPosition.y = oldPosition.y + yChange;
+
+        // Check if player is pressing key to BOOST
+        if(player.userInput.keysPressed['KEY_SPACE']) {
+            xChange *= config.tank.boostFactor;
+            yChange *= config.tank.boostFactor;
+        }
+
+        clientData.position = newPosition;
+
+    }
+
     updateTank(clientData) {
         let player = clientData.player;
         let tank = clientData.tank;

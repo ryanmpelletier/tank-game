@@ -69,6 +69,7 @@ gameLogicService.initializeGame();
  * this is for accessing clientData outside of the context of a socket event
  */
 var currentClientDatas = [];
+var currentClientDatasSpectators = [];
 var sockets = {};
 var scoreboardList = [];
 var radarObjects = {};
@@ -121,15 +122,21 @@ socketIo.on('connection', function(socket) {
     * They send back some information the server needs to properly manage this user
     */
     socket.on('welcome_received', function(clientUpdatedData) {
-        //copy over player nested object to clientData reference for this socket
-        currentClientData.player = clientUpdatedData.player;
 
-        //add references for the clientData and for the socket
-        currentClientDatas.push(currentClientData);
+        //copy over player nested object to clientData reference for this socket
+        currentClientData.player = clientUpdatedData.player || {};
+
+        //get reference to socket so we can send updates to this client
         sockets[clientUpdatedData.id] = socket;
 
-        //put client onto quadtree
-        quadtree.put(currentClientData.tank.forQuadtree());
+        //players need to go into the quadtree and the currentClientDatas array
+        //spectators just go in the currentClientDatasSpectators array so their logic can be processed separately
+        if(clientUpdatedData.player.type === 'PLAYER'){
+            currentClientDatas.push(currentClientData);
+            quadtree.put(currentClientData.tank.forQuadtree());
+        }else if (clientUpdatedData.player.type === 'SPECTATOR'){
+            currentClientDatasSpectators.push(currentClientData);
+        }
     });
 
     /**
@@ -162,10 +169,18 @@ socketIo.on('connection', function(socket) {
         quadtree.remove(currentClientData.tank.forQuadtree(), 'id');
 
 
-        var playerIndex = util.findIndex(currentClientDatas,currentClientData.id);
-        if(playerIndex > -1) {
-            currentClientDatas.splice(playerIndex,1);
-            winston.log('debug',`Player ${currentClientData.player.screenName} has been removed from tracked players.`);
+        if(currentClientData.player.type === 'PLAYER'){
+            var playerIndex = util.findIndex(currentClientDatas,currentClientData.id);
+            if(playerIndex > -1) {
+                currentClientDatas.splice(playerIndex,1);
+                winston.log('debug',`Player ${currentClientData.player.screenName} has been removed from tracked players.`);
+            }
+        }else if (currentClientData.player.type === 'SPECTATOR'){
+            var spectatorIndex = util.findIndex(currentClientDatasSpectators, currentClientData.id);
+            if(spectatorIndex > -1){
+                currentClientDatasSpectators.splice(spectatorIndex, 1);
+                winston.log('debug', `Spectator has been removed from tracked spectators.`);
+            }
         }
 
         var allItemsInQuadtree = quadtree.get({x:0,y:0,w:config.gameWidth,h:config.gameHeight});
@@ -228,27 +243,37 @@ var gameTick = function(clientData) {
     gameLogicService.gameTick(clientData, sockets[clientData.id], currentClientDatas);
 };
 
+var gameTickSpectator = function(clientData) {
+    gameLogicService.gameTickSpectator(clientData, sockets[clientData.id]);
+};
+
 
 /**
- * Iterate through players and update their game objects,
- * this will include putting each currentClientData on the quadtree
+ * Iterate through players and spectators and update their game objects
  */
 var gameObjectUpdater = function() {
-    //Iterate backwards, players may be removed from the array as the iteration occurs
+
+    //Iterate backwards, players or spectators may be removed from the array as the iteration occurs
     for (var i = currentClientDatas.length - 1; i >= 0; --i) {
         gameTick(currentClientDatas[i]);
     }
+
+    for(var i = currentClientDatasSpectators.length - 1; i >= 0; --i) {
+        gameTickSpectator(currentClientDatasSpectators[i])
+    }
+
 };
 
 /**
  * For each player send the game objects that are visible to them.
  */
 var clientUpdater = function() {
-    currentClientDatas.forEach(function(clientData) {
+
+    function queryAndSendData(clientData){
         /**
-        * Query quadtree using players current position and their screenwidth
-        * QuadtreeManager will return everything the client needs in order to draw the game objects
-        */
+         * Query quadtree using players current position and their screenwidth
+         * QuadtreeManager will return everything the client needs in order to draw the game objects
+         */
         var queryArea = {
             x: clientData.position.x - clientData.player.screenWidth/2,
             y: clientData.position.y - clientData.player.screenHeight/2,
@@ -257,14 +282,14 @@ var clientUpdater = function() {
         };
 
         var perspective = {
-            "perspective":{
+            "perspective": {
                 x: clientData.position.x,
                 y: clientData.position.y
             }
         };
 
         var ammo = {
-            "ammo":{
+            "ammo": {
                 capacity: config.tank.ammoCapacity,
                 count: clientData.tank.ammo
             }
@@ -298,7 +323,11 @@ var clientUpdater = function() {
                 {radar: radarObjects}
             )
         );
-    });
+    }
+
+
+    currentClientDatas.forEach(function(clientData){queryAndSendData(clientData)});
+    currentClientDatasSpectators.forEach(function(clientData){queryAndSendData(clientData)});
 };
 
 var updateScoreboard = function(){

@@ -59,13 +59,13 @@ function setupStartScreen() {
             node.setAttribute("id", "start-screen-content");
             node.innerHTML = this.responseText;
             document.body.appendChild(node);
-            document.getElementById("start-screen-form").onsubmit = beginGame;
+            document.getElementById("button-play").onclick = beginGame;
             document.getElementById("button-spectate").onclick = spectate;
         };
         xhr.send();
     } else {
         document.body.appendChild(screenNameForm);
-        document.getElementById("start-screen-form").onsubmit = beginGame;
+        document.getElementById("button-play").onclick = beginGame;
         document.getElementById("button-spectate").onclick = spectate;
     }
 }
@@ -94,6 +94,24 @@ function beginGame() {
 function spectate(){
     socket = socketIoClient();
     setupSpectateSocket(socket);
+
+    //NOTE: This is duplicate code in the rest of this method that will be refactored
+
+    //socket says it is ready to start playing.
+    socket.emit('init', document.getElementById("input-username").value.trim().slice(0, 10));
+
+    //remove the start up form from the page
+    screenNameForm = document.getElementById("start-screen-content");
+    screenNameForm.parentNode.removeChild(screenNameForm);
+
+    canvasGameBoard = new Canvas();
+    drawingUtil = new DrawingUtil(canvasGameBoard.getCanvas());
+
+    document.getElementById("leaderboard").style.display = "block";
+    document.getElementById("boost").style.display = "block";
+
+    startGame();
+
 }
 
 /**
@@ -149,6 +167,7 @@ function setupPlaySocket(socket) {
          */
         clientInitData.player.screenHeight = global.screenHeight;
         clientInitData.player.screenWidth = global.screenWidth;
+        clientInitData.player.type = 'PLAYER';
 
         global.gameWidth = gameConfig.gameWidth;
         global.gameHeight = gameConfig.gameHeight;
@@ -208,13 +227,50 @@ function setupSpectateSocket(socket){
          */
         clientInitData.player.screenHeight = global.screenHeight;
         clientInitData.player.screenWidth = global.screenWidth;
+        clientInitData.player.type = 'SPECTATOR';
+        global.playerType = 'SPECTATOR';
 
         global.gameWidth = gameConfig.gameWidth;
         global.gameHeight = gameConfig.gameHeight;
         global.screenName = clientInitData.tank.screenName;
 
-        //TODO, add data here which indicates whether the client will be a player or a spectator
         socket.emit('welcome_received', clientInitData);
+    });
+
+
+    //NOTE: below code is redundant and should be refactored
+    //server needs to draw what gets put into gameObjects
+    socket.on('game_objects_update', function(gameObjects) {
+        clientGameObjects = gameObjects;
+        if((new Date().getTime() - lastClientCheckin) > global.clientCheckinInterval){
+            socket.emit('client_checkin', canvasGameBoard.getUserInput());
+            lastClientCheckin = new Date().getTime();
+        }
+    });
+
+    /**
+     * Server wants to calculate my ping,
+     * emit back to server right away.
+     */
+    socket.on('pingcheck',function() {
+        socket.emit('pongcheck');
+    });
+
+    /**
+     * Tank has been destroyed, socket connection
+     */
+    socket.on('death',function(){
+        //stop animating
+        window.cancelAnimationFrame(requestedFrame);
+        //clear canvas
+        canvasGameBoard.clear();
+        //empty the game objects this client is drawing
+        clientGameObjects = {};
+        //remove leaderboard and boost bar
+        document.getElementById("leaderboard").style.display = "none";
+        document.getElementById("boost").style.display = "none";
+        //setup start screen
+        setupStartScreen();
     });
 }
 

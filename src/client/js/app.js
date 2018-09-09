@@ -74,28 +74,17 @@ function setupStartScreen() {
 function beginGame() {
     socket = socketIoClient();
     setupPlaySocket(socket);
-
-    //socket says it is ready to start playing.
-    socket.emit('init', document.getElementById("input-username").value.trim().slice(0, 10));
-
-    //remove the start up form from the page
-    screenNameForm = document.getElementById("start-screen-content");
-    screenNameForm.parentNode.removeChild(screenNameForm);
-
-    canvasGameBoard = new Canvas();
-    drawingUtil = new DrawingUtil(canvasGameBoard.getCanvas());
-
-    document.getElementById("leaderboard").style.display = "block";
-    document.getElementById("boost").style.display = "block";
-
-    startGame();
+    init();
 }
 
 function spectate(){
     socket = socketIoClient();
     setupSpectateSocket(socket);
+    init();
 
-    //NOTE: This is duplicate code in the rest of this method that will be refactored
+}
+
+function init() {
 
     //socket says it is ready to start playing.
     socket.emit('init', document.getElementById("input-username").value.trim().slice(0, 10));
@@ -111,7 +100,6 @@ function spectate(){
     document.getElementById("boost").style.display = "block";
 
     startGame();
-
 }
 
 /**

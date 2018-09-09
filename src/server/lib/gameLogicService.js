@@ -101,35 +101,35 @@ class GameLogicService {
         let yChange = 0;
 
         if(player.userInput.keysPressed['KEY_RIGHT']) {
-            xChange += config.tank.normalSpeed;
+            xChange += config.spectatorSpeed;
         }
         if(player.userInput.keysPressed['KEY_LEFT']) {
-            xChange -= config.tank.normalSpeed;
+            xChange -= config.spectatorSpeed;
         }
         if(player.userInput.keysPressed['KEY_DOWN']) {
-            yChange += config.tank.normalSpeed;
+            yChange += config.spectatorSpeed;
         }
         if(player.userInput.keysPressed['KEY_UP']) {
-            yChange -= config.tank.normalSpeed;
+            yChange -= config.spectatorSpeed;
         }
 
         // Check that user is moving diagonally
         if(xChange !== 0 && yChange !== 0) {
             // Calculate equivalent x & y coord. changes for moving diagonally at same speed as horizontally/vertically
             // The change for x & y will be smaller for moving diagonally
-            let diagSpeedFactor = Math.sqrt(Math.pow(config.tank.normalSpeed, 2) / 2);
+            let diagSpeedFactor = Math.sqrt(Math.pow(config.spectatorSpeed, 2) / 2);
             xChange = Math.sign(xChange) * diagSpeedFactor;
             yChange = Math.sign(yChange) * diagSpeedFactor;
         }
-
-        newPosition.x = oldPosition.x + xChange;
-        newPosition.y = oldPosition.y + yChange;
 
         // Check if player is pressing key to BOOST
         if(player.userInput.keysPressed['KEY_SPACE']) {
             xChange *= config.tank.boostFactor;
             yChange *= config.tank.boostFactor;
         }
+
+        newPosition.x = oldPosition.x + xChange;
+        newPosition.y = oldPosition.y + yChange;
 
         clientData.position = newPosition;
 

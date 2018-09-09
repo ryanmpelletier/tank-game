@@ -6,6 +6,7 @@
     "scoreBoardLength": 10,
     "spawnAreaWidth": 500,
     "spawnAreaHeight": 500,
+    "spectatorSpeed": 8,
     "defaultKeysPressed": {
         "KEY_UP": false,
         "KEY_LEFT": false,

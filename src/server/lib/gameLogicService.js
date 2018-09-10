@@ -13,10 +13,10 @@ var winston = require('winston');
 winston.level = 'debug';
 
 class GameLogicService {
-    constructor(quadtreeManager, spatialHashManager) {
+    constructor(quadtreeManager) {
         this.quadtreeManager = quadtreeManager;
         this.quadtree = quadtreeManager.getQuadtree();
-        this.spatialHashManager = spatialHashManager;
+        // this.spatialHashManager = spatialHashManager;
     }
 
     //this initializeGame() code can pretty much take as long as it wants, no players will be waiting for this code to finish
@@ -204,7 +204,9 @@ class GameLogicService {
             // Update tank's frame since tank is moving
             tank.spriteTankHull.update();
 
-            this.addTracks(tank, newPosition, angleInRadians);
+            //I am going to rework tracks. The server is working too hard on tracks, this will be the clients job
+            //the client will get a list of points which are where the tank has changed direction and will draw tracks however it likes (or something like that)
+            // this.addTracks(tank, newPosition, angleInRadians);
         }
 
         var objects = this.quadtreeManager.queryGameObjectsForType(['WALL', 'TANK'], {x: newPosition.x - config.tank.width / 2, y: newPosition.y - config.tank.height / 2, w: config.tank.width, h: config.tank.height});
@@ -309,8 +311,8 @@ class GameLogicService {
 
         // Add new tank tracks since tank has changed location
         // NOTE: Tracks aren't added if there are already tracks in same location on game board
-        this.spatialHashManager.insertTrack(track1);
-        this.spatialHashManager.insertTrack(track2);
+        // this.spatialHashManager.insertTrack(track1);
+        // this.spatialHashManager.insertTrack(track2);
     };
 
     increaseAmmoIfNecessary(clientData, time) {
@@ -458,6 +460,8 @@ class GameLogicService {
      * This code is dangerous, will try to place user over and over again indefinitely,
      * need to eventually have a max amount of tries. We can't just stall the entire game because someone can't be placed.
      * I hope to make the game board dynamically grow.
+     *
+     *
      */
     static getSpawnLocation(quadtreeManager){
         outerLoop: while(true){
@@ -467,6 +471,7 @@ class GameLogicService {
 
             //query quadtree for objects of certain type within a certain area of that location
             //TODO optimize by directly using the quadtree, which can stop a query once a certain object is found
+            //also if a wall is there it shouldn't be a no go, need to see if the wall and tank collide!
             var objects = quadtreeManager.queryGameObjectsForType(['BULLET', 'WALL', 'TANK'], {x:(x - config.spawnAreaWidth / 2), y:(y - config.spawnAreaHeight / 2), w: config.spawnAreaWidth , h: config.spawnAreaHeight });
 
             //if any of the objects came back which can kill a tank, get different random coordinates
@@ -482,7 +487,20 @@ class GameLogicService {
             }
 
         }
+    }
 
+    //will need a reference to each client connected to send out the resize event
+    //clients should "pause" during this, while the server figures out how to resize the board, which could take a sec
+    static resizeGameBoard(quadtreeManager, sockets){
+        //iterate through all the sockets and send out the "boardResizeStart" event
+
+        //figure out what size to make the board
+        //do any logic for shrinking/growing the board
+        //will define min size
+        //will need to move players if they are in the shrinking part
+        //will need to generate new walls if the board is growing
+
+        //iterate through all the sockets and send out the "boardResizeEnd" event
     }
 
 }

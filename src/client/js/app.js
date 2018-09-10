@@ -198,6 +198,28 @@ function setupPlaySocket(socket) {
         setupStartScreen();
     });
 
+    /**
+     * Server will dynamically change the size of the game board.
+     * This event indicates that the server is beginning that process.
+     */
+    socket.on('boardResizeStart', function(){
+
+        //halt drawing and probably display a greyed out board and a loading bar
+
+    });
+
+
+    /**
+     * Server will dynamically change the size of the game board.
+     * This event indicates that the server has completed that process.
+     */
+    socket.on('boardResizeEnd', function(gameConfig){
+        global.gameWidth = gameConfig.gameWidth;
+        global.gameHeight = gameConfig.gameHeight;
+
+        //make whatever changes need to happen and resume drawing
+    });
+
 }
 
 function setupSpectateSocket(socket){

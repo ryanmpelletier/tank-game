@@ -48,7 +48,7 @@ http.listen(port, function(){
 var ClientData = require('./lib/clientData');
 var util = require('./lib/util');
 var QuadtreeManager = require('./lib/quadtreeManager');
-var SpatialHashManager = require('./lib/spacialHashManager');
+// var SpatialHashManager = require('./lib/spacialHashManager');
 var GameLogicService = require('./lib/gameLogicService');
 var Heap = require('heap');
 
@@ -58,9 +58,9 @@ var Heap = require('heap');
 var quadtreeManager = new QuadtreeManager();
 var quadtree = quadtreeManager.getQuadtree();
 
-const spatialHashManager = new SpatialHashManager();
+// const spatialHashManager = new SpatialHashManager();
 
-var gameLogicService = new GameLogicService(quadtreeManager, spatialHashManager);
+var gameLogicService = new GameLogicService(quadtreeManager);
 
 gameLogicService.initializeGame();
 
@@ -317,7 +317,7 @@ var clientUpdater = function() {
                 {},
                 perspective,
                 quadtreeManager.queryGameObjects(queryArea),
-                spatialHashManager.queryTracks(range),
+                // spatialHashManager.queryTracks(range),
                 ammo,
                 {scoreboard: scoreboardList},
                 {radar: radarObjects}

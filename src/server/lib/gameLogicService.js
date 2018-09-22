@@ -16,9 +16,6 @@ winston.level = 'debug';
 class GameLogicService {
     constructor(quadtreeManager) {
         this.quadtreeManager = quadtreeManager;
-        //TODO: dont have this store a reference to the quadtree, have it get it from the quadtreeManger every time
-        this.quadtree = quadtreeManager.getQuadtree();
-        // this.spatialHashManager = spatialHashManager;
     }
 
     //this initializeGame() code can pretty much take as long as it wants, no players will be waiting for this code to finish
@@ -33,15 +30,15 @@ class GameLogicService {
         var rightBorderWall = new Wall(this.quadtreeManager.currentWidth - config.wall.width, 0, config.wall.width, this.quadtreeManager.currentHeight);
         var bottomBorderWall = new Wall(0, this.quadtreeManager.currentHeight - config.wall.width, this.quadtreeManager.currentWidth, config.wall.width);
 
-        this.quadtree.put(leftBorderWall.forQuadtree());
-        this.quadtree.put(topBorderWall.forQuadtree());
-        this.quadtree.put(rightBorderWall.forQuadtree());
-        this.quadtree.put(bottomBorderWall.forQuadtree());
+        this.quadtreeManager.getQuadtree().put(leftBorderWall.forQuadtree());
+        this.quadtreeManager.getQuadtree().put(topBorderWall.forQuadtree());
+        this.quadtreeManager.getQuadtree().put(rightBorderWall.forQuadtree());
+        this.quadtreeManager.getQuadtree().put(bottomBorderWall.forQuadtree());
 
         for(var i = 0; i < config.wall.count; i++){
             //random x,y to start barrier
-            var x = Math.floor((Math.random() * config.gameWidth));
-            var y = Math.floor((Math.random() * config.gameHeight));
+            var x = Math.floor((Math.random() * this.quadtreeManager.currentWidth));
+            var y = Math.floor((Math.random() * this.quadtreeManager.currentHeight));
 
 
             var w;
@@ -59,8 +56,8 @@ class GameLogicService {
                 h = Math.max(config.wall.minDimension,Math.floor((Math.random() * (config.wall.maxDimension / 3))));
             }
 
-            var wall = new Wall(x,y,Math.min(config.gameWidth - x,w),Math.min(config.gameHeight - y,h));
-            this.quadtree.put(wall.forQuadtree());
+            var wall = new Wall(x,y,Math.min(this.quadtreeManager.currentWidth - x,w),Math.min(this.quadtreeManager.currentHeight - y,h));
+            this.quadtreeManager.getQuadtree().put(wall.forQuadtree());
         }
     }
 
@@ -216,8 +213,8 @@ class GameLogicService {
             clientData.position = newPosition;
 
             // Update Tank object on QuadTree
-            this.quadtree.remove(oldTank, 'id');
-            this.quadtree.put(tank.forQuadtree());
+            this.quadtreeManager.getQuadtree().remove(oldTank, 'id');
+            this.quadtreeManager.getQuadtree().put(tank.forQuadtree());
         }
     };
 
@@ -339,7 +336,7 @@ class GameLogicService {
                 let bulletIndex = util.findIndex(clientData.tank.bullets, bullet.id);
                 if(bulletIndex > -1){
                     clientData.tank.bullets.splice(bulletIndex,1);
-                    this.quadtree.remove(bullet.forQuadtree(), 'id');
+                    this.quadtreeManager.getQuadtree().remove(bullet.forQuadtree(), 'id');
                 }
             }else{
                 let currentBulletLocation = bullet.forQuadtree();
@@ -385,8 +382,8 @@ class GameLogicService {
 
                 let forQuadtree = bullet.forQuadtree();
 
-                this.quadtree.remove(currentBulletLocation, 'id');
-                this.quadtree.put(forQuadtree);
+                this.quadtreeManager.getQuadtree().remove(currentBulletLocation, 'id');
+                this.quadtreeManager.getQuadtree().put(forQuadtree);
             }
         }
     };
@@ -418,7 +415,7 @@ class GameLogicService {
                     (xComponent * config.bullet.velocity),
                     (yComponent * config.bullet.velocity));
 
-                this.quadtree.put(bullet.forQuadtree());
+                this.quadtreeManager.getQuadtree().put(bullet.forQuadtree());
                 clientData.tank.bullets.push(bullet);
             }
 
@@ -429,7 +426,7 @@ class GameLogicService {
         /**
          * Check any collisions on tank
          */
-        var objectsInTankArea = this.quadtree.get(clientData.tank.forQuadtree());
+        var objectsInTankArea = this.quadtreeManager.getQuadtree().get(clientData.tank.forQuadtree());
         for(var objectInTankArea of objectsInTankArea){
             if(objectInTankArea.type === 'BULLET'){
                 var bullet = objectInTankArea.object;
@@ -444,7 +441,7 @@ class GameLogicService {
                     var bulletIndex = util.findIndex(currentClientDatas[playerIndex].tank.bullets, bullet.id);
                     if(bulletIndex > -1){
                         currentClientDatas[playerIndex].tank.bullets.splice(bulletIndex,1);
-                        this.quadtree.remove(bullet.forQuadtree(), 'id');
+                        this.quadtreeManager.getQuadtree().remove(bullet.forQuadtree(), 'id');
                     }
                 }
                 //destroy tank
@@ -463,8 +460,8 @@ class GameLogicService {
         outerLoop: while(true){
             //generate random x and y within the board
             //TODO: pre generate these
-            var x = Math.floor((Math.random() * config.gameWidth));
-            var y = Math.floor((Math.random() * config.gameHeight));
+            var x = Math.floor((Math.random() * quadtreeManager.currentWidth));
+            var y = Math.floor((Math.random() * quadtreeManager.currentHeight));
 
             //query quadtree for objects of certain type within a certain area of that location
             //TODO optimize by directly using the quadtree, which can stop a query once a certain object is found
@@ -485,21 +482,6 @@ class GameLogicService {
 
         }
     }
-
-    //will need a reference to each client connected to send out the resize event
-    //clients should "pause" during this, while the server figures out how to resize the board, which could take a sec
-    static resizeGameBoard(quadtreeManager, sockets){
-        //iterate through all the sockets and send out the "boardResizeStart" event
-
-        //figure out what size to make the board
-        //do any logic for shrinking/growing the board
-        //will define min size
-        //will need to move players if they are in the shrinking part
-        //will need to generate new walls if the board is growing
-
-        //iterate through all the sockets and send out the "boardResizeEnd" event
-    }
-
 }
 
 module.exports = GameLogicService;

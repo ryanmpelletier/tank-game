@@ -37,8 +37,11 @@ app.get('/', function(req, res){
 app.post('/grow', function (req, res) {
     var newWidth = (quadtreeManager.currentWidth + 100);
     var newHeight = (quadtreeManager.currentHeight + 100);
-    winston.log('debug', 'Resizine game board to ' + newWidth + ' * ' + newHeight);
+    winston.log('debug', 'Resizing game board to ' + newWidth + ' * ' + newHeight);
     quadtreeManager.growQuadtree(newWidth, newHeight);
+    currentClientDatas.forEach(function(clientData) {
+        sockets[clientData.id].emit('boardResizeEnd', {gameWidth: quadtreeManager.currentWidth, gameHeight: quadtreeManager.currentHeight});
+    });
     res.sendStatus(200);
 });
 
@@ -67,7 +70,6 @@ var Heap = require('heap');
  * Quadtree will hold all of the objects in the game that will need to be kept track of
  */
 var quadtreeManager = new QuadtreeManager();
-var quadtree = quadtreeManager.getQuadtree();
 
 // const spatialHashManager = new SpatialHashManager();
 
@@ -144,7 +146,7 @@ socketIo.on('connection', function(socket) {
         //spectators just go in the currentClientDatasSpectators array so their logic can be processed separately
         if(clientUpdatedData.player.type === 'PLAYER'){
             currentClientDatas.push(currentClientData);
-            quadtree.put(currentClientData.tank.forQuadtree());
+            quadtreeManager.getQuadtree().put(currentClientData.tank.forQuadtree());
         }else if (clientUpdatedData.player.type === 'SPECTATOR'){
             currentClientDatasSpectators.push(currentClientData);
         }
@@ -171,13 +173,13 @@ socketIo.on('connection', function(socket) {
          */
 
          for(let bullet of currentClientData.tank.bullets){
-             quadtree.remove(bullet.forQuadtree());
+             quadtreeManager.getQuadtree().remove(bullet.forQuadtree());
          }
 
          /**
           * Remove player from quadtree
           */
-        quadtree.remove(currentClientData.tank.forQuadtree(), 'id');
+         quadtreeManager.getQuadtree().remove(currentClientData.tank.forQuadtree(), 'id');
 
 
         if(currentClientData.player.type === 'PLAYER'){
@@ -194,7 +196,7 @@ socketIo.on('connection', function(socket) {
             }
         }
 
-        var allItemsInQuadtree = quadtree.get({x:0,y:0,w:quadtreeManager.currentWidth,h:quadtreeManager.currentHeight});
+        var allItemsInQuadtree = quadtreeManager.getQuadtree().get({x:0,y:0,w:quadtreeManager.currentWidth,h:quadtreeManager.currentHeight});
         winston.log('debug', 'quadtree size', allItemsInQuadtree.length);
 
     });

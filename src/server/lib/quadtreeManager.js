@@ -5,6 +5,8 @@
  */
 var config = require('../../../config.json');
 var SimpleQuadtree = require('simple-quadtree');
+var Wall = require('./wall');
+
 
 class QuadtreeManager {
     constructor() {
@@ -89,16 +91,30 @@ class QuadtreeManager {
         var newQuadTree = new SimpleQuadtree(0, 0, width, height, {maxChildren: 25});
 
 
+        // //remove side barriers from current quadtree
+        this.quadtree.remove(new Wall(0, 0, config.wall.width, this.currentHeight).forQuadtree());
+        this.quadtree.remove(new Wall(0, 0, this.currentWidth, config.wall.width).forQuadtree());
+        this.quadtree.remove(new Wall(this.currentWidth - config.wall.width, 0, config.wall.width, this.currentHeight).forQuadtree());
+        this.quadtree.remove(new Wall(0, this.currentHeight - config.wall.width, this.currentWidth, config.wall.width).forQuadtree());
+
         //query current quadtree for all the objects in it and put them in the new quadtree
         this.quadtree.get({x: 0, y: 0, w: this.currentWidth, h: this.currentHeight}, function(quadtreeObject){
             newQuadTree.put(quadtreeObject);
             return true;
         });
 
-
-        //record new height and width
+        //set new height and width
         this.currentWidth = width;
         this.currentHeight = height;
+
+        //add new barriers
+        newQuadTree.put(new Wall(0, 0, config.wall.width, this.currentHeight).forQuadtree());
+        newQuadTree.put(new Wall(0, 0, this.currentWidth, config.wall.width).forQuadtree());
+        newQuadTree.put(new Wall(this.currentWidth - config.wall.width, 0, config.wall.width, this.currentHeight).forQuadtree());
+        newQuadTree.put(new Wall(0, this.currentHeight - config.wall.width, this.currentWidth, config.wall.width).forQuadtree());
+
+        //make the game's quadtree be the new bigger one
+        this.quadtree = newQuadTree;
     }
 }
 

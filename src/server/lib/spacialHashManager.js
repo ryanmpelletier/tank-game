@@ -6,8 +6,8 @@ class SpatialHashManager {
         const range = {
             x: 0,
             y: 0,
-            width: config.gameWidth,
-            height: config.gameHeight
+            width: quadtreeManager.currentWidth,
+            height: quadtreeManager.currentHeight
         };
         const cellSize = config.track.width * config.track.height * 2;
 

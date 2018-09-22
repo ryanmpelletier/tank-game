@@ -203,7 +203,6 @@ function setupPlaySocket(socket) {
      * This event indicates that the server is beginning that process.
      */
     socket.on('boardResizeStart', function(){
-
         //halt drawing and probably display a greyed out board and a loading bar
 
     });
@@ -216,8 +215,6 @@ function setupPlaySocket(socket) {
     socket.on('boardResizeEnd', function(gameConfig){
         global.gameWidth = gameConfig.gameWidth;
         global.gameHeight = gameConfig.gameHeight;
-
-        //make whatever changes need to happen and resume drawing
     });
 
 }

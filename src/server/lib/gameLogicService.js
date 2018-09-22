@@ -456,30 +456,45 @@ class GameLogicService {
     }
 
 
-    static getSpawnLocation(quadtreeManager){
+    static getSpawnLocation(quadtreeManager, currentClientDatas, sockets){
+
+        var numberOfTriesBeforeResize = 10;
+        var tries = 0;
         outerLoop: while(true){
-            //generate random x and y within the board
-            //TODO: pre generate these
-            var x = Math.floor((Math.random() * quadtreeManager.currentWidth));
-            var y = Math.floor((Math.random() * quadtreeManager.currentHeight));
+            if(tries < numberOfTriesBeforeResize){
+                //generate random x and y within the board
+                //TODO: pre generate these
+                var x = Math.floor((Math.random() * quadtreeManager.currentWidth));
+                var y = Math.floor((Math.random() * quadtreeManager.currentHeight));
 
-            //query quadtree for objects of certain type within a certain area of that location
-            //TODO optimize by directly using the quadtree, which can stop a query once a certain object is found
-            //also if a wall is there it shouldn't be a no go, need to see if the wall and tank collide!
-            var objects = quadtreeManager.queryGameObjectsForType(['BULLET', 'WALL', 'TANK'], {x:(x - config.spawnAreaWidth / 2), y:(y - config.spawnAreaHeight / 2), w: config.spawnAreaWidth , h: config.spawnAreaHeight });
+                //query quadtree for objects of certain type within a certain area of that location
+                //TODO optimize by directly using the quadtree, which can stop a query once a certain object is found
+                //also if a wall is there it shouldn't be a no go, need to see if the wall and tank collide!
+                var objects = quadtreeManager.queryGameObjectsForType(['BULLET', 'WALL', 'TANK'], {x:(x - config.spawnAreaWidth / 2), y:(y - config.spawnAreaHeight / 2), w: config.spawnAreaWidth , h: config.spawnAreaHeight });
 
-            //if any of the objects came back which can kill a tank, get different random coordinates
-            for(var key of Object.keys(objects)){
-                if (objects.hasOwnProperty(key) && objects[key].length > 0) {
-                    continue outerLoop;
+                //if any of the objects came back which can kill a tank, get different random coordinates
+                for(var key of Object.keys(objects)){
+                    if (objects.hasOwnProperty(key) && objects[key].length > 0) {
+                        tries++;
+                        continue outerLoop;
+                    }
                 }
-            }
 
-            return {
-                x: x,
-                y: y
+                return {
+                    x: x,
+                    y: y
+                }
+            }else{
+                //resize board
+                var newWidth = (quadtreeManager.currentWidth + 100);
+                var newHeight = (quadtreeManager.currentHeight + 100);
+                winston.log('debug', 'Resizing game board to ' + newWidth + ' * ' + newHeight);
+                quadtreeManager.growQuadtree(newWidth, newHeight);
+                currentClientDatas.forEach(function(clientData) {
+                    sockets[clientData.id].emit('boardResizeEnd', {gameWidth: quadtreeManager.currentWidth, gameHeight: quadtreeManager.currentHeight});
+                });
+                tries = 0;
             }
-
         }
     }
 }

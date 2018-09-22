@@ -34,16 +34,16 @@ app.get('/', function(req, res){
 /**
  * For now, I am making a URL you can post to in order to test out growing the board.
  */
-app.post('/grow', function (req, res) {
-    var newWidth = (quadtreeManager.currentWidth + 100);
-    var newHeight = (quadtreeManager.currentHeight + 100);
-    winston.log('debug', 'Resizing game board to ' + newWidth + ' * ' + newHeight);
-    quadtreeManager.growQuadtree(newWidth, newHeight);
-    currentClientDatas.forEach(function(clientData) {
-        sockets[clientData.id].emit('boardResizeEnd', {gameWidth: quadtreeManager.currentWidth, gameHeight: quadtreeManager.currentHeight});
-    });
-    res.sendStatus(200);
-});
+// app.post('/grow', function (req, res) {
+//     var newWidth = (quadtreeManager.currentWidth + 100);
+//     var newHeight = (quadtreeManager.currentHeight + 100);
+//     winston.log('debug', 'Resizing game board to ' + newWidth + ' * ' + newHeight);
+//     quadtreeManager.growQuadtree(newWidth, newHeight);
+//     currentClientDatas.forEach(function(clientData) {
+//         sockets[clientData.id].emit('boardResizeEnd', {gameWidth: quadtreeManager.currentWidth, gameHeight: quadtreeManager.currentHeight});
+//     });
+//     res.sendStatus(200);
+// });
 
 /**
  * Start listening, I'm not sure how the details of this are working
@@ -106,7 +106,7 @@ socketIo.on('connection', function(socket) {
     * Here is where I need to perform any server-side logic to set up state for the newly connecting player.
     * For example: calculate players starting position, get their ID, etc.
     */
-    var currentClientData = new ClientData(socket.id, GameLogicService.getSpawnLocation(quadtreeManager));
+    var currentClientData = new ClientData(socket.id, GameLogicService.getSpawnLocation(quadtreeManager, currentClientDatas, sockets));
 
 
     /**

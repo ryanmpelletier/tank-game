@@ -12,7 +12,9 @@ class QuadtreeManager {
          * Internally hold one quadtree, I can see someone wanting to write one that had multiple but
          * I'm not going to be concerned with that for now
          */
-        this.quadtree = new SimpleQuadtree(0, 0, config.gameWidth, config.gameHeight, {maxChildren: 25});
+        this.quadtree = new SimpleQuadtree(0, 0, config.startingGameWidth, config.startingGameHeight, {maxChildren: 25});
+        this.currentWidth = config.startingGameWidth;
+        this.currentHeight = config.startingGameHeight;
     }
 
     /**
@@ -56,7 +58,7 @@ class QuadtreeManager {
      * @param {String} gameObjectType - The type of game object to return a list of all objects of this type.
      * @returns {Array} The array containing all game objects of the desired type.
      */
-    queryGameObjectsForType(gameObjectTypes, queryArea = {x: 0, y: 0, w: config.gameWidth, h: config.gameHeight}) {
+    queryGameObjectsForType(gameObjectTypes, queryArea = {x: 0, y: 0, w: this.currentWidth, h: this.currentHeight}) {
 
         // Get ALL game objects
         var gameObjects = {};
@@ -78,6 +80,25 @@ class QuadtreeManager {
 
     getQuadtree() {
         return this.quadtree;
+    }
+
+    //this method will create a new quadtree of the given size and copy the items from the current qudatree into it
+    growQuadtree(width, height) {
+
+        //instantiate new quadtree with new height and width
+        var newQuadTree = new SimpleQuadtree(0, 0, width, height, {maxChildren: 25});
+
+
+        //query current quadtree for all the objects in it and put them in the new quadtree
+        this.quadtree.get({x: 0, y: 0, w: this.currentWidth, h: this.currentHeight}, function(quadtreeObject){
+            newQuadTree.put(quadtreeObject);
+            return true;
+        });
+
+
+        //record new height and width
+        this.currentWidth = width;
+        this.currentHeight = height;
     }
 }
 

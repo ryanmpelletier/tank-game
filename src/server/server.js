@@ -32,6 +32,17 @@ app.get('/', function(req, res){
 });
 
 /**
+ * For now, I am making a URL you can post to in order to test out growing the board.
+ */
+app.post('/grow', function (req, res) {
+    var newWidth = (quadtreeManager.currentWidth + 100);
+    var newHeight = (quadtreeManager.currentHeight + 100);
+    winston.log('debug', 'Resizine game board to ' + newWidth + ' * ' + newHeight);
+    quadtreeManager.growQuadtree(newWidth, newHeight);
+    res.sendStatus(200);
+});
+
+/**
  * Start listening, I'm not sure how the details of this are working
  */
 var port = process.env.PORT || config.port;
@@ -114,7 +125,7 @@ socketIo.on('connection', function(socket) {
             }
         }
         currentClientData.screenName = screenName.toLowerCase();
-        socket.emit('welcome', currentClientData, {gameWidth: config.gameWidth, gameHeight: config.gameHeight});
+        socket.emit('welcome', currentClientData, {gameWidth: quadtreeManager.currentWidth, gameHeight: quadtreeManager.currentHeight});
     });
 
     /**
@@ -183,7 +194,7 @@ socketIo.on('connection', function(socket) {
             }
         }
 
-        var allItemsInQuadtree = quadtree.get({x:0,y:0,w:config.gameWidth,h:config.gameHeight});
+        var allItemsInQuadtree = quadtree.get({x:0,y:0,w:quadtreeManager.currentWidth,h:quadtreeManager.currentHeight});
         winston.log('debug', 'quadtree size', allItemsInQuadtree.length);
 
     });

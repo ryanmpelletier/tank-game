@@ -12,9 +12,11 @@ var util = require('./util');
 var winston = require('winston');
 winston.level = 'debug';
 
+
 class GameLogicService {
     constructor(quadtreeManager) {
         this.quadtreeManager = quadtreeManager;
+        //TODO: dont have this store a reference to the quadtree, have it get it from the quadtreeManger every time
         this.quadtree = quadtreeManager.getQuadtree();
         // this.spatialHashManager = spatialHashManager;
     }
@@ -26,10 +28,10 @@ class GameLogicService {
          * I'm still not sure I want to use the quadtree to store data for the borders.
          * I don't know how much it will help us, it might even not help. 
          */
-        var leftBorderWall = new Wall(0, 0, config.wall.width, config.gameHeight);
-        var topBorderWall = new Wall(0, 0, config.gameWidth, config.wall.width);
-        var rightBorderWall = new Wall(config.gameWidth - config.wall.width, 0, config.wall.width, config.gameHeight);
-        var bottomBorderWall = new Wall(0, config.gameHeight - config.wall.width, config.gameWidth, config.wall.width);
+        var leftBorderWall = new Wall(0, 0, config.wall.width, this.quadtreeManager.currentHeight);
+        var topBorderWall = new Wall(0, 0, this.quadtreeManager.currentWidth, config.wall.width);
+        var rightBorderWall = new Wall(this.quadtreeManager.currentWidth - config.wall.width, 0, config.wall.width, this.quadtreeManager.currentHeight);
+        var bottomBorderWall = new Wall(0, this.quadtreeManager.currentHeight - config.wall.width, this.quadtreeManager.currentWidth, config.wall.width);
 
         this.quadtree.put(leftBorderWall.forQuadtree());
         this.quadtree.put(topBorderWall.forQuadtree());
@@ -456,16 +458,11 @@ class GameLogicService {
         socket.disconnect();
     }
 
-    /*
-     * This code is dangerous, will try to place user over and over again indefinitely,
-     * need to eventually have a max amount of tries. We can't just stall the entire game because someone can't be placed.
-     * I hope to make the game board dynamically grow.
-     *
-     *
-     */
+
     static getSpawnLocation(quadtreeManager){
         outerLoop: while(true){
             //generate random x and y within the board
+            //TODO: pre generate these
             var x = Math.floor((Math.random() * config.gameWidth));
             var y = Math.floor((Math.random() * config.gameHeight));
 

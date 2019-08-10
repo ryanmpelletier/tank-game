@@ -2,7 +2,7 @@
 
 
 ### NOTE ###
-It has been a while since this has been maintained. If someone wants to make a pull request to work with current node/npm/gulp version I would love it! Last I tried, I got it working with npm 5.5.1, node v9.2.1, and gulp 3.9.1. There are also dependencies which Github tells me have vulnerabilities. I'm open to fixes!
+It has been a while since this has been maintained. If someone wants to make a pull request to work with current node/npm/gulp version I would love it! Last I tried, I got it working with **npm 5.5.1, node v9.2.1, and gulp 3.9.1**. There are also dependencies which Github tells me have vulnerabilities. I'm open to fixes!
 
 
 ## Description ##

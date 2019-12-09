@@ -24,3 +24,5 @@ The build files used are pretty simple, and are also documented well. In order t
 1.  **npm start**
 1.  *Browse to localhost:8080*
 
+[![Run on Repl.it](https://repl.it/badge/github/ryanp102694/tank-game)](https://repl.it/github/ryanp102694/tank-game)
+

@@ -44,7 +44,7 @@ gulp.task('move-client', function(){
  * Lastly the output is put into bin/client/js in one JS file!
  * 
  */
-gulp.task('build-client', ['move-client'], function(){
+gulp.task('build-client', gulp.series('move-client', function(){
     return gulp.src('src/client/js/app.js')
         .pipe(webpack(require('./webpack.config.js')))    
         .pipe(babel({
@@ -53,17 +53,17 @@ gulp.task('build-client', ['move-client'], function(){
             ]
         }))
         .pipe(gulp.dest('bin/client/js/'));
-});
+}));
 
 /**
  * Grabs all the files in /src/server and puts them in /bin/server after running babel on them,
  * this depends on the client already being built, so 'build-client' is run first
  */
-gulp.task('build-server', ['build-client'], function () {
+gulp.task('build-server', gulp.series('build-client', function () {
   return gulp.src(['src/server/**/*.*', 'src/server/**/*.js'])
     .pipe(babel())
     .pipe(gulp.dest('bin/server/'));
-});
+}));
 
 
 /**
@@ -76,7 +76,7 @@ gulp.task('build-server', ['build-client'], function () {
  * 
  * NOTE: you can type rs and hit <enter> in the console at any time to restart the server
  */
-gulp.task('run', ['build-server'], function () {
+gulp.task('run', gulp.series('build-server', function () {
     nodemon({
         delay: 1000,
         nodeArgs: ['--inspect'],
@@ -85,7 +85,7 @@ gulp.task('run', ['build-server'], function () {
     .on('restart',function(){
         console.log("restarted");
     });
-});
+}));
 
 /**
  * Any time a source file is changed, run the 'build-server' task
@@ -99,4 +99,4 @@ gulp.task('watch', function() {
  * Default gulp task, if just 'gulp' is run in the project root directory, this task will run.
  * Watch is also called to watch for source code changes, and call build-server when necessary
  */
-gulp.task('default', ['run', 'watch']);
+gulp.task('default', gulp.series('run', 'watch'));

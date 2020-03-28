@@ -10,7 +10,7 @@ Project is not actively maintained. Working with **npm 6.10.3, node v12.10.0, an
 * Game written in Node.js using WebSockets (socket.io) and HTML5 canvas.
 * 0.1
 * Primary Authors:
-	Ryan Pelletier
+	Ryan Pelletier,
 	Davis DeRuiter
 * Contributors:
 	gacon116

@@ -48,26 +48,7 @@
     "screenName":{
         "maxLength": 12,
         "blacklist": [
-            "ass",
-            "bitch",
-            "bastard",
-            "boob",
-            "boobs",
-            "cock",
-            "cunt",
-            "damn",
-            "dick",
-            "fuck",
-            "nigga",
-            "nigger",
-            "penis",
-            "pussy",
-            "shit",
-            "titties",
-            "tits",
-            "tit",
-            "titty",
-            "whore"
+            "someBadWord",
         ]
     }
 }

@@ -4,9 +4,15 @@ module.exports = {
     "clientCheckinInterval": 15,
     '32': 'KEY_SPACE',
     '65': 'KEY_LEFT',
+    '81': 'KEY_LEFT',
+    '90': 'KEY_UP',
     '87': 'KEY_UP',
     '68': 'KEY_RIGHT',
     '83': 'KEY_DOWN',
+    '37': 'KEY_LEFT',
+    '38': 'KEY_UP',
+    '39': 'KEY_RIGHT',
+    '40': 'KEY_DOWN',
     'drawing':{
         'drawingOrder': ["perspective", "tracks", "tanks", "bullets", "walls", "ammo", "playerInfo", "scoreboard", "radar"],
         'ammo':{

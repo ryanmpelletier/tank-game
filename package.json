@@ -27,7 +27,7 @@
     "socket.io-client": "^2.0.3",
     "spatial-hash": "0.0.4",
     "webpack": "^3.0.0",
-    "webpack-stream": "^3.2.0",
+    "webpack-stream": "^7.0.0",
     "winston": "^2.3.1"
   },
   "devDependencies": {
